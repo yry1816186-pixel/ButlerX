@@ -240,6 +240,10 @@ class ButlerConfig:
     script_allowlist: List[str] = field(default_factory=list)
     openclaw_cli_path: str = "openclaw"
     openclaw_env: Dict[str, Any] = field(default_factory=dict)
+    openclaw_gateway_url: str = "ws://127.0.0.1:18789"
+    openclaw_gateway_token: str = ""
+    openclaw_gateway_password: str = ""
+    openclaw_gateway_enabled: bool = False
     scheduler_enabled: bool = True
     scheduler_interval_sec: int = 5
     email_imap_host: str = ""
@@ -680,6 +684,18 @@ def load_config(path: Optional[str] = None) -> ButlerConfig:
         ),
         openclaw_env=_env_or_cfg(
             "OPENCLAW_ENV", cfg, "openclaw.env", _parse_dict, {}
+        ),
+        openclaw_gateway_url=_env_or_cfg(
+            "OPENCLAW_GATEWAY_URL", cfg, "openclaw.gateway_url", _parse_str, "ws://127.0.0.1:18789"
+        ),
+        openclaw_gateway_token=_env_or_cfg(
+            "OPENCLAW_GATEWAY_TOKEN", cfg, "openclaw.gateway_token", _parse_str, ""
+        ),
+        openclaw_gateway_password=_env_or_cfg(
+            "OPENCLAW_GATEWAY_PASSWORD", cfg, "openclaw.gateway_password", _parse_str, ""
+        ),
+        openclaw_gateway_enabled=_env_or_cfg(
+            "OPENCLAW_GATEWAY_ENABLED", cfg, "openclaw.gateway_enabled", _parse_bool, False
         ),
         scheduler_enabled=_env_or_cfg(
             "SCHEDULER_ENABLED", cfg, "scheduler.enabled", _parse_bool, True

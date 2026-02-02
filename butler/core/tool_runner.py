@@ -12,6 +12,7 @@ from ..tools.image_gen import ImageGenerator
 from ..tools.media_store import store_event
 from ..tools.notify import send_notification
 from ..tools.openclaw_cli import OpenClawCLI
+from ..tools.openclaw_gateway import OpenClawGatewaySync
 from ..tools.ptz_onvif import PTZOnvif
 from ..tools.script_runner import ScriptRunner
 from ..tools.system_exec import SystemExec
@@ -97,6 +98,13 @@ class ToolRunner:
         )
         self.sys_exec = SystemExec(config.system_exec_allowlist, config.system_exec_timeout_sec)
         self.openclaw = OpenClawCLI(config.openclaw_cli_path, config.openclaw_env)
+        self.openclaw_gateway = None
+        if config.openclaw_gateway_enabled:
+            self.openclaw_gateway = OpenClawGatewaySync(
+                url=config.openclaw_gateway_url,
+                token=config.openclaw_gateway_token,
+                password=config.openclaw_gateway_password,
+            )
         self.scripts = ScriptRunner(
             config.script_dir, config.script_allowlist, config.system_exec_timeout_sec
         )
@@ -333,6 +341,43 @@ class ToolRunner:
             elif action_type == "openclaw_message_send":
                 output = self.openclaw.send_message(
                     target=str(params.get("target") or ""),
+                    message=str(params.get("message") or ""),
+                    channel=params.get("channel"),
+                    account=params.get("account"),
+                )
+            elif action_type == "openclaw_send_media":
+                output = self.openclaw.send_with_media(
+                    target=str(params.get("target") or ""),
+                    media=str(params.get("media") or ""),
+                    message=str(params.get("message") or ""),
+                    channel=params.get("channel"),
+                    account=params.get("account"),
+                )
+            elif action_type == "openclaw_send_buttons":
+                buttons = params.get("buttons")
+                if buttons and isinstance(buttons, list):
+                    output = self.openclaw.send_with_buttons(
+                        target=str(params.get("target") or ""),
+                        message=str(params.get("message") or ""),
+                        buttons=buttons,
+                        channel=params.get("channel"),
+                        account=params.get("account"),
+                    )
+                else:
+                    status = "error"
+                    output = {"error": "buttons_must_be_array"}
+            elif action_type == "openclaw_reply_message":
+                output = self.openclaw.reply_to_message(
+                    target=str(params.get("target") or ""),
+                    message_id=str(params.get("message_id") or ""),
+                    message=str(params.get("message") or ""),
+                    channel=params.get("channel"),
+                    account=params.get("account"),
+                )
+            elif action_type == "openclaw_send_to_thread":
+                output = self.openclaw.send_to_thread(
+                    target=str(params.get("target") or ""),
+                    thread_id=str(params.get("thread_id") or ""),
                     message=str(params.get("message") or ""),
                     channel=params.get("channel"),
                     account=params.get("account"),
