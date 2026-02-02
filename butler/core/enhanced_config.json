@@ -1,0 +1,131 @@
+{
+  "version": "2.0",
+  "system": {
+    "name": "Butler Enhanced",
+    "description": "全屋智慧管家系统 - 增强版",
+    "log_level": "INFO"
+  },
+  "modules": {
+    "knowledge_graph": {
+      "enabled": true,
+      "data_path": "/app/butler/data/knowledge_graph",
+      "auto_save_interval": 300
+    },
+    "dialogue_engine": {
+      "enabled": true,
+      "max_conversations": 100,
+      "max_message_history": 20,
+      "context_ttl_seconds": 3600
+    },
+    "goal_engine": {
+      "enabled": true,
+      "max_active_goals": 10,
+      "max_history_size": 100
+    },
+    "scene_engine": {
+      "enabled": true,
+      "auto_activate": false,
+      "data_path": "/app/butler/data/scenes"
+    },
+    "automation_engine": {
+      "enabled": true,
+      "evaluation_interval_seconds": 5,
+      "data_path": "/app/butler/data/automations"
+    },
+    "habit_learner": {
+      "enabled": true,
+      "min_occurrences": 3,
+      "min_confidence": 0.7,
+      "max_history_size": 1000
+    },
+    "anomaly_detector": {
+      "enabled": true,
+      "alert_threshold_severity": 3,
+      "data_path": "/app/butler/data/anomalies"
+    },
+    "energy_optimizer": {
+      "enabled": true,
+      "evaluation_interval_seconds": 300,
+      "data_path": "/app/butler/data/energy"
+    },
+    "predictive_service": {
+      "enabled": true,
+      "prediction_horizon_hours": 24,
+      "confidence_threshold": 0.6,
+      "data_path": "/app/butler/data/predictions"
+    },
+    "ir_control": {
+      "enabled": true,
+      "use_broadlink": false,
+      "use_lirc": false,
+      "data_path": "/app/butler/data/ir_control"
+    },
+    "simulator": {
+      "enabled": true,
+      "virtual_devices": 10,
+      "auto_start": true,
+      "data_path": "/app/butler/data/simulator"
+    },
+    "test_framework": {
+      "enabled": true,
+      "auto_run_on_start": false,
+      "test_timeout_seconds": 30
+    }
+  },
+  "mqtt": {
+    "host": "mosquitto",
+    "port": 1883,
+    "topics": {
+      "subscribe": [
+        "butler/in/event",
+        "butler/in/command",
+        "butler/in/sensor"
+      ],
+      "publish": [
+        "butler/out/event",
+        "butler/out/action_plan",
+        "butler/out/action_result",
+        "butler/out/anomaly",
+        "butler/out/suggestion"
+      ]
+    }
+  },
+  "llm": {
+    "provider": "glm",
+    "api_key": "",
+    "base_url": "https://open.bigmodel.cn/api/paas/v4",
+    "model_text": "glm-4.7",
+    "model_vision": "glm-4.6v",
+    "temperature": 0.2,
+    "max_tokens": 1024,
+    "top_p": 0.8,
+    "cache_ttl_seconds": 30,
+    "cache_size": 128
+  },
+  "voice": {
+    "wake_words": ["hello", "butler", "管家"],
+    "asr": {
+      "provider": "faster-whisper",
+      "model": "small",
+      "language": "zh",
+      "device": "cpu",
+      "compute_type": "int8"
+    },
+    "tts": {
+      "enabled": true,
+      "provider": "local",
+      "model": "piper"
+    }
+  },
+  "vision": {
+    "enabled": true,
+    "provider": "local",
+    "model": "yolov8",
+    "confidence_threshold": 0.5
+  },
+  "privacy": {
+    "default_level": 0,
+    "auto_blur_faces": true,
+    "record_anonymous_events": true
+  }
+}

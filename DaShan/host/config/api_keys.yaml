@@ -1,0 +1,60 @@
+# DaShan Robot Configuration
+# API Keys Configuration
+
+# GLM-4 API Configuration
+glm:
+  api_key: "your_glm4_api_key_here"
+  model: "glm-4"
+  base_url: "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+  temperature: 0.7
+  max_tokens: 1000
+  top_p: 0.9
+
+# Wake Word Configuration
+wake_word:
+  model_path: "models/wakeword"
+  threshold: 0.5
+  sample_rate: 16000
+
+# Whisper Configuration
+whisper:
+  model_size: "base"
+  language: "zh"
+  device: "auto"
+  sample_rate: 16000
+
+# Piper TTS Configuration
+piper:
+  model_path: "models/tts/zh_CN-xiaoyan-low"
+  config_path: "models/tts/zh_CN-xiaoyan-low.onnx.json"
+  sample_rate: 22050
+  speaker_id: 0
+  noise_scale: 0.667
+  length_scale: 1.0
+
+# Serial Configuration
+serial:
+  port: "auto"
+  baudrate: 115200
+  timeout: 2.0
+
+# Behavior Configuration
+behavior:
+  idle_timeout: 30.0
+  animation_speed: 1.0
+  emotion_decay: 0.01
+  blink_interval_min: 2.0
+  blink_interval_max: 5.0
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  file: "logs/dashan.log"
+  max_size: 10485760
+  backup_count: 5
+
+# Memory Configuration
+memory:
+  storage_path: "data/memory"
+  max_memories: 100
+  max_facts: 50

@@ -1,0 +1,194 @@
+{
+  "mqtt": {
+    "host": "mosquitto",
+    "port": 1883,
+    "keepalive_sec": 60,
+    "reconnect_min_sec": 1,
+    "reconnect_max_sec": 10
+  },
+  "db": {
+    "path": "/app/butler/data/butler.db"
+  },
+  "topics": {
+    "in_event": ["butler/in/event"],
+    "in_command": ["butler/in/command"],
+    "out_event": ["butler/out/event"],
+    "out_action_plan": ["butler/out/action_plan"],
+    "out_action_result": ["butler/out/action_result"],
+    "sub_topics": [],
+    "publish_topics": []
+  },
+  "ui": {
+    "poll_interval_ms": 5000
+  },
+  "policy": {
+    "arrival": {
+      "zone": "entry",
+      "cooldown_sec": 300,
+      "notify_title": "Welcome home",
+      "notify_message": "Entry zone activity detected."
+    },
+    "patrol_presets": ["entry", "living_room", "hallway"],
+    "find_keys_cameras": ["entry_cam", "kitchen_cam", "living_cam"],
+    "intrusion": {
+      "mode_required": "away",
+      "unknown_person_value": "unknown",
+      "record_duration_sec": 15,
+      "camera_default": "backyard_cam",
+      "window_sec": 120,
+      "count_threshold": 3
+    }
+  },
+  "ptz": {
+    "entry_preset": "entry",
+    "patrol_dwell_sec": 5
+  },
+  "sim": {
+    "entry_camera": "entry_cam",
+    "fall_zone": "living_room",
+    "fall_camera": "living_cam"
+  },
+  "privacy": {
+    "mode_default": false,
+    "camera_action_types": [
+      "ptz_goto_preset",
+      "ptz_patrol",
+      "snapshot",
+      "store_event",
+      "vision_detect",
+      "face_enroll",
+      "face_verify"
+    ],
+    "block_store_kinds": ["record"]
+  },
+  "mode": {
+    "default": "home"
+  },
+  "frigate": {
+    "topic": "",
+    "sub_topic": "frigate/#",
+    "mode": "OBSERVE",
+    "debug_raw": false,
+    "raw_log_path": "/app/logs/frigate_raw.log",
+    "event_type": "frigate_event",
+    "payload_map": {},
+    "passthrough_raw": true,
+    "severity_default": 1,
+    "severity_path": ""
+  },
+  "llm": {
+    "api_key": "",
+    "base_url": "https://open.bigmodel.cn/api/paas/v4",
+    "model_text": "glm-4.7",
+    "model_vision": "glm-4.6v",
+    "timeout_sec": 60,
+    "temperature": 0.2,
+    "max_tokens": 1024,
+    "top_p": 0.8
+  },
+  "brain": {
+    "cache_ttl_sec": 30,
+    "cache_size": 128,
+    "max_actions": 6,
+    "retry_attempts": 1,
+    "rules_allow_images": false,
+    "rules": [
+      {
+        "id": "notify_test",
+        "enabled": false,
+        "any": ["提醒", "通知"],
+        "actions": [
+          {
+            "action_type": "notify",
+            "params": {
+              "title": "Butler 通知",
+              "message": "这是规则触发的通知",
+              "level": "info"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "system_exec": {
+    "allowlist": [],
+    "timeout_sec": 20
+  },
+  "scripts": {
+    "dir": "/app/butler/scripts",
+    "allowlist": []
+  },
+  "scheduler": {
+    "enabled": true,
+    "interval_sec": 5
+  },
+  "email": {
+    "imap": {
+      "host": "",
+      "port": 993,
+      "ssl": true
+    },
+    "smtp": {
+      "host": "",
+      "port": 587,
+      "ssl": false,
+      "starttls": true
+    },
+    "username": "",
+    "password": "",
+    "from": ""
+  },
+  "image": {
+    "api_url": "",
+    "api_key": "",
+    "model": "",
+    "timeout_sec": 60
+  },
+  "vision": {
+    "enabled": true,
+    "device": "cpu",
+    "face_model_path": "yolov11m-face.pt",
+    "object_model_path": "yolov8n.pt",
+    "face_backend": "auto",
+    "face_match_threshold": 0.35,
+    "face_min_confidence": 0.5,
+    "object_min_confidence": 0.25,
+    "max_faces": 5
+  },
+  "asr": {
+    "api_url": "",
+    "api_key": "",
+    "model": "whisper-1",
+    "timeout_sec": 60,
+    "provider": "faster-whisper",
+    "model_local": "small",
+    "language": "zh",
+    "device": "cpu",
+    "compute_type": "int8",
+    "download_dir": "/app/butler/models/whisper",
+    "beam_size": 5,
+    "vosk_model_path": ""
+  },
+  "voice": {
+    "wake_words": ["hello", "butler"]
+  },
+  "search": {
+    "api_url": "",
+    "api_key": "",
+    "query_param": "q",
+    "key_param": "api_key",
+    "provider": "",
+    "timeout_sec": 20
+  },
+  "gateway": {
+    "base_url": "",
+    "token": "",
+    "token_header": "Authorization",
+    "timeout_sec": 20,
+    "allowlist": []
+  },
+  "openclaw": {
+    "cli_path": "openclaw",
+    "env": {}
+  }
+}

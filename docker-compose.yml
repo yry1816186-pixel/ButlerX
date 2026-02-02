@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.18
+    container_name: butler_mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
+    networks:
+      - butler-network
+
+  butler-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: butler_core
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./butler:/app/butler
+      - ./butler/data:/app/butler/data
+      - ./logs:/app/logs
+    environment:
+      - BUTLER_CONFIG=/app/butler/config.json
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+      - SUB_TOPICS=butler/in/event,butler/in/command
+      - PUBLISH_TOPICS=butler/out/event,butler/out/action_plan,butler/out/action_result
+      - COOLDOWN_MINUTES=5
+      - MODE_DEFAULT=home
+      - PRIVACY_DEFAULT=0
+      - MQTT_BROKER_HOST=mosquitto
+      - MQTT_BROKER_PORT=1883
+      - DB_PATH=/app/butler/data/butler.db
+      - GLM_API_KEY=${GLM_API_KEY:-}
+      - GLM_BASE_URL=${GLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
+      - GLM_MODEL_TEXT=${GLM_MODEL_TEXT:-glm-4.7}
+      - GLM_MODEL_VISION=${GLM_MODEL_VISION:-glm-4.6v}
+      - GLM_TEMPERATURE=${GLM_TEMPERATURE:-0.2}
+      - GLM_MAX_TOKENS=${GLM_MAX_TOKENS:-1024}
+      - GLM_TOP_P=${GLM_TOP_P:-0.8}
+      - BRAIN_CACHE_TTL_SEC=${BRAIN_CACHE_TTL_SEC:-30}
+      - BRAIN_CACHE_SIZE=${BRAIN_CACHE_SIZE:-128}
+      - BRAIN_MAX_ACTIONS=${BRAIN_MAX_ACTIONS:-6}
+      - BRAIN_RETRY_ATTEMPTS=${BRAIN_RETRY_ATTEMPTS:-1}
+      - BRAIN_RULES_ALLOW_IMAGES=${BRAIN_RULES_ALLOW_IMAGES:-0}
+      - BRAIN_RULES=${BRAIN_RULES:-}
+      - SYSTEM_EXEC_ALLOWLIST=${SYSTEM_EXEC_ALLOWLIST:-}
+      - SCRIPT_DIR=${SCRIPT_DIR:-/app/butler/scripts}
+      - SCRIPT_ALLOWLIST=${SCRIPT_ALLOWLIST:-}
+      - OPENCLAW_CLI_PATH=${OPENCLAW_CLI_PATH:-openclaw}
+      - OPENCLAW_ENV=${OPENCLAW_ENV:-}
+      - SCHEDULER_ENABLED=${SCHEDULER_ENABLED:-1}
+      - SCHEDULER_INTERVAL_SEC=${SCHEDULER_INTERVAL_SEC:-5}
+      - EMAIL_IMAP_HOST=${EMAIL_IMAP_HOST:-}
+      - EMAIL_IMAP_PORT=${EMAIL_IMAP_PORT:-993}
+      - EMAIL_IMAP_SSL=${EMAIL_IMAP_SSL:-1}
+      - EMAIL_SMTP_HOST=${EMAIL_SMTP_HOST:-}
+      - EMAIL_SMTP_PORT=${EMAIL_SMTP_PORT:-587}
+      - EMAIL_SMTP_SSL=${EMAIL_SMTP_SSL:-0}
+      - EMAIL_SMTP_STARTTLS=${EMAIL_SMTP_STARTTLS:-1}
+      - EMAIL_USERNAME=${EMAIL_USERNAME:-}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
+      - EMAIL_FROM=${EMAIL_FROM:-}
+      - IMAGE_API_URL=${IMAGE_API_URL:-}
+      - IMAGE_API_KEY=${IMAGE_API_KEY:-}
+      - IMAGE_MODEL=${IMAGE_MODEL:-}
+      - IMAGE_TIMEOUT_SEC=${IMAGE_TIMEOUT_SEC:-60}
+      - ASR_API_URL=${ASR_API_URL:-}
+      - ASR_API_KEY=${ASR_API_KEY:-}
+      - ASR_MODEL=${ASR_MODEL:-whisper-1}
+      - ASR_TIMEOUT_SEC=${ASR_TIMEOUT_SEC:-60}
+      - ASR_PROVIDER=${ASR_PROVIDER:-faster-whisper}
+      - ASR_MODEL_LOCAL=${ASR_MODEL_LOCAL:-small}
+      - ASR_LANGUAGE=${ASR_LANGUAGE:-zh}
+      - ASR_DEVICE=${ASR_DEVICE:-cpu}
+      - ASR_COMPUTE_TYPE=${ASR_COMPUTE_TYPE:-int8}
+      - ASR_DOWNLOAD_DIR=${ASR_DOWNLOAD_DIR:-/app/butler/models/whisper}
+      - ASR_BEAM_SIZE=${ASR_BEAM_SIZE:-5}
+      - ASR_VOSK_MODEL_PATH=${ASR_VOSK_MODEL_PATH:-}
+      - WAKE_WORDS=${WAKE_WORDS:-hello,butler}
+      - SEARCH_API_URL=${SEARCH_API_URL:-}
+      - SEARCH_API_KEY=${SEARCH_API_KEY:-}
+      - SEARCH_QUERY_PARAM=${SEARCH_QUERY_PARAM:-q}
+      - SEARCH_KEY_PARAM=${SEARCH_KEY_PARAM:-api_key}
+      - SEARCH_PROVIDER=${SEARCH_PROVIDER:-}
+      - SEARCH_TIMEOUT_SEC=${SEARCH_TIMEOUT_SEC:-20}
+      - GATEWAY_BASE_URL=${GATEWAY_BASE_URL:-}
+      - GATEWAY_TOKEN=${GATEWAY_TOKEN:-}
+      - GATEWAY_TOKEN_HEADER=${GATEWAY_TOKEN_HEADER:-Authorization}
+      - GATEWAY_TIMEOUT_SEC=${GATEWAY_TIMEOUT_SEC:-20}
+      - GATEWAY_ALLOWLIST=${GATEWAY_ALLOWLIST:-}
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+    networks:
+      - butler-network
+
+  butler-simulator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: butler_simulator
+    volumes:
+      - ./butler:/app/butler
+    command: python -m butler.adapters.simulator
+    environment:
+      - BUTLER_CONFIG=/app/butler/config.json
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+      - SUB_TOPICS=butler/in/event,butler/in/command
+      - MQTT_BROKER_HOST=mosquitto
+      - MQTT_BROKER_PORT=1883
+    depends_on:
+      - mosquitto
+      - butler-core
+    restart: unless-stopped
+    networks:
+      - butler-network
+
+networks:
+  butler-network:
+    driver: bridge

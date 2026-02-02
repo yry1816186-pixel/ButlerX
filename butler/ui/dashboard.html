@@ -1,0 +1,662 @@
+﻿﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>智慧管家 · 概览</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+  </head>
+  <body>
+    <header class="app-shell">
+      <div class="topbar">
+        <div class="brand">
+          <div class="eyebrow">Butler Studio</div>
+          <h1>智慧管家后台</h1>
+          <p>事件驱动 · AI 规划 · 多模态感知</p>
+        </div>
+        <nav>
+          <a class="active" href="/dashboard">概览</a>
+          <a href="/controls">控制台</a>
+        </nav>
+      </div>
+
+      <section class="hero">
+        <div class="hero-header">
+          <div>
+            <h2>系统概览</h2>
+            <p class="hero-sub">集中查看运行状态、最新事件与关键配置。</p>
+          </div>
+          <div class="chip-group">
+            <span id="modeChip" class="chip">模式 --</span>
+            <span id="privacyChip" class="chip">隐私 --</span>
+            <span id="lastSyncChip" class="chip warn">未刷新</span>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-label">事件</span>
+            <span class="kpi-value" id="kpiEvents">--</span>
+            <span class="status" id="kpiEventsSub">最近 10 条</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">计划</span>
+            <span class="kpi-value" id="kpiPlans">--</span>
+            <span class="status" id="kpiPlansSub">策略输出</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">结果</span>
+            <span class="kpi-value" id="kpiResults">--</span>
+            <span class="status" id="kpiResultsSub">执行反馈</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">调度</span>
+            <span class="kpi-value" id="kpiSchedules">--</span>
+            <span class="status" id="kpiSchedulesSub">待执行任务</span>
+          </div>
+        </div>
+        <div class="button-row">
+          <button class="secondary" onclick="refreshAll()">刷新概览</button>
+          <button class="ghost" onclick="syncHADevices()">同步 HA 设备</button>
+          <button onclick="togglePrivacy()">切换隐私</button>
+          <button class="ghost" onclick="window.location.href='/controls'">打开控制台</button>
+        </div>
+      </section>
+    </header>
+
+    <main class="app-shell stack">
+      <section class="grid two-col">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">实时动态</h3>
+              <p class="panel-subtitle">事件、计划、结果与调度的最新流动。</p>
+            </div>
+            <div class="chip-group">
+              <span class="chip">Live Feed</span>
+            </div>
+          </div>
+          <div id="activityFeed" class="feed"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">即将执行</h3>
+              <p class="panel-subtitle">调度器即将触发的任务。</p>
+            </div>
+            <span class="chip">Schedules</span>
+          </div>
+          <div id="scheduleList" class="data-list"></div>
+        </div>
+      </section>
+
+      <section class="grid two-col">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">设备概览</h3>
+              <p class="panel-subtitle">当前已注册设备与运行状态。</p>
+            </div>
+            <span class="chip">Devices</span>
+          </div>
+          <div class="kpi-grid" style="margin-top: 0;">
+            <div class="kpi-card">
+              <span class="kpi-label">设备总数</span>
+              <span class="kpi-value" id="deviceTotal">--</span>
+              <span class="status">全部后端</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">虚拟设备</span>
+              <span class="kpi-value" id="deviceVirtual">--</span>
+              <span class="status">Simulator</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">HA 设备</span>
+              <span class="kpi-value" id="deviceHA">--</span>
+              <span class="status">Home Assistant</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-label">IR 设备</span>
+              <span class="kpi-value" id="deviceIR">--</span>
+              <span class="status">红外控制</span>
+            </div>
+          </div>
+          <div class="separator"></div>
+          <div id="deviceList" class="data-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">场景一键</h3>
+              <p class="panel-subtitle">从场景库快速触发常用模式。</p>
+            </div>
+            <span class="chip">Scenes</span>
+          </div>
+          <div id="sceneGrid" class="scene-grid"></div>
+        </div>
+      </section>
+
+      <section class="grid two-col">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">声纹档案</h3>
+              <p class="panel-subtitle">已录入的声纹标签与 ID。</p>
+            </div>
+            <span class="chip">Voiceprints</span>
+          </div>
+          <div id="voiceprintList" class="data-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">人脸档案</h3>
+              <p class="panel-subtitle">已录入的人脸标签与 ID。</p>
+            </div>
+            <span class="chip">Faceprints</span>
+          </div>
+          <div id="faceprintList" class="data-list"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h3 class="panel-title">系统配置快照</h3>
+            <p class="panel-subtitle">关键配置与默认值的可视化摘要。</p>
+          </div>
+          <span class="chip">Config</span>
+        </div>
+        <div id="configGrid" class="grid three-col"></div>
+      </section>
+    </main>
+
+    <footer class="app-shell footer" id="pollHint">等待刷新。</footer>
+
+    <script>
+      const modeChip = document.getElementById("modeChip");
+      const privacyChip = document.getElementById("privacyChip");
+      const lastSyncChip = document.getElementById("lastSyncChip");
+      const pollHint = document.getElementById("pollHint");
+      const kpiEvents = document.getElementById("kpiEvents");
+      const kpiPlans = document.getElementById("kpiPlans");
+      const kpiResults = document.getElementById("kpiResults");
+      const kpiSchedules = document.getElementById("kpiSchedules");
+      const deviceTotal = document.getElementById("deviceTotal");
+      const deviceVirtual = document.getElementById("deviceVirtual");
+      const deviceHA = document.getElementById("deviceHA");
+      const deviceIR = document.getElementById("deviceIR");
+      const activityFeed = document.getElementById("activityFeed");
+      const scheduleList = document.getElementById("scheduleList");
+      const deviceList = document.getElementById("deviceList");
+      const sceneGrid = document.getElementById("sceneGrid");
+      const voiceprintList = document.getElementById("voiceprintList");
+      const faceprintList = document.getElementById("faceprintList");
+      const configGrid = document.getElementById("configGrid");
+
+      let pollTimer = null;
+      let privacyEnabled = false;
+
+      const fetchJson = async (path, options) => {
+        try {
+          const res = await fetch(path, options);
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || res.statusText);
+          }
+          return data;
+        } catch (err) {
+          console.warn("Request failed:", path, err);
+          return null;
+        }
+      };
+
+      const formatTs = (ts) => {
+        if (!ts) return "未知";
+        return new Date(ts * 1000).toLocaleString();
+      };
+
+      const shorten = (value, limit = 60) => {
+        if (!value) return "";
+        const text = String(value);
+        return text.length > limit ? `${text.slice(0, limit)}...` : text;
+      };
+
+      const statusBadge = (severity) => {
+        if (severity >= 3) return "critical";
+        if (severity >= 2) return "warn";
+        return "ok";
+      };
+
+      const clearAndAppend = (container, node) => {
+        container.replaceChildren();
+        container.appendChild(node);
+      };
+
+      const createEmpty = (text) => {
+        const empty = document.createElement("div");
+        empty.className = "data-item";
+        empty.textContent = text;
+        return empty;
+      };
+
+      const updateChips = (data) => {
+        const mode = data?.mode || "未知";
+        privacyEnabled = Boolean(data?.privacy_mode);
+        modeChip.textContent = `模式 ${mode}`;
+        privacyChip.textContent = `隐私 ${privacyEnabled ? "开启" : "关闭"}`;
+        privacyChip.className = privacyEnabled ? "chip alert" : "chip";
+      };
+
+      const updateKpis = (data, schedules) => {
+        kpiEvents.textContent = (data?.events || []).length;
+        kpiPlans.textContent = (data?.plans || []).length;
+        kpiResults.textContent = (data?.results || []).length;
+        kpiSchedules.textContent = (schedules || []).length;
+      };
+
+      const renderFeed = (data, schedules) => {
+        const feed = [];
+        (data?.events || []).forEach((event) => {
+          feed.push({
+            kind: "event",
+            ts: event.ts,
+            title: event.type,
+            meta: event.source,
+            badge: statusBadge(event.severity || 0),
+            tags: [event.correlation_id ? `关联 ${event.correlation_id}` : null, shorten(JSON.stringify(event.payload || {}), 80)],
+          });
+        });
+        (data?.plans || []).forEach((plan) => {
+          feed.push({
+            kind: "plan",
+            ts: plan.created_ts,
+            title: plan.policy || "计划",
+            meta: plan.reason || "策略生成",
+            badge: "ok",
+            tags: [`动作 ${plan.actions?.length || 0}`],
+          });
+        });
+        (data?.results || []).forEach((result) => {
+          feed.push({
+            kind: "result",
+            ts: result.ts,
+            title: result.action_type || "结果",
+            meta: result.status || "unknown",
+            badge: result.status === "error" ? "critical" : "ok",
+            tags: [shorten(JSON.stringify(result.output || {}), 80)],
+          });
+        });
+        (schedules || []).forEach((schedule) => {
+          feed.push({
+            kind: "schedule",
+            ts: schedule.run_at,
+            title: schedule.note || "调度任务",
+            meta: `计划于 ${formatTs(schedule.run_at)}`,
+            badge: "warn",
+            tags: [`动作 ${schedule.actions?.length || 0}`],
+          });
+        });
+
+        feed.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+        activityFeed.replaceChildren();
+        if (!feed.length) {
+          activityFeed.appendChild(createEmpty("暂无动态"));
+          return;
+        }
+
+        feed.slice(0, 12).forEach((item) => {
+          const card = document.createElement("div");
+          card.className = "feed-item";
+          card.dataset.kind = item.kind;
+
+          const titleRow = document.createElement("div");
+          titleRow.className = "data-title";
+
+          const title = document.createElement("strong");
+          title.textContent = item.title;
+
+          const badge = document.createElement("span");
+          badge.className = `badge ${item.badge}`;
+          badge.textContent = item.kind;
+
+          titleRow.appendChild(title);
+          titleRow.appendChild(badge);
+
+          const meta = document.createElement("div");
+          meta.className = "data-meta";
+          meta.textContent = `${item.meta || ""} · ${formatTs(item.ts)}`;
+
+          const tags = document.createElement("div");
+          tags.className = "tag-row";
+          (item.tags || []).filter(Boolean).forEach((tagText) => {
+            const tag = document.createElement("span");
+            tag.className = "tag";
+            tag.textContent = tagText;
+            tags.appendChild(tag);
+          });
+
+          card.appendChild(titleRow);
+          card.appendChild(meta);
+          if (tags.childNodes.length) {
+            card.appendChild(tags);
+          }
+          activityFeed.appendChild(card);
+        });
+      };
+
+      const renderSchedules = (schedules) => {
+        scheduleList.replaceChildren();
+        if (!schedules || !schedules.length) {
+          scheduleList.appendChild(createEmpty("暂无即将执行的调度"));
+          return;
+        }
+
+        schedules.forEach((schedule) => {
+          const card = document.createElement("div");
+          card.className = "data-item";
+
+          const titleRow = document.createElement("div");
+          titleRow.className = "data-title";
+
+          const title = document.createElement("strong");
+          title.textContent = schedule.note || "调度任务";
+
+          const badge = document.createElement("span");
+          badge.className = "badge warn";
+          badge.textContent = "待执行";
+
+          titleRow.appendChild(title);
+          titleRow.appendChild(badge);
+
+          const meta = document.createElement("div");
+          meta.className = "data-meta";
+          meta.textContent = `触发时间: ${formatTs(schedule.run_at)}`;
+
+          const tags = document.createElement("div");
+          tags.className = "tag-row";
+          const countTag = document.createElement("span");
+          countTag.className = "tag";
+          countTag.textContent = `动作 ${schedule.actions?.length || 0}`;
+          tags.appendChild(countTag);
+
+          card.appendChild(titleRow);
+          card.appendChild(meta);
+          card.appendChild(tags);
+          scheduleList.appendChild(card);
+        });
+      };
+
+      const renderDevices = (devices) => {
+        deviceList.replaceChildren();
+        if (!devices || !devices.length) {
+          deviceList.appendChild(createEmpty("暂无设备"));
+          deviceTotal.textContent = "0";
+          deviceVirtual.textContent = "0";
+          deviceHA.textContent = "0";
+          deviceIR.textContent = "0";
+          return;
+        }
+
+        const virtualCount = devices.filter((d) => d.backend === "virtual").length;
+        const haCount = devices.filter((d) => d.backend === "homeassistant").length;
+        const irCount = devices.filter((d) => d.backend === "ir").length;
+
+        deviceTotal.textContent = devices.length;
+        deviceVirtual.textContent = virtualCount;
+        deviceHA.textContent = haCount;
+        deviceIR.textContent = irCount;
+
+        devices.slice(0, 8).forEach((device) => {
+          const card = document.createElement("div");
+          card.className = "data-item";
+
+          const titleRow = document.createElement("div");
+          titleRow.className = "data-title";
+
+          const title = document.createElement("strong");
+          title.textContent = device.name || device.device_id || "未知设备";
+
+          const badge = document.createElement("span");
+          badge.className = "badge ok";
+          badge.textContent = device.backend || "unknown";
+
+          titleRow.appendChild(title);
+          titleRow.appendChild(badge);
+
+          const state = document.createElement("div");
+          state.className = "data-meta";
+          let stateText = "";
+          if (device.state && typeof device.state === "object") {
+            stateText = device.state.state || device.state.status || "";
+          } else if (device.type) {
+            stateText = device.type;
+          }
+          state.textContent = stateText ? `状态: ${shorten(stateText, 40)}` : "";
+
+          const tags = document.createElement("div");
+          tags.className = "tag-row";
+          if (device.device_id) {
+            const idTag = document.createElement("span");
+            idTag.className = "tag";
+            idTag.textContent = device.device_id;
+            tags.appendChild(idTag);
+          }
+          if (device.entity_id) {
+            const entTag = document.createElement("span");
+            entTag.className = "tag";
+            entTag.textContent = device.entity_id;
+            tags.appendChild(entTag);
+          }
+
+          card.appendChild(titleRow);
+          if (state.textContent) {
+            card.appendChild(state);
+          }
+          if (tags.childNodes.length) {
+            card.appendChild(tags);
+          }
+          deviceList.appendChild(card);
+        });
+      };
+
+      const renderScenes = (scenes) => {
+        sceneGrid.replaceChildren();
+        if (!scenes || !scenes.length) {
+          sceneGrid.appendChild(createEmpty("暂无场景"));
+          return;
+        }
+
+        scenes.forEach((scene) => {
+          const card = document.createElement("article");
+          card.className = "scene-card";
+
+          const icon = document.createElement("div");
+          icon.className = "scene-icon";
+          icon.textContent = scene.icon || "★";
+
+          const title = document.createElement("h3");
+          title.textContent = scene.name || scene.scene_id;
+
+          const desc = document.createElement("p");
+          desc.textContent = scene.description || "";
+
+          const actions = document.createElement("div");
+          actions.className = "scene-actions";
+
+          const button = document.createElement("button");
+          button.className = "secondary";
+          button.textContent = "激活场景";
+          button.onclick = () => activateScene(scene.scene_id);
+
+          actions.appendChild(button);
+          card.appendChild(icon);
+          card.appendChild(title);
+          card.appendChild(desc);
+          card.appendChild(actions);
+          sceneGrid.appendChild(card);
+        });
+      };
+
+      const renderPrints = (prints, container, emptyText) => {
+        container.replaceChildren();
+        if (!prints || !prints.length) {
+          container.appendChild(createEmpty(emptyText));
+          return;
+        }
+        prints.slice(0, 6).forEach((print) => {
+          const card = document.createElement("div");
+          card.className = "data-item";
+
+          const titleRow = document.createElement("div");
+          titleRow.className = "data-title";
+
+          const title = document.createElement("strong");
+          title.textContent = print.label || "未命名";
+
+          const badge = document.createElement("span");
+          badge.className = "badge ok";
+          badge.textContent = "已录入";
+
+          titleRow.appendChild(title);
+          titleRow.appendChild(badge);
+
+          const meta = document.createElement("div");
+          meta.className = "data-meta";
+          meta.textContent = `ID: ${print.voiceprint_id || print.faceprint_id || "--"}`;
+
+          card.appendChild(titleRow);
+          card.appendChild(meta);
+          container.appendChild(card);
+        });
+      };
+
+      const renderConfig = (config) => {
+        configGrid.replaceChildren();
+        if (!config) {
+          configGrid.appendChild(createEmpty("无法读取配置"));
+          return;
+        }
+
+        const items = [
+          { label: "MQTT Host", value: config.mqtt?.host || "--" },
+          { label: "MQTT Port", value: config.mqtt?.port || "--" },
+          { label: "输入 Topic", value: (config.topics?.in_event || []).join(", ") || "--" },
+          { label: "命令 Topic", value: (config.topics?.in_command || []).join(", ") || "--" },
+          { label: "输出 Topic", value: (config.topics?.out_event || []).join(", ") || "--" },
+          { label: "默认模式", value: config.defaults?.mode || "--" },
+          { label: "隐私默认", value: config.defaults?.privacy ? "开启" : "关闭" },
+          { label: "轮询间隔", value: `${config.ui?.poll_interval_ms || 0} ms` },
+        ];
+
+        items.forEach((item) => {
+          const card = document.createElement("div");
+          card.className = "kpi-card";
+
+          const label = document.createElement("span");
+          label.className = "kpi-label";
+          label.textContent = item.label;
+
+          const value = document.createElement("span");
+          value.className = "kpi-value";
+          value.style.fontSize = "16px";
+          value.textContent = shorten(item.value, 80);
+
+          card.appendChild(label);
+          card.appendChild(value);
+          configGrid.appendChild(card);
+        });
+      };
+
+      const refreshAll = async () => {
+        const [dashboardData, schedulesData, devicesData, scenesData, voiceData, faceData] =
+          await Promise.all([
+            fetchJson("/api/dashboard"),
+            fetchJson("/api/schedules"),
+            fetchJson("/api/devices"),
+            fetchJson("/api/scenes"),
+            fetchJson("/api/voice/prints"),
+            fetchJson("/api/face/prints"),
+          ]);
+
+        if (dashboardData) {
+          updateChips(dashboardData);
+          updateKpis(dashboardData, schedulesData?.due || []);
+          renderFeed(dashboardData, schedulesData?.due || []);
+        }
+
+        renderSchedules(schedulesData?.due || []);
+        renderDevices(devicesData?.devices || []);
+        renderScenes(scenesData?.scenes || []);
+        renderPrints(voiceData?.prints || [], voiceprintList, "暂无声纹记录");
+        renderPrints(faceData?.prints || [], faceprintList, "暂无人脸记录");
+
+        const now = new Date();
+        lastSyncChip.textContent = `更新 ${now.toLocaleTimeString()}`;
+        lastSyncChip.className = "chip";
+      };
+
+      const loadConfig = async () => {
+        const config = await fetchJson("/api/config");
+        renderConfig(config);
+        const interval = config?.ui?.poll_interval_ms || 5000;
+        startPolling(interval);
+      };
+
+      const startPolling = (intervalMs) => {
+        if (pollTimer) {
+          clearInterval(pollTimer);
+        }
+        pollTimer = setInterval(refreshAll, intervalMs);
+        pollHint.textContent = `每 ${Math.round(intervalMs / 1000)} 秒刷新。`;
+      };
+
+      const sendCommand = async (commandType, payload = {}) => {
+        const res = await fetchJson("/api/command", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command_type: commandType, payload }),
+        });
+        return res;
+      };
+
+      const togglePrivacy = async () => {
+        const desired = !privacyEnabled;
+        const result = await sendCommand("privacy_toggle", { enabled: desired });
+        if (result?.status === "ok") {
+          privacyEnabled = desired;
+          privacyChip.textContent = `隐私 ${privacyEnabled ? "开启" : "关闭"}`;
+          privacyChip.className = privacyEnabled ? "chip alert" : "chip";
+        }
+      };
+
+      const syncHADevices = async () => {
+        const result = await fetchJson("/api/devices/sync", { method: "POST" });
+        if (result?.error) {
+          alert(`同步失败: ${result.error}`);
+        } else {
+          await refreshAll();
+        }
+      };
+
+      const activateScene = async (sceneId) => {
+        const result = await fetchJson("/api/scenes/activate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scene_id: sceneId }),
+        });
+        if (result?.error) {
+          alert(`场景激活失败: ${result.error}`);
+        } else {
+          alert(result?.message || "场景已激活");
+          await refreshAll();
+        }
+      };
+
+      refreshAll();
+      loadConfig();
+    </script>
+  </body>
+</html>
