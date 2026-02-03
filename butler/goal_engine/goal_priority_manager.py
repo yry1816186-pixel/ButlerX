@@ -30,6 +30,14 @@ class PriorityFactorWeight:
 
 
 @dataclass
+class PriorityWeight:
+    factor: PriorityFactor
+    weight: float = 1.0
+    enabled: bool = True
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class PriorityAdjustment:
     goal_id: str
     original_priority: int

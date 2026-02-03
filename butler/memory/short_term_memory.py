@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from collections import OrderedDict
 from datetime import datetime, timedelta
 
-from .memory_system import MemoryItem
+from .memory_types import MemoryItem
 
 logger = logging.getLogger(__name__)
 

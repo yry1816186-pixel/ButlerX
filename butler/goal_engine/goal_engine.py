@@ -36,6 +36,46 @@ class GoalStatus(Enum):
     CANCELLED = "cancelled"
     DEFERRED = "deferred"
     ABORTED = "aborted"
+    ACTIVE = "active"
+    PAUSED = "paused"
+
+class GoalState(Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    DEFERRED = "deferred"
+    ABORTED = "aborted"
+    ACTIVE = "active"
+    PAUSED = "paused"
+
+@dataclass
+class GoalStatistics:
+    total_goals: int = 0
+    active_goals: int = 0
+    completed_goals: int = 0
+    failed_goals: int = 0
+    cancelled_goals: int = 0
+    deferred_goals: int = 0
+    success_rate: float = 0.0
+    average_completion_time: float = 0.0
+    last_goal_completed: Optional[datetime] = None
+    last_goal_failed: Optional[datetime] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "total_goals": self.total_goals,
+            "active_goals": self.active_goals,
+            "completed_goals": self.completed_goals,
+            "failed_goals": self.failed_goals,
+            "cancelled_goals": self.cancelled_goals,
+            "deferred_goals": self.deferred_goals,
+            "success_rate": self.success_rate,
+            "average_completion_time": self.average_completion_time,
+            "last_goal_completed": self.last_goal_completed.isoformat() if self.last_goal_completed else None,
+            "last_goal_failed": self.last_goal_failed.isoformat() if self.last_goal_failed else None
+        }
 
 
 @dataclass

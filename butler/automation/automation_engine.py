@@ -73,6 +73,40 @@ class AutomationState:
         }
 
 @dataclass
+class AutomationStatistics:
+    total_triggers: int = 0
+    total_runs: int = 0
+    successful_runs: int = 0
+    failed_runs: int = 0
+    last_triggered: Optional[datetime] = None
+    last_run: Optional[datetime] = None
+    average_run_time: float = 0.0
+
+    def get_success_rate(self) -> float:
+        if self.total_runs == 0:
+            return 0.0
+        return self.successful_runs / self.total_runs
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "total_triggers": self.total_triggers,
+            "total_runs": self.total_runs,
+            "successful_runs": self.successful_runs,
+            "failed_runs": self.failed_runs,
+            "last_triggered": self.last_triggered.isoformat() if self.last_triggered else None,
+            "last_run": self.last_run.isoformat() if self.last_run else None,
+            "average_run_time": self.average_run_time,
+            "success_rate": self.get_success_rate()
+        }
+
+class AutomationStatus(Enum):
+    IDLE = "idle"
+    RUNNING = "running"
+    PAUSED = "paused"
+    ERROR = "error"
+    DISABLED = "disabled"
+
+@dataclass
 class AutomationExecution:
     execution_id: str
     automation_id: str

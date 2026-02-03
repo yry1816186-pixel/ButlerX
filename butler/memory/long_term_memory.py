@@ -6,7 +6,7 @@ import os
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 
-from .memory_system import MemoryItem
+from .memory_types import MemoryItem
 
 logger = logging.getLogger(__name__)
 

@@ -8,9 +8,32 @@ from datetime import datetime
 from dataclasses import dataclass, field
 
 from .long_term_memory import LongTermMemory
-from .memory_system import MemoryItem, MemoryType
+from .memory_types import MemoryItem, MemoryType
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class Relation:
+    relation_id: str
+    source_id: str
+    target_id: str
+    relation_type: str
+    confidence: float = 1.0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_at: datetime = field(default_factory=datetime.now)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "relation_id": self.relation_id,
+            "source_id": self.source_id,
+            "target_id": self.target_id,
+            "relation_type": self.relation_type,
+            "confidence": self.confidence,
+            "metadata": self.metadata,
+            "created_at": self.created_at.isoformat()
+        }
+
 
 @dataclass
 class Concept:

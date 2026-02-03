@@ -1,13 +1,12 @@
 from __future__ import annotations
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional, Callable, Tuple
-from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Callable, Tuple, TYPE_CHECKING
 from datetime import datetime, timedelta
-from enum import Enum
 import json
 from collections import OrderedDict
 
+from .memory_types import MemoryItem, MemoryType, MemoryLevel, MemoryAccessLevel, MemoryPriority, ConsolidationStrategy
 from .working_memory import WorkingMemory
 from .short_term_memory import ShortTermMemory
 from .long_term_memory import LongTermMemory
@@ -17,72 +16,6 @@ from .procedural_memory import ProceduralMemory
 from .memory_query import MemoryQuery, MemoryQueryResult
 
 logger = logging.getLogger(__name__)
-
-class MemoryLevel(Enum):
-    WORKING = "working"
-    SHORT_TERM = "short_term"
-    LONG_TERM = "long_term"
-
-class MemoryType(Enum):
-    EPISODIC = "episodic"
-    SEMANTIC = "semantic"
-    PROCEDURAL = "procedural"
-    WORKING = "working"
-
-class MemoryAccessLevel(Enum):
-    PUBLIC = "public"
-    PRIVATE = "private"
-    ENCRYPTED = "encrypted"
-
-class MemoryPriority(Enum):
-    LOW = 1
-    NORMAL = 2
-    HIGH = 3
-    CRITICAL = 4
-
-@dataclass
-class MemoryItem:
-    memory_id: str
-    content: Any
-    memory_type: MemoryType
-    access_level: MemoryAccessLevel
-    created_at: datetime = field(default_factory=datetime.now)
-    last_accessed: datetime = field(default_factory=datetime.now)
-    access_count: int = 0
-    priority: MemoryPriority = MemoryPriority.NORMAL
-    tags: List[str] = field(default_factory=list)
-    embedding: Optional[List[float]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    expires_at: Optional[datetime] = None
-    ttl: Optional[float] = None
-
-    def is_expired(self) -> bool:
-        if self.expires_at:
-            return datetime.now() > self.expires_at
-        if self.ttl:
-            return (datetime.now() - self.created_at).total_seconds() > self.ttl
-        return False
-
-    def access(self):
-        self.last_accessed = datetime.now()
-        self.access_count += 1
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "memory_id": self.memory_id,
-            "content": self.content if not isinstance(self.content, (bytes, bytearray)) else "<binary>",
-            "memory_type": self.memory_type.value,
-            "access_level": self.access_level.value,
-            "created_at": self.created_at.isoformat(),
-            "last_accessed": self.last_accessed.isoformat(),
-            "access_count": self.access_count,
-            "priority": self.priority.value,
-            "tags": self.tags,
-            "embedding_available": self.embedding is not None,
-            "metadata": self.metadata,
-            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
-            "ttl": self.ttl
-        }
 
 class MemorySystem:
     def __init__(

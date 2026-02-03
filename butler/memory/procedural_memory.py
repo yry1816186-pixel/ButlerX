@@ -8,9 +8,30 @@ from datetime import datetime
 from dataclasses import dataclass, field
 
 from .long_term_memory import LongTermMemory
-from .memory_system import MemoryItem, MemoryType
+from .memory_types import MemoryItem, MemoryType
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ProcedureStep:
+    step_id: str
+    step_type: str
+    description: str
+    parameters: Dict[str, Any] = field(default_factory=dict)
+    optional: bool = False
+    timeout: Optional[float] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "step_id": self.step_id,
+            "step_type": self.step_type,
+            "description": self.description,
+            "parameters": self.parameters,
+            "optional": self.optional,
+            "timeout": self.timeout
+        }
+
 
 @dataclass
 class Procedure:

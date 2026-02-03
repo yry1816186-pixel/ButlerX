@@ -35,12 +35,20 @@ class ErrorCategory(Enum):
 
 class RecoveryStrategy(Enum):
     RETRY = "retry"
+    CIRCUIT_BREAKER = "circuit_breaker"
     FALLBACK = "fallback"
+    IGNORE = "ignore"
+    LOG_AND_CONTINUE = "log_and_continue"
     DEGRADE = "degrade"
     SKIP = "skip"
     ABORT = "abort"
     NOTIFY = "notify"
     RESTART = "restart"
+
+class CircuitBreakerState(Enum):
+    CLOSED = "closed"
+    OPEN = "open"
+    HALF_OPEN = "half_open"
 
 @dataclass
 class ErrorContext:

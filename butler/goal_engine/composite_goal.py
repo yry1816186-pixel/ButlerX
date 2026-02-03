@@ -44,6 +44,18 @@ class SubGoalConfig:
 
 
 @dataclass
+class SubGoal:
+    goal_id: str
+    name: str
+    priority: int = 0
+    strategy: SubGoalStrategy = SubGoalStrategy.SEQUENTIAL
+    conditions: List[Dict[str, Any]] = field(default_factory=list)
+    timeout: Optional[float] = None
+    retry_count: int = 0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class CompositeGoal:
     goal_id: str
     name: str

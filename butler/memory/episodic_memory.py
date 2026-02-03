@@ -8,9 +8,34 @@ from datetime import datetime
 from dataclasses import dataclass, field
 
 from .long_term_memory import LongTermMemory
-from .memory_system import MemoryItem, MemoryType
+from .memory_types import MemoryItem, MemoryType
 
 logger = logging.getLogger(__name__)
+
+@dataclass
+class Event:
+    event_id: str
+    event_type: str
+    description: str
+    timestamp: datetime = field(default_factory=datetime.now)
+    participants: List[str] = field(default_factory=list)
+    location: Optional[str] = None
+    context: Dict[str, Any] = field(default_factory=dict)
+    importance: float = 0.5
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "event_id": self.event_id,
+            "event_type": self.event_type,
+            "description": self.description,
+            "timestamp": self.timestamp.isoformat(),
+            "participants": self.participants,
+            "location": self.location,
+            "context": self.context,
+            "importance": self.importance,
+            "metadata": self.metadata
+        }
 
 @dataclass
 class Episode:
@@ -36,6 +61,9 @@ class Episode:
             "importance": self.importance,
             "tags": self.tags
         }
+
+    def add_event(self, event):
+        self.events.append(event.to_dict() if hasattr(event, 'to_dict') else event)
 
 class EpisodicMemory(LongTermMemory):
     def __init__(self, storage_path: Optional[str] = None):

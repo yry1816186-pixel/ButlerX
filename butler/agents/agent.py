@@ -35,6 +35,14 @@ class AgentPriority(Enum):
     HIGH = 3
     CRITICAL = 4
 
+class TaskStatus(Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    TIMEOUT = "timeout"
+
 @dataclass
 class AgentCapability:
     name: str

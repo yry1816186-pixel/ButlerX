@@ -15,17 +15,16 @@ from butler.agents.agent import (
 class TestAgentConfig:
     def test_agent_config_creation(self):
         config = AgentConfig(
+            agent_id="test_agent_001",
             name="Test Agent",
             agent_type="test",
             enabled=True,
-            max_queue_size=100,
             heartbeat_interval=30.0
         )
-        
+
         assert config.name == "Test Agent"
         assert config.agent_type == "test"
         assert config.enabled is True
-        assert config.max_queue_size == 100
         assert config.heartbeat_interval == 30.0
 
 
@@ -34,15 +33,15 @@ class TestAgentMessage:
         message = AgentMessage(
             message_id="msg_001",
             sender_id="agent_001",
-            receiver_id="agent_002",
+            recipient_id="agent_002",
             message_type=MessageType.REQUEST,
             content={"action": "test"},
             timestamp=datetime.now()
         )
-        
+
         assert message.message_id == "msg_001"
         assert message.sender_id == "agent_001"
-        assert message.receiver_id == "agent_002"
+        assert message.recipient_id == "agent_002"
         assert message.message_type == MessageType.REQUEST
 
     def test_message_to_dict(self):
