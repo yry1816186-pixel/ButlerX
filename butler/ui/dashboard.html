@@ -3,124 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>智慧管家 - 控制台</title>
+  <title>仪表盘 - 智能管家</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .app-container {
+    :root {
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #ffffff;
+      --bg-hover: #e8f4f8;
+      --text-primary: #1a1a2e;
+      --text-secondary: #6b7280;
+      --primary-color: #0088cc;
+      --primary-hover: #006699;
+      --primary-light: #e6f7ff;
+      --success: #52c41a;
+      --warning: #faad14;
+      --danger: #ff4d4f;
+      --info: #1890ff;
+      --border-color: #e5e7eb;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --sidebar-width: 260px;
+      --top-bar-height: 64px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .layout {
       display: flex;
       min-height: 100vh;
-      background: var(--bg-deep);
     }
 
     .sidebar {
-      width: 260px;
-      background: var(--bg-dark);
-      border-right: 1px solid rgba(0, 136, 204, 0.1);
-      display: flex;
-      flex-direction: column;
+      width: var(--sidebar-width);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
       position: fixed;
-      top: 0;
+      height: 100vh;
+      overflow-y: auto;
       left: 0;
-      bottom: 0;
-      z-index: 1000;
-      transition: transform 0.3s ease;
+      top: 0;
+      z-index: 100;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
     }
 
     .sidebar-header {
-      padding: 24px;
-      border-bottom: 1px solid rgba(0, 136, 204, 0.1);
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .sidebar-logo {
-      font-family: 'Orbitron', sans-serif;
       font-size: 20px;
-      font-weight: 900;
-      background: var(--gradient-neon);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .sidebar-nav {
-      flex: 1;
-      padding: 20px 12px;
-      overflow-y: auto;
+    .sidebar-logo::before {
+      content: '🏠';
+      font-size: 24px;
     }
 
     .nav-section {
-      margin-bottom: 24px;
+      padding: 16px 12px;
     }
 
     .nav-section-title {
       font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
+      font-weight: 600;
+      color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 12px;
-      padding-left: 12px;
+      letter-spacing: 0.5px;
+      padding: 8px 12px;
+      margin-bottom: 4px;
     }
 
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin: 4px 0;
+      border-radius: 8px;
       color: var(--text-secondary);
-      font-size: 13px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s ease;
-      margin-bottom: 4px;
     }
 
     .nav-item:hover {
-      background: rgba(0, 136, 204, 0.08);
-      color: var(--text-primary);
+      background: var(--bg-hover);
+      color: var(--primary-color);
     }
 
     .nav-item.active {
-      background: var(--gradient-neon);
-      color: white;
+      background: var(--primary-light);
+      color: var(--primary-color);
+      font-weight: 600;
     }
 
-    .nav-icon {
+    .nav-item::before {
+      content: attr(data-icon);
       font-size: 18px;
+      margin-right: 12px;
+      width: 24px;
+      text-align: center;
     }
 
     .sidebar-footer {
       padding: 20px;
-      border-top: 1px solid rgba(0, 136, 204, 0.1);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
     }
 
     .system-info {
       font-size: 11px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       line-height: 1.6;
     }
 
     .main-content {
       flex: 1;
-      margin-left: 260px;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-deep);
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
     }
 
     .top-bar {
-      height: 64px;
-      background: var(--bg-card);
-      border-bottom: 1px solid rgba(0, 136, 204, 0.1);
+      height: var(--top-bar-height);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
+      padding: 0 32px;
       position: sticky;
       top: 0;
-      z-index: 999;
+      z-index: 90;
     }
 
     .top-bar-left {
@@ -133,106 +174,114 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text-secondary);
     }
 
     .breadcrumb a {
-      color: var(--primary);
+      color: var(--text-secondary);
       text-decoration: none;
+      transition: color 0.2s;
     }
 
     .breadcrumb a:hover {
-      text-decoration: underline;
+      color: var(--primary-color);
+    }
+
+    .breadcrumb .current {
+      color: var(--primary-color);
+      font-weight: 600;
     }
 
     .top-bar-right {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 24px;
+    }
+
+    .notification-btn {
+      position: relative;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+
+    .notification-btn:hover {
+      color: var(--primary-color);
     }
 
     .notification-badge {
-      position: relative;
-      cursor: pointer;
-      font-size: 20px;
-    }
-
-    .badge-count {
       position: absolute;
-      top: -6px;
-      right: -6px;
-      width: 20px;
-      height: 20px;
-      background: var(--pink);
+      top: -4px;
+      right: -4px;
+      background: var(--danger);
       color: white;
-      border-radius: 50%;
-      font-size: 11px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 600;
     }
 
     .user-profile {
       display: flex;
       align-items: center;
       gap: 10px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: var(--bg-primary);
       cursor: pointer;
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      transition: all 0.3s ease;
+      transition: all 0.2s;
     }
 
     .user-profile:hover {
-      background: rgba(0, 136, 204, 0.08);
+      background: var(--bg-hover);
     }
 
     .user-avatar {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: var(--gradient-neon);
+      background: var(--primary-color);
       display: flex;
       align-items: center;
       justify-content: center;
+      color: white;
+      font-weight: 600;
       font-size: 14px;
     }
 
     .user-name {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 500;
       color: var(--text-primary);
     }
 
-    .dashboard-content {
-      padding: 24px;
-      max-width: 1600px;
-      margin: 0 auto;
-      width: 100%;
+    .page-header {
+      padding: 32px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .page-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 24px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .page-title .refresh-btn {
-      font-size: 16px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: var(--radius-sm);
-      transition: all 0.3s ease;
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
     }
 
-    .page-title .refresh-btn:hover {
-      background: rgba(0, 136, 204, 0.1);
+    .content {
+      padding: 32px;
     }
 
     .dashboard-grid {
@@ -244,16 +293,17 @@
     .status-overview {
       grid-column: span 12;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
     }
 
     .status-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.15);
-      border-radius: var(--radius-md);
-      padding: 20px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
       display: flex;
       align-items: center;
       gap: 16px;
@@ -261,15 +311,16 @@
     }
 
     .status-card:hover {
-      border-color: var(--primary);
-      box-shadow: 0 4px 16px rgba(0, 136, 204, 0.12);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+      border-color: var(--primary-color);
     }
 
     .status-icon {
       width: 56px;
       height: 56px;
       border-radius: 12px;
-      background: var(--gradient-neon);
+      background: var(--primary-light);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -282,60 +333,64 @@
     }
 
     .status-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-size: 13px;
+      color: var(--text-secondary);
       margin-bottom: 4px;
+      font-weight: 500;
     }
 
     .status-value {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--text-primary);
       margin-bottom: 4px;
     }
 
     .status-sub {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .status-indicator {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
     }
 
     .status-indicator.online {
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(82, 196, 26, 0.4);
     }
 
     .status-indicator.offline {
-      background: var(--pink);
-      box-shadow: 0 0 8px var(--pink);
+      background: var(--danger);
+      box-shadow: 0 0 8px rgba(255, 77, 79, 0.4);
+    }
+
+    .status-indicator.warning {
+      background: var(--warning);
+      box-shadow: 0 0 8px rgba(250, 173, 20, 0.4);
     }
 
     .quick-actions {
       grid-column: span 12;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
 
     .quick-actions-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
     }
 
     .quick-action-btn {
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.15);
-      border-radius: var(--radius-md);
-      padding: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -346,43 +401,43 @@
     }
 
     .quick-action-btn:hover {
-      border-color: var(--primary);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 136, 204, 0.15);
+      border-color: var(--primary-color);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      background: var(--primary-light);
     }
 
     .quick-action-icon {
-      font-size: 32px;
+      font-size: 28px;
     }
 
     .quick-action-label {
       font-size: 13px;
       font-weight: 600;
       color: var(--text-primary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .quick-action-btn.danger:hover {
-      border-color: var(--pink);
-      box-shadow: 0 8px 20px rgba(255, 0, 136, 0.15);
+      border-color: var(--danger);
+      background: #fff1f0;
     }
 
     .monitoring-section {
       grid-column: span 8;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
 
     .events-section {
       grid-column: span 4;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
 
     .section-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.15);
-      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+      border-radius: 12px;
       padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
     }
 
     .section-header {
@@ -393,7 +448,7 @@
     }
 
     .section-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--text-primary);
       display: flex;
@@ -404,18 +459,17 @@
     .section-title::before {
       content: '';
       width: 4px;
-      height: 18px;
-      background: var(--gradient-neon);
+      height: 20px;
+      background: var(--primary-color);
       border-radius: 2px;
     }
 
     .section-action {
-      font-size: 12px;
-      color: var(--primary);
+      font-size: 13px;
+      color: var(--primary-color);
       cursor: pointer;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      transition: color 0.2s;
     }
 
     .section-action:hover {
@@ -425,26 +479,22 @@
     .camera-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      gap: 16px;
+      margin-bottom: 20px;
     }
 
     .camera-preview {
-      background: var(--bg-dark);
-      border-radius: var(--radius-sm);
+      background: var(--bg-primary);
+      border-radius: 8px;
       aspect-ratio: 16/9;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       font-size: 14px;
       position: relative;
       overflow: hidden;
-    }
-
-    .camera-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      border: 1px solid var(--border-color);
     }
 
     .camera-label {
@@ -455,47 +505,41 @@
       padding: 8px 12px;
       background: rgba(0, 0, 0, 0.7);
       color: white;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .sensor-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
-      margin-top: 16px;
     }
 
     .sensor-card {
-      background: var(--bg-dark);
-      border: 1px solid rgba(0, 136, 204, 0.1);
-      border-radius: var(--radius-sm);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       padding: 16px;
       text-align: center;
     }
 
     .sensor-value {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
-      color: var(--primary);
+      color: var(--primary-color);
       margin-bottom: 4px;
     }
 
     .sensor-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-size: 12px;
+      color: var(--text-secondary);
     }
 
     .event-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      max-height: 400px;
+      max-height: 450px;
       overflow-y: auto;
     }
 
@@ -503,15 +547,15 @@
       display: flex;
       gap: 12px;
       padding: 12px;
-      background: var(--bg-dark);
-      border: 1px solid rgba(0, 136, 204, 0.08);
-      border-radius: var(--radius-sm);
-      transition: all 0.3s ease;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: all 0.2s ease;
     }
 
     .event-item:hover {
-      border-color: var(--primary);
-      background: rgba(0, 136, 204, 0.03);
+      border-color: var(--primary-color);
+      background: var(--primary-light);
     }
 
     .event-icon {
@@ -526,19 +570,23 @@
     }
 
     .event-icon.info {
-      background: rgba(0, 136, 204, 0.15);
+      background: #e6f7ff;
+      color: var(--info);
     }
 
     .event-icon.success {
-      background: rgba(0, 204, 102, 0.15);
+      background: #f6ffed;
+      color: var(--success);
     }
 
     .event-icon.warning {
-      background: rgba(255, 85, 0, 0.15);
+      background: #fffbe6;
+      color: var(--warning);
     }
 
     .event-icon.error {
-      background: rgba(255, 0, 136, 0.15);
+      background: #fff1f0;
+      color: var(--danger);
     }
 
     .event-content {
@@ -546,16 +594,68 @@
     }
 
     .event-title {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--text-primary);
       margin-bottom: 4px;
     }
 
     .event-time {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2000;
+      animation: slideIn 0.3s ease;
+      min-width: 300px;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--danger);
+    }
+
+    .toast.warning {
+      border-left: 4px solid var(--warning);
+    }
+
+    .toast.info {
+      border-left: 4px solid var(--info);
+    }
+
+    .toast-icon {
+      font-size: 20px;
+    }
+
+    .toast-message {
+      font-size: 14px;
+      color: var(--text-primary);
+      flex: 1;
     }
 
     @media (max-width: 1200px) {
@@ -564,6 +664,15 @@
       }
       .events-section {
         grid-column: span 12;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 220px;
+      }
+      .main-content {
+        margin-left: 220px;
       }
     }
 
@@ -577,81 +686,50 @@
       .main-content {
         margin-left: 0;
       }
+      .top-bar {
+        padding: 0 16px;
+      }
+      .page-header,
+      .content {
+        padding: 20px 16px;
+      }
       .status-overview {
         grid-template-columns: 1fr;
+      }
+      .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
 </head>
 <body>
-  <div class="app-container">
+  <div class="layout">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-logo">SMART BUTLER</div>
+        <div class="sidebar-logo">智能管家</div>
       </div>
-      <nav class="sidebar-nav">
+      <nav>
         <div class="nav-section">
           <div class="nav-section-title">主菜单</div>
-          <div class="nav-item active" onclick="navigate('dashboard')">
-            <span class="nav-icon">📊</span>
-            <span>仪表盘</span>
-          </div>
-          <div class="nav-item" onclick="navigate('devices')">
-            <span class="nav-icon">🔌</span>
-            <span>设备管理</span>
-          </div>
-          <div class="nav-item" onclick="navigate('health')">
-            <span class="nav-icon">💊</span>
-            <span>系统健康</span>
-          </div>
-          <div class="nav-item" onclick="navigate('alerts')">
-            <span class="nav-icon">🔔</span>
-            <span>告警中心</span>
-          </div>
+          <a href="dashboard.html" class="nav-item active" data-icon="📊">仪表盘</a>
+          <a href="devices.html" class="nav-item" data-icon="🔌">设备管理</a>
+          <a href="scenes.html" class="nav-item" data-icon="🎬">场景控制</a>
         </div>
         <div class="nav-section">
           <div class="nav-section-title">功能</div>
-          <div class="nav-item" onclick="navigate('scenes')">
-            <span class="nav-icon">🎬</span>
-            <span>场景控制</span>
-          </div>
-          <div class="nav-item" onclick="navigate('ai')">
-            <span class="nav-icon">🤖</span>
-            <span>AI配置</span>
-          </div>
+          <a href="ai.html" class="nav-item" data-icon="🤖">AI 助手</a>
+          <a href="vision.html" class="nav-item" data-icon="👁️">视觉监控</a>
         </div>
         <div class="nav-section">
           <div class="nav-section-title">监控</div>
-          <div class="nav-item" onclick="navigate('vision')">
-            <span class="nav-icon">👁️</span>
-            <span>视觉监控</span>
-          </div>
-          <div class="nav-item" onclick="navigate('analytics')">
-            <span class="nav-icon">📊</span>
-            <span>数据分析</span>
-          </div>
-        </div>
-        <div class="nav-section">
-          <div class="nav-section-title">监控</div>
-          <div class="nav-item" onclick="navigate('vision')">
-            <span class="nav-icon">📹</span>
-            <span>视觉监控</span>
-          </div>
-          <div class="nav-item" onclick="navigate('logs')">
-            <span class="nav-icon">📝</span>
-            <span>系统日志</span>
-          </div>
+          <a href="health.html" class="nav-item" data-icon="💓">系统健康</a>
+          <a href="alerts.html" class="nav-item" data-icon="🔔">告警中心</a>
+          <a href="logs.html" class="nav-item" data-icon="📋">日志记录</a>
         </div>
         <div class="nav-section">
           <div class="nav-section-title">系统</div>
-          <div class="nav-item" onclick="navigate('settings')">
-            <span class="nav-icon">⚙️</span>
-            <span>系统设置</span>
-          </div>
-          <div class="nav-item" onclick="navigate('security')">
-            <span class="nav-icon">🔐</span>
-            <span>权限安全</span>
-          </div>
+          <a href="security.html" class="nav-item" data-icon="🔐">用户管理</a>
+          <a href="settings.html" class="nav-item" data-icon="⚙️">系统设置</a>
         </div>
       </nav>
       <div class="sidebar-footer">
@@ -666,18 +744,18 @@
     <main class="main-content">
       <div class="top-bar">
         <div class="top-bar-left">
-          <button class="refresh-btn" onclick="toggleSidebar()" style="font-size: 20px;">☰</button>
+          <button onclick="toggleSidebar()" style="font-size: 20px; background: none; border: none; cursor: pointer; padding: 4px;">☰</button>
           <div class="breadcrumb">
-            <span>智慧管家</span>
+            <a href="dashboard.html">首页</a>
             <span>/</span>
-            <a href="#">仪表盘</a>
+            <span class="current">仪表盘</span>
           </div>
         </div>
         <div class="top-bar-right">
-          <div class="notification-badge" onclick="showNotifications()">
-            <span>🔔</span>
-            <span class="badge-count">3</span>
-          </div>
+          <button class="notification-btn" onclick="showNotifications()">
+            🔔
+            <span class="notification-badge">3</span>
+          </button>
           <div class="user-profile" onclick="showUserMenu()">
             <div class="user-avatar">A</div>
             <div class="user-name">管理员</div>
@@ -685,12 +763,15 @@
         </div>
       </div>
 
-      <div class="dashboard-content">
-        <div class="page-title">
-          <span>控制台</span>
-          <span class="refresh-btn" onclick="refreshDashboard()" title="刷新">🔄</span>
-        </div>
+      <div class="page-header">
+        <h1 class="page-title">
+          <span>仪表盘</span>
+          <span onclick="refreshDashboard()" style="cursor: pointer; font-size: 20px; opacity: 0.6;" title="刷新">🔄</span>
+        </h1>
+        <p class="page-subtitle">系统总览与实时监控</p>
+      </div>
 
+      <div class="content">
         <div class="dashboard-grid">
           <div class="status-overview">
             <div class="status-card">
@@ -708,14 +789,14 @@
               <div class="status-icon">🏠</div>
               <div class="status-content">
                 <div class="status-label">设备状态</div>
-                <div class="status-value">12/14</div>
-                <div class="status-sub">12在线 · 2离线</div>
+                <div class="status-value">21/24</div>
+                <div class="status-sub">21在线 · 3离线</div>
               </div>
             </div>
             <div class="status-card">
               <div class="status-icon">🧠</div>
               <div class="status-content">
-                <div class="status-label">AI引擎</div>
+                <div class="status-label">AI 引擎</div>
                 <div class="status-value">活跃</div>
                 <div class="status-sub">响应时间: 0.8s</div>
               </div>
@@ -731,7 +812,7 @@
           </div>
 
           <div class="quick-actions">
-            <div class="section-title" style="margin-bottom: 16px; font-size: 14px;">快捷操作</div>
+            <div class="section-title" style="margin-bottom: 16px; font-size: 18px;">快捷操作</div>
             <div class="quick-actions-grid">
               <div class="quick-action-btn" onclick="activateScene('home')">
                 <div class="quick-action-icon">🏠</div>
@@ -772,15 +853,15 @@
             <div class="section-card">
               <div class="section-header">
                 <div class="section-title">实时监控</div>
-                <span class="section-action" onclick="navigate('vision')">查看全部 →</span>
+                <span class="section-action" onclick="window.location.href='vision.html'">查看全部 →</span>
               </div>
               <div class="camera-grid">
                 <div class="camera-preview">
-                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180' viewBox='0 0 320 180'%3E%3Crect fill='%231a1a2e' width='320' height='180'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%235a5a6e' font-size='14'%3E门口摄像头%3C/text%3E%3C/svg%3E" alt="门口摄像头">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180' viewBox='0 0 320 180'%3E%3Crect fill='%23f5f7fa' width='320' height='180'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-size='14'%3E门口摄像头%3C/text%3E%3C/svg%3E" alt="门口摄像头">
                   <div class="camera-label">门口摄像头</div>
                 </div>
                 <div class="camera-preview">
-                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180' viewBox='0 0 320 180'%3E%3Crect fill='%231a1a2e' width='320' height='180'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%235a5a6e' font-size='14'%3E客厅摄像头%3C/text%3E%3C/svg%3E" alt="客厅摄像头">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180' viewBox='0 0 320 180'%3E%3Crect fill='%23f5f7fa' width='320' height='180'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-size='14'%3E客厅摄像头%3C/text%3E%3C/svg%3E" alt="客厅摄像头">
                   <div class="camera-label">客厅摄像头</div>
                 </div>
               </div>
@@ -802,7 +883,7 @@
                   <div class="sensor-label">实时功率</div>
                 </div>
                 <div class="sensor-card">
-                  <div class="sensor-value">3.2kW·h</div>
+                  <div class="sensor-value">12.5kW·h</div>
                   <div class="sensor-label">今日能耗</div>
                 </div>
                 <div class="sensor-card">
@@ -817,7 +898,7 @@
             <div class="section-card">
               <div class="section-header">
                 <div class="section-title">最近事件</div>
-                <span class="section-action" onclick="navigate('logs')">查看全部 →</span>
+                <span class="section-action" onclick="window.location.href='logs.html'">查看全部 →</span>
               </div>
               <div class="event-list">
                 <div class="event-item">
@@ -878,33 +959,14 @@
   </div>
 
   <script>
-    function navigate(page) {
-      const pages = {
-        'dashboard': 'dashboard.html',
-        'devices': 'controls.html',
-        'scenes': 'controls.html',
-        'ai': 'settings.html',
-        'vision': 'settings.html',
-        'analytics': 'logs.html',
-        'settings': 'settings.html',
-        'users': 'settings.html',
-        'logs': 'logs.html',
-        'security': 'settings.html'
-      };
-      
-      if (pages[page]) {
-        window.location.href = pages[page];
-      }
-    }
-
     function toggleSidebar() {
       document.querySelector('.sidebar').classList.toggle('open');
     }
 
     function refreshDashboard() {
-      showNotification('正在刷新仪表盘...', 'info');
+      showToast('info', '正在刷新', '正在刷新仪表盘数据...');
       setTimeout(() => {
-        showNotification('刷新完成', 'success');
+        showToast('success', '刷新完成', '数据已更新');
       }, 1000);
     }
 
@@ -915,57 +977,62 @@
         'sleep': '睡眠模式',
         'eco': '节能模式'
       };
-      showNotification(`正在激活${sceneNames[scene]}...`, 'info');
+      showToast('info', '场景激活', `正在激活${sceneNames[scene]}...`);
       setTimeout(() => {
-        showNotification(`${sceneNames[scene]}已激活`, 'success');
+        showToast('success', '场景已激活', `${sceneNames[scene]}已成功激活`);
       }, 1500);
     }
 
     function toggleAllDevices(turnOn) {
-      showNotification(`正在${turnOn ? '开启' : '关闭'}所有设备...`, 'info');
+      showToast('info', '设备控制', `正在${turnOn ? '开启' : '关闭'}所有设备...`);
       setTimeout(() => {
-        showNotification(`所有设备已${turnOn ? '开启' : '关闭'}`, 'success');
+        showToast('success', '操作完成', `所有设备已${turnOn ? '开启' : '关闭'}`);
       }, 1500);
     }
 
     function emergencyShutdown() {
       if (confirm('确定要执行紧急关闭吗？这将关闭所有设备！')) {
-        showNotification('正在执行紧急关闭...', 'warning');
+        showToast('warning', '紧急关闭', '正在执行紧急关闭...');
         setTimeout(() => {
-          showNotification('所有设备已紧急关闭', 'success');
+          showToast('success', '关闭完成', '所有设备已紧急关闭');
         }, 2000);
       }
     }
 
     function voiceControl() {
-      showNotification('语音控制已启动', 'info');
-      if (window.smartButlerUI && window.smartButlerUI.startVoiceRecognition) {
-        window.smartButlerUI.startVoiceRecognition();
-      }
+      showToast('info', '语音控制', '语音控制已启动');
     }
 
     function showNotifications() {
-      showNotification('您有3条未读通知', 'info');
+      showToast('info', '通知', '您有3条未读通知');
     }
 
     function showUserMenu() {
-      showNotification('用户菜单', 'info');
+      showToast('info', '用户菜单', '用户菜单已打开');
     }
 
-    function showNotification(message, type = 'info') {
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      notification.innerHTML = `
-        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '💡'}</span>
-        <span>${message}</span>
+    function showToast(type, title, message) {
+      const icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <span class="toast-icon">${icons[type]}</span>
+        <div class="toast-message">
+          <strong>${title}</strong><br>
+          ${message}
+        </div>
       `;
-      document.body.appendChild(notification);
-      
-      setTimeout(() => notification.classList.add('show'), 10);
-      
+      document.body.appendChild(toast);
+
       setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 400);
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
   </script>

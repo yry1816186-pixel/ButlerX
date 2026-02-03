@@ -1,1155 +1,1946 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>智慧管家 - 设备管理</title>
-  <link rel="stylesheet" href="assets/style.css">
-  <style>
-    .page-container {
-      display: flex;
-      min-height: 100vh;
-      background: var(--bg-deep);
-    }
-
-    .main-content {
-      flex: 1;
-      margin-left: 260px;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-deep);
-    }
-
-    .top-bar {
-      height: 64px;
-      background: var(--bg-card);
-      border-bottom: 1px solid rgba(0, 136, 204, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      position: sticky;
-      top: 0;
-      z-index: 999;
-    }
-
-    .content-area {
-      padding: 24px;
-      max-width: 1600px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .search-box {
-      flex: 1;
-      min-width: 280px;
-      position: relative;
-    }
-
-    .search-box input {
-      width: 100%;
-      padding: 12px 16px 12px 48px;
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.15);
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-
-    .search-box input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-    }
-
-    .filter-select {
-      padding: 12px 16px;
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.15);
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      min-width: 140px;
-    }
-
-    .filter-select:hover {
-      border-color: var(--primary);
-    }
-
-    .view-toggle {
-      display: flex;
-      gap: 8px;
-    }
-
-    .view-btn {
-      padding: 12px;
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.15);
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .view-btn.active {
-      background: var(--gradient-neon);
-      color: white;
-      border-color: transparent;
-    }
-
-    .view-btn:hover:not(.active) {
-      color: var(--text-primary);
-      border-color: var(--primary);
-    }
-
-    .toolbar-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .btn-icon {
-      padding: 12px;
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.15);
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-icon:hover {
-      color: var(--text-primary);
-      border-color: var(--primary);
-      background: rgba(0, 136, 204, 0.05);
-    }
-
-    .btn-primary {
-      padding: 12px 24px;
-      background: var(--gradient-neon);
-      border: none;
-      border-radius: var(--radius-sm);
-      color: white;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 136, 204, 0.2);
-    }
-
-    .tabs-container {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 24px;
-      background: var(--bg-card);
-      padding: 8px;
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(0, 136, 204, 0.1);
-    }
-
-    .group-tab {
-      padding: 12px 20px;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .group-tab:hover {
-      background: rgba(0, 136, 204, 0.08);
-      color: var(--text-primary);
-    }
-
-    .group-tab.active {
-      background: var(--gradient-neon);
-      color: white;
-    }
-
-    .devices-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
-    .device-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.15);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .device-card:hover {
-      border-color: var(--primary);
-      box-shadow: 0 8px 24px rgba(0, 136, 204, 0.15);
-      transform: translateY(-4px);
-    }
-
-    .device-card.selected {
-      border-color: var(--primary);
-      background: rgba(0, 136, 204, 0.05);
-    }
-
-    .device-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      margin-bottom: 16px;
-    }
-
-    .device-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: var(--gradient-neon);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-    }
-
-    .device-checkbox {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(0, 136, 204, 0.3);
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-
-    .device-checkbox.checked {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-
-    .device-checkbox.checked::after {
-      content: '✓';
-      color: white;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .device-name {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-
-    .device-location {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-    }
-
-    .device-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .status-dot.online {
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-    }
-
-    .status-dot.offline {
-      background: var(--pink);
-      box-shadow: 0 0 8px var(--pink);
-    }
-
-    .status-text {
-      color: var(--text-secondary);
-    }
-
-    .device-controls {
-      display: flex;
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .control-btn {
-      flex: 1;
-      padding: 10px;
-      background: var(--bg-dark);
-      border: 1px solid rgba(0, 136, 204, 0.1);
-      border-radius: var(--radius-sm);
-      color: var(--text-primary);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .control-btn:hover {
-      background: var(--primary);
-      color: white;
-      border-color: transparent;
-    }
-
-    .control-btn.active {
-      background: var(--accent);
-      color: white;
-      border-color: transparent;
-    }
-
-    .batch-actions-bar {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.2);
-      border-radius: var(--radius-lg);
-      padding: 16px 24px;
-      display: flex;
-      gap: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      z-index: 1000;
-    }
-
-    .batch-actions-bar.show {
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .batch-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-right: 24px;
-      border-right: 1px solid rgba(0, 136, 204, 0.2);
-    }
-
-    .batch-count {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .batch-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-
-    .detail-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(10px);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .detail-modal.show {
-      display: flex;
-    }
-
-    .modal-content {
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 136, 204, 0.2);
-      border-radius: var(--radius-xl);
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
-      animation: modalIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px;
-      border-bottom: 1px solid rgba(0, 136, 204, 0.1);
-    }
-
-    .modal-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .modal-close {
-      width: 40px;
-      height: 40px;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 20px;
-      cursor: pointer;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-    }
-
-    .modal-close:hover {
-      background: rgba(255, 0, 136, 0.1);
-      color: var(--pink);
-      transform: rotate(90deg);
-    }
-
-    .modal-body {
-      padding: 24px;
-    }
-
-    .detail-section {
-      margin-bottom: 24px;
-    }
-
-    .detail-section-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .detail-section-title::before {
-      content: '';
-      width: 4px;
-      height: 18px;
-      background: var(--gradient-neon);
-      border-radius: 2px;
-    }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .detail-item {
-      background: var(--bg-dark);
-      border: 1px solid rgba(0, 136, 204, 0.08);
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-    }
-
-    .detail-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
-    }
-
-    .detail-value {
-      font-size: 14px;
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-
-    .chart-placeholder {
-      background: var(--bg-dark);
-      border: 1px solid rgba(0, 136, 204, 0.1);
-      border-radius: var(--radius-md);
-      height: 200px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      padding: 24px;
-      border-top: 1px solid rgba(0, 136, 204, 0.1);
-    }
-
-    @media (max-width: 768px) {
-      .main-content {
-        margin-left: 0;
-      }
-      .devices-grid {
-        grid-template-columns: 1fr;
-      }
-      .batch-actions-bar {
-        width: 90%;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设备管理 - 智能管家</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-hover: #e8f4f8;
+            --text-primary: #1a1a2e;
+            --text-secondary: #6b7280;
+            --primary-color: #0088cc;
+            --primary-hover: #006699;
+            --primary-light: #e6f7ff;
+            --success: #52c41a;
+            --warning: #faad14;
+            --danger: #ff4d4f;
+            --info: #1890ff;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 260px;
+            --top-bar-height: 64px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-header h1::before {
+            content: '🏠';
+            font-size: 24px;
+        }
+
+        .nav-section {
+            padding: 16px 12px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-item::before {
+            content: attr(data-icon);
+            font-size: 18px;
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            height: var(--top-bar-height);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb .current {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .notification-btn {
+            position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .notification-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--bg-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .user-profile:hover {
+            background: var(--bg-hover);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .page-header {
+            padding: 32px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-trend.up {
+            color: var(--success);
+        }
+
+        .stat-trend.down {
+            color: var(--danger);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+
+        .filter-select {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .sort-select {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 140px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff7875;
+        }
+
+        .btn-text {
+            background: none;
+            color: var(--text-secondary);
+            padding: 8px 12px;
+        }
+
+        .btn-text:hover {
+            color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0;
+            align-items: center;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            bottom: -1px;
+        }
+
+        .tab:hover {
+            color: var(--primary-color);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .results-info {
+            margin-left: auto;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .device-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .device-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-3px);
+            border-color: var(--primary-color);
+        }
+
+        .device-card.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .device-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .device-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .device-checkbox.checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .device-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .device-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        .device-type {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .device-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .device-status.online {
+            background: #f6ffed;
+            color: var(--success);
+        }
+
+        .device-status.offline {
+            background: #fff2f0;
+            color: var(--danger);
+        }
+
+        .device-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .device-status.online::before {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .device-info {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 10px;
+            font-size: 11px;
+        }
+
+        .device-info-item {
+            color: var(--text-secondary);
+        }
+
+        .device-info-item span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .batch-actions {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-secondary);
+            padding: 14px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            border: 1px solid var(--border-color);
+        }
+
+        .batch-actions.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .batch-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding-right: 16px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .batch-info span {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            max-width: 680px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .control-panel {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 18px;
+            margin-top: 16px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            min-width: 80px;
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .control-slider {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--border-color);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .control-value {
+            min-width: 45px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chart-container {
+            height: 160px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding: 18px 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 14px 18px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            min-width: 280px;
+            max-width: 400px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info);
+        }
+
+        .toast-icon {
+            font-size: 18px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .icon-option {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .icon-option:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .icon-option.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-state-hint {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-action {
+            margin-top: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+            .main-content {
+                margin-left: 220px;
+            }
+            .devices-grid {
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .top-bar {
+                padding: 0 16px;
+            }
+            .page-header,
+            .content {
+                padding: 20px 16px;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            .batch-actions {
+                width: 92%;
+                left: 50%;
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px;
+            }
+            .batch-info {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding-right: 0;
+                padding-bottom: 12px;
+                text-align: center;
+            }
+            .toolbar-left,
+            .toolbar-right {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                min-width: 100%;
+            }
+            .filter-select,
+            .sort-select {
+                width: 100%;
+            }
+            .results-info {
+                text-align: center;
+                margin-top: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="page-container">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">SMART BUTLER</div>
-      </div>
-      <nav class="sidebar-nav">
-        <div class="nav-section">
-          <div class="nav-section-title">主菜单</div>
-          <div class="nav-item" onclick="navigate('dashboard')">
-            <span class="nav-icon">📊</span>
-            <span>仪表盘</span>
-          </div>
-          <div class="nav-item active" onclick="navigate('devices')">
-            <span class="nav-icon">🔌</span>
-            <span>设备管理</span>
-          </div>
-          <div class="nav-item" onclick="navigate('health')">
-            <span class="nav-icon">💊</span>
-            <span>系统健康</span>
-          </div>
-          <div class="nav-item" onclick="navigate('alerts')">
-            <span class="nav-icon">🔔</span>
-            <span>告警中心</span>
-          </div>
-        </div>
-        <div class="nav-section">
-          <div class="nav-section-title">功能</div>
-          <div class="nav-item" onclick="navigate('scenes')">
-            <span class="nav-icon">🎬</span>
-            <span>场景控制</span>
-          </div>
-          <div class="nav-item" onclick="navigate('ai')">
-            <span class="nav-icon">🤖</span>
-            <span>AI配置</span>
-          </div>
-        </div>
-        <div class="nav-section">
-          <div class="nav-section-title">监控</div>
-          <div class="nav-item" onclick="navigate('vision')">
-            <span class="nav-icon">📹</span>
-            <span>视觉监控</span>
-          </div>
-          <div class="nav-item" onclick="navigate('logs')">
-            <span class="nav-icon">📝</span>
-            <span>系统日志</span>
-          </div>
-        </div>
-        <div class="nav-section">
-          <div class="nav-section-title">系统</div>
-          <div class="nav-item" onclick="navigate('settings')">
-            <span class="nav-icon">⚙️</span>
-            <span>系统设置</span>
-          </div>
-          <div class="nav-item" onclick="navigate('security')">
-            <span class="nav-icon">🔐</span>
-            <span>权限安全</span>
-          </div>
-        </div>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="system-info">
-          <div>系统版本: v2.0.1</div>
-          <div>运行时间: 24天12小时</div>
-          <div>最后更新: 2026-02-03</div>
-        </div>
-      </div>
-    </aside>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>智能管家</h1>
+            </div>
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">主菜单</div>
+                    <a href="dashboard.html" class="nav-item" data-icon="📊">仪表盘</a>
+                    <a href="devices.html" class="nav-item active" data-icon="🔌">设备管理</a>
+                    <a href="scenes.html" class="nav-item" data-icon="🎬">场景控制</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">功能</div>
+                    <a href="ai.html" class="nav-item" data-icon="🤖">AI 助手</a>
+                    <a href="vision.html" class="nav-item" data-icon="👁️">视觉监控</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">监控</div>
+                    <a href="health.html" class="nav-item" data-icon="💓">系统健康</a>
+                    <a href="alerts.html" class="nav-item" data-icon="🔔">告警中心</a>
+                    <a href="logs.html" class="nav-item" data-icon="📋">日志记录</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">系统</div>
+                    <a href="security.html" class="nav-item" data-icon="🔐">用户管理</a>
+                    <a href="settings.html" class="nav-item" data-icon="⚙️">系统设置</a>
+                </div>
+            </nav>
+        </aside>
 
-    <main class="main-content">
-      <div class="top-bar">
-        <div class="top-bar-left">
-          <button class="refresh-btn" onclick="toggleSidebar()" style="font-size: 20px;">☰</button>
-          <div class="breadcrumb">
-            <span>智慧管家</span>
-            <span>/</span>
-            <a href="#">设备管理</a>
-          </div>
-        </div>
-        <div class="top-bar-right">
-          <div class="notification-badge" onclick="showNotifications()">
-            <span>🔔</span>
-            <span class="badge-count">3</span>
-          </div>
-          <div class="user-profile" onclick="showUserMenu()">
-            <div class="user-avatar">A</div>
-            <div class="user-name">管理员</div>
-          </div>
-        </div>
-      </div>
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="breadcrumb">
+                    <a href="dashboard.html">首页</a>
+                    <span>/</span>
+                    <span class="current">设备管理</span>
+                </div>
+                <div class="top-bar-right">
+                    <button class="notification-btn">
+                        🔔
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="user-avatar">A</div>
+                        <span class="user-name">管理员</span>
+                    </div>
+                </div>
+            </header>
 
-      <div class="content-area">
-        <div class="page-title" style="margin-bottom: 24px;">
-          <span>设备管理</span>
-          <span class="refresh-btn" onclick="refreshDevices()" title="刷新">🔄</span>
-        </div>
+            <div class="page-header">
+                <h1 class="page-title">设备管理</h1>
+                <p class="page-subtitle">管理和控制所有智能家居设备</p>
+            </div>
 
-        <div class="toolbar">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="搜索设备..." id="device-search" onkeyup="filterDevices()">
-          </div>
-          <select class="filter-select" id="type-filter" onchange="filterDevices()">
-            <option value="all">所有类型</option>
-            <option value="light">照明</option>
-            <option value="climate">环境控制</option>
-            <option value="media">影音娱乐</option>
-            <option value="security">安防监控</option>
-            <option value="cover">窗帘窗户</option>
-          </select>
-          <select class="filter-select" id="status-filter" onchange="filterDevices()">
-            <option value="all">所有状态</option>
-            <option value="online">在线</option>
-            <option value="offline">离线</option>
-          </select>
-          <div class="view-toggle">
-            <button class="view-btn active" onclick="setView('grid')">▦</button>
-            <button class="view-btn" onclick="setView('list')">☰</button>
-          </div>
-          <div class="toolbar-actions">
-            <button class="btn-icon" onclick="addDevice()" title="添加设备">➕</button>
-            <button class="btn-icon" onclick="refreshDevices()" title="刷新">🔄</button>
-          </div>
-        </div>
+            <div class="content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">总设备数</div>
+                        <div class="stat-value">24</div>
+                        <div class="stat-trend up">↑ 新增 2 台</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">在线设备</div>
+                        <div class="stat-value">21</div>
+                        <div class="stat-trend up">↑ 87.5% 在线率</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">离线设备</div>
+                        <div class="stat-value">3</div>
+                        <div class="stat-trend down">↓ 需要关注</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">今日能耗</div>
+                        <div class="stat-value">12.5</div>
+                        <div class="stat-trend up">↑ kWh</div>
+                    </div>
+                </div>
 
-        <div class="tabs-container">
-          <button class="group-tab active" onclick="filterByGroup('all')">全部 (14)</button>
-          <button class="group-tab" onclick="filterByGroup('living-room')">客厅 (5)</button>
-          <button class="group-tab" onclick="filterByGroup('bedroom')">卧室 (4)</button>
-          <button class="group-tab" onclick="filterByGroup('kitchen')">厨房 (3)</button>
-          <button class="group-tab" onclick="filterByGroup('bathroom')">浴室 (2)</button>
-        </div>
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="search-box">
+                            <input type="text" placeholder="搜索设备名称、类型或位置..." id="searchInput">
+                        </div>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="">所有状态</option>
+                            <option value="online">在线</option>
+                            <option value="offline">离线</option>
+                        </select>
+                        <select class="filter-select" id="locationFilter">
+                            <option value="">所有位置</option>
+                            <option value="客厅">客厅</option>
+                            <option value="卧室">卧室</option>
+                            <option value="厨房">厨房</option>
+                            <option value="浴室">浴室</option>
+                            <option value="户外">户外</option>
+                        </select>
+                        <select class="sort-select" id="sortSelect">
+                            <option value="name">按名称排序</option>
+                            <option value="type">按类型排序</option>
+                            <option value="location">按位置排序</option>
+                            <option value="energy">按能耗排序</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-text" onclick="selectAll()">全选</button>
+                        <button class="btn btn-text" onclick="clearSelection()">取消选择</button>
+                        <button class="btn btn-primary" onclick="addDevice()">
+                            ➕ 添加设备
+                        </button>
+                    </div>
+                </div>
 
-        <div class="devices-grid" id="devices-grid">
-          <div class="device-card" data-id="1" data-type="light" data-status="online" onclick="selectDevice(this)">
-            <div class="device-header">
-              <div class="device-icon">💡</div>
-              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
-            </div>
-            <div class="device-name">客厅主灯</div>
-            <div class="device-location">客厅 · 智能照明</div>
-            <div class="device-status">
-              <span class="status-dot online"></span>
-              <span class="status-text">已开启</span>
-            </div>
-            <div class="device-controls">
-              <button class="control-btn active" onclick="event.stopPropagation(); toggleDevice(this, 1)">开</button>
-              <button class="control-btn" onclick="event.stopPropagation(); toggleDevice(this, 0)">关</button>
-            </div>
-          </div>
+                <div class="tabs">
+                    <button class="tab active" data-tab="all">全部设备</button>
+                    <button class="tab" data-tab="lighting">照明</button>
+                    <button class="tab" data-tab="climate">温控</button>
+                    <button class="tab" data-tab="security">安防</button>
+                    <button class="tab" data-tab="sensors">传感器</button>
+                    <button class="tab" data-tab="media">媒体</button>
+                    <span class="results-info" id="resultsInfo">显示 24 台设备</span>
+                </div>
 
-          <div class="device-card" data-id="2" data-type="climate" data-status="online" onclick="selectDevice(this)">
-            <div class="device-header">
-              <div class="device-icon">❄️</div>
-              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
-            </div>
-            <div class="device-name">客厅空调</div>
-            <div class="device-location">客厅 · 环境控制</div>
-            <div class="device-status">
-              <span class="status-dot online"></span>
-              <span class="status-text">制冷中</span>
-            </div>
-            <div class="device-controls">
-              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 18)">18°</button>
-              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 24)">24°</button>
-              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 26)">26°</button>
-            </div>
-          </div>
+                <div class="devices-grid" id="devicesGrid">
+                </div>
 
-          <div class="device-card" data-id="3" data-type="media" data-status="online" onclick="selectDevice(this)">
-            <div class="device-header">
-              <div class="device-icon">🔊</div>
-              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+                <div class="batch-actions" id="batchActions">
+                    <div class="batch-info">已选择 <span id="selectedCount">0</span> 台设备</div>
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary" onclick="batchToggle()">批量开关</button>
+                        <button class="btn btn-secondary" onclick="batchUpdate()">批量更新</button>
+                        <button class="btn btn-danger" onclick="batchDelete()">批量删除</button>
+                    </div>
+                </div>
             </div>
-            <div class="device-name">音响系统</div>
-            <div class="device-location">客厅 · 影音娱乐</div>
-            <div class="device-status">
-              <span class="status-dot online"></span>
-              <span class="status-text">播放中</span>
-            </div>
-            <div class="device-controls">
-              <button class="control-btn active" onclick="event.stopPropagation(); controlMedia(this, 'play')">▶</button>
-              <button class="control-btn" onclick="event.stopPropagation(); controlMedia(this, 'pause')">⏸</button>
-              <button class="control-btn" onclick="event.stopPropagation(); controlMedia(this, 'stop')">⏹</button>
-            </div>
-          </div>
-
-          <div class="device-card" data-id="4" data-type="cover" data-status="offline" onclick="selectDevice(this)">
-            <div class="device-header">
-              <div class="device-icon">🪟</div>
-              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
-            </div>
-            <div class="device-name">客厅窗帘</div>
-            <div class="device-location">客厅 · 窗帘控制</div>
-            <div class="device-status">
-              <span class="status-dot offline"></span>
-              <span class="status-text">离线</span>
-            </div>
-            <div class="device-controls">
-              <button class="control-btn" onclick="event.stopPropagation(); setCoverPosition(this, 'open')">打开</button>
-              <button class="control-btn" onclick="event.stopPropagation(); setCoverPosition(this, 'close')">关闭</button>
-              <button class="control-btn" onclick="event.stopPropagation(); setCoverPosition(this, 'half')">半开</button>
-            </div>
-          </div>
-
-          <div class="device-card" data-id="5" data-type="security" data-status="online" onclick="selectDevice(this)">
-            <div class="device-header">
-              <div class="device-icon">📷</div>
-              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
-            </div>
-            <div class="device-name">门口摄像头</div>
-            <div class="device-location">门口 · 安防监控</div>
-            <div class="device-status">
-              <span class="status-dot online"></span>
-              <span class="status-text">录制中</span>
-            </div>
-            <div class="device-controls">
-              <button class="control-btn active" onclick="event.stopPropagation(); toggleRecording(this)">录制</button>
-              <button class="control-btn" onclick="event.stopPropagation(); viewCamera()">查看</button>
-            </div>
-          </div>
-
-          <div class="device-card" data-id="6" data-type="light" data-status="online" onclick="selectDevice(this)">
-            <div class="device-header">
-              <div class="device-icon">💡</div>
-              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
-            </div>
-            <div class="device-name">卧室主灯</div>
-            <div class="device-location">卧室 · 智能照明</div>
-            <div class="device-status">
-              <span class="status-dot online"></span>
-              <span class="status-text">已关闭</span>
-            </div>
-            <div class="device-controls">
-              <button class="control-btn" onclick="event.stopPropagation(); toggleDevice(this, 1)">开</button>
-              <button class="control-btn active" onclick="event.stopPropagation(); toggleDevice(this, 0)">关</button>
-            </div>
-          </div>
-
-          <div class="device-card" data-id="7" data-type="climate" data-status="online" onclick="selectDevice(this)">
-            <div class="device-header">
-              <div class="device-icon">❄️</div>
-              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
-            </div>
-            <div class="device-name">卧室空调</div>
-            <div class="device-location">卧室 · 环境控制</div>
-            <div class="device-status">
-              <span class="status-dot online"></span>
-              <span class="status-text">24°C</span>
-            </div>
-            <div class="device-controls">
-              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 18)">18°</button>
-              <button class="control-btn active" onclick="event.stopPropagation(); setTemperature(this, 24)">24°</button>
-              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 26)">26°</button>
-            </div>
-          </div>
-
-          <div class="device-card" data-id="8" data-type="security" data-status="offline" onclick="selectDevice(this)">
-            <div class="device-header">
-              <div class="device-icon">🔒</div>
-              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
-            </div>
-            <div class="device-name">智能门锁</div>
-            <div class="device-location">门口 · 安防监控</div>
-            <div class="device-status">
-              <span class="status-dot offline"></span>
-              <span class="status-text">离线</span>
-            </div>
-            <div class="device-controls">
-              <button class="control-btn" onclick="event.stopPropagation(); lockDoor()">上锁</button>
-              <button class="control-btn" onclick="event.stopPropagation(); unlockDoor()">开锁</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <div class="batch-actions-bar" id="batch-actions">
-      <div class="batch-info">
-        <span class="batch-count" id="selected-count">0</span>
-        <span class="batch-label">个设备已选择</span>
-      </div>
-      <button class="btn-primary" onclick="batchTurnOn()">批量开启</button>
-      <button class="btn-primary" onclick="batchTurnOff()">批量关闭</button>
-      <button class="btn-icon" onclick="closeBatchActions()">✕</button>
+        </main>
     </div>
 
-    <div class="detail-modal" id="detail-modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div class="modal-title" id="modal-device-name">设备详情</div>
-          <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-overlay" id="deviceModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">设备详情</h2>
+                <button class="modal-close" onclick="closeModal()" title="按 ESC 关闭">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-title">基本信息</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">设备名称</span>
+                            <span class="info-value" id="deviceName">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">设备类型</span>
+                            <span class="info-value" id="deviceType">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">设备位置</span>
+                            <span class="info-value" id="deviceLocation">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">连接状态</span>
+                            <span class="info-value" id="deviceStatus">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-section" id="controlSection">
+                    <div class="modal-section-title">设备控制</div>
+                    <div class="control-panel">
+                        <div class="control-row">
+                            <span class="control-label">亮度</span>
+                            <input type="range" class="control-slider" id="brightnessSlider" min="0" max="100" value="80">
+                            <span class="control-value" id="brightnessValue">80%</span>
+                        </div>
+                        <div class="control-row" id="colorRow" style="display: none;">
+                            <span class="control-label">颜色</span>
+                            <input type="color" id="colorPicker" value="#0088cc" style="width: 60px; height: 32px; border: none; border-radius: 6px; cursor: pointer;">
+                        </div>
+                        <div class="control-row" id="tempRow" style="display: none;">
+                            <span class="control-label">温度</span>
+                            <input type="range" class="control-slider" id="tempSlider" min="16" max="32" value="24">
+                            <span class="control-value" id="tempValue">24°C</span>
+                        </div>
+                        <div class="control-buttons">
+                            <button class="btn btn-primary" onclick="applyControl()">应用设置</button>
+                            <button class="btn btn-secondary" onclick="toggleDevice()">开关设备</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">使用统计</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">今日运行时间</span>
+                            <span class="info-value">8.5 小时</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">本周使用次数</span>
+                            <span class="info-value">42 次</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">今日能耗</span>
+                            <span class="info-value">0.8 kWh</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">最后更新</span>
+                            <span class="info-value">2 分钟前</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">能耗趋势（近7天）</div>
+                    <div class="chart-container" id="energyChart">
+                        <canvas id="energyCanvas" width="500" height="160" style="display: none;"></canvas>
+                        <div id="energyChartPlaceholder" style="text-align: center;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">📊</div>
+                            <div>暂无能耗数据</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+                <button class="btn btn-primary" onclick="editDevice()">编辑设备</button>
+            </div>
         </div>
-        <div class="modal-body">
-          <div class="detail-section">
-            <div class="detail-section-title">基本信息</div>
-            <div class="detail-grid">
-              <div class="detail-item">
-                <div class="detail-label">设备ID</div>
-                <div class="detail-value" id="detail-id">-</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">设备类型</div>
-                <div class="detail-value" id="detail-type">-</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">设备位置</div>
-                <div class="detail-value" id="detail-location">-</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">当前状态</div>
-                <div class="detail-value" id="detail-status">-</div>
-              </div>
-            </div>
-          </div>
-          <div class="detail-section">
-            <div class="detail-section-title">使用统计</div>
-            <div class="chart-placeholder">
-              📊 使用历史数据图表
-            </div>
-          </div>
-          <div class="detail-section">
-            <div class="detail-section-title">能耗数据</div>
-            <div class="detail-grid">
-              <div class="detail-item">
-                <div class="detail-label">今日能耗</div>
-                <div class="detail-value" id="detail-energy-today">-</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">本月能耗</div>
-                <div class="detail-value" id="detail-energy-month">-</div>
-              </div>
-            </div>
-          </div>
-          <div class="detail-section">
-            <div class="detail-section-title">维护信息</div>
-            <div class="detail-grid">
-              <div class="detail-item">
-                <div class="detail-label">最后更新</div>
-                <div class="detail-value" id="detail-last-update">-</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">固件版本</div>
-                <div class="detail-value" id="detail-firmware">-</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-primary" onclick="editDevice()">编辑设备</button>
-          <button class="btn-icon" onclick="closeModal()">取消</button>
-        </div>
-      </div>
     </div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="editModalTitle">添加新设备</h2>
+                <button class="modal-close" onclick="closeEditModal()" title="按 ESC 关闭">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-title">设备信息</div>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">设备名称 <span style="color: var(--danger);">*</span></span>
+                            <input type="text" id="editDeviceName" placeholder="例如：客厅灯" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px;">
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">设备类型 <span style="color: var(--danger);">*</span></span>
+                            <select id="editDeviceType" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: var(--bg-secondary);">
+                                <option value="">请选择类型</option>
+                                <option value="照明设备">照明设备</option>
+                                <option value="温控设备">温控设备</option>
+                                <option value="安防设备">安防设备</option>
+                                <option value="传感器">传感器</option>
+                                <option value="媒体设备">媒体设备</option>
+                                <option value="自动化设备">自动化设备</option>
+                                <option value="环境设备">环境设备</option>
+                            </select>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">设备位置 <span style="color: var(--danger);">*</span></span>
+                            <select id="editDeviceLocation" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: var(--bg-secondary);">
+                                <option value="">请选择位置</option>
+                                <option value="客厅">客厅</option>
+                                <option value="主卧">主卧</option>
+                                <option value="次卧">次卧</option>
+                                <option value="厨房">厨房</option>
+                                <option value="浴室">浴室</option>
+                                <option value="书房">书房</option>
+                                <option value="走廊">走廊</option>
+                                <option value="大门">大门</option>
+                                <option value="户外">户外</option>
+                            </select>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">设备图标</span>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+                                <button type="button" class="icon-option" data-icon="💡" onclick="selectEditIcon('💡')">💡</button>
+                                <button type="button" class="icon-option" data-icon="❄️" onclick="selectEditIcon('❄️')">❄️</button>
+                                <button type="button" class="icon-option" data-icon="🔒" onclick="selectEditIcon('🔒')">🔒</button>
+                                <button type="button" class="icon-option" data-icon="🌡️" onclick="selectEditIcon('🌡️')">🌡️</button>
+                                <button type="button" class="icon-option" data-icon="🪟" onclick="selectEditIcon('🪟')">🪟</button>
+                                <button type="button" class="icon-option" data-icon="🔔" onclick="selectEditIcon('🔔')">🔔</button>
+                                <button type="button" class="icon-option" data-icon="🔊" onclick="selectEditIcon('🔊')">🔊</button>
+                                <button type="button" class="icon-option" data-icon="📹" onclick="selectEditIcon('📹')">📹</button>
+                                <button type="button" class="icon-option" data-icon="🔌" onclick="selectEditIcon('🔌')">🔌</button>
+                                <button type="button" class="icon-option" data-icon="📺" onclick="selectEditIcon('📺')">📺</button>
+                                <button type="button" class="icon-option" data-icon="💧" onclick="selectEditIcon('💧')">💧</button>
+                                <button type="button" class="icon-option" data-icon="🚶" onclick="selectEditIcon('🚶')">🚶</button>
+                                <button type="button" class="icon-option" data-icon="🤖" onclick="selectEditIcon('🤖')">🤖</button>
+                                <button type="button" class="icon-option" data-icon="🌿" onclick="selectEditIcon('🌿')">🌿</button>
+                                <button type="button" class="icon-option" data-icon="💨" onclick="selectEditIcon('💨')">💨</button>
+                            </div>
+                            <input type="hidden" id="editDeviceIcon" value="💡">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">功能支持</div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px;">
+                            <input type="checkbox" id="editSupportBrightness"> 亮度调节
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px;">
+                            <input type="checkbox" id="editSupportColor"> 颜色调节
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px;">
+                            <input type="checkbox" id="editSupportTemperature"> 温度调节
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">状态</div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px;">
+                            <input type="radio" name="editDeviceStatus" value="online" checked> 在线
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px;">
+                            <input type="radio" name="editDeviceStatus" value="offline"> 离线
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                <button class="btn btn-primary" id="editModalSaveBtn" onclick="saveEditDevice()">添加设备</button>
+                <button class="btn btn-danger" id="editModalDeleteBtn" onclick="deleteEditDevice()" style="display: none;">删除设备</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
 
     <script>
-      let selectedDevices = new Set();
-      let currentGroup = 'all';
+        const devices = [
+            { id: 1, name: '客厅主灯', type: '照明设备', location: '客厅', status: 'online', icon: '💡', energy: '1.2', supports: ['brightness', 'color'] },
+            { id: 2, name: '客厅空调', type: '温控设备', location: '客厅', status: 'online', icon: '❄️', energy: '3.5', supports: ['temperature'] },
+            { id: 3, name: '智能门锁', type: '安防设备', location: '大门', status: 'online', icon: '🔒', energy: '0.1', supports: [] },
+            { id: 4, name: '温度传感器', type: '传感器', location: '客厅', status: 'online', icon: '🌡️', energy: '0.05', supports: [] },
+            { id: 5, name: '卧室空调', type: '温控设备', location: '主卧', status: 'offline', icon: '❄️', energy: '0', supports: ['temperature'] },
+            { id: 6, name: '智能窗帘', type: '自动化设备', location: '主卧', status: 'online', icon: '🪟', energy: '0.2', supports: ['brightness'] },
+            { id: 7, name: '厨房灯光', type: '照明设备', location: '厨房', status: 'online', icon: '💡', energy: '0.8', supports: ['brightness'] },
+            { id: 8, name: '烟雾报警器', type: '安防设备', location: '厨房', status: 'online', icon: '🔔', energy: '0.05', supports: [] },
+            { id: 9, name: '智能音箱', type: '媒体设备', location: '客厅', status: 'online', icon: '🔊', energy: '0.3', supports: ['brightness'] },
+            { id: 10, name: '浴室灯', type: '照明设备', location: '浴室', status: 'online', icon: '💡', energy: '0.5', supports: ['brightness'] },
+            { id: 11, name: '花园灯', type: '照明设备', location: '户外', status: 'offline', icon: '💡', energy: '0', supports: ['brightness', 'color'] },
+            { id: 12, name: '摄像头', type: '安防设备', location: '大门', status: 'online', icon: '📹', energy: '1.5', supports: [] },
+            { id: 13, name: '智能插座', type: '自动化设备', location: '客厅', status: 'online', icon: '🔌', energy: '0.6', supports: [] },
+            { id: 14, name: '卧室灯', type: '照明设备', location: '主卧', status: 'online', icon: '💡', energy: '0.4', supports: ['brightness', 'color'] },
+            { id: 15, name: '次卧空调', type: '温控设备', location: '次卧', status: 'online', icon: '❄️', energy: '2.1', supports: ['temperature'] },
+            { id: 16, name: '智能电视', type: '媒体设备', location: '客厅', status: 'offline', icon: '📺', energy: '0', supports: ['brightness'] },
+            { id: 17, name: '湿度传感器', type: '传感器', location: '浴室', status: 'online', icon: '💧', energy: '0.05', supports: [] },
+            { id: 18, name: '运动传感器', type: '传感器', location: '走廊', status: 'online', icon: '🚶', energy: '0.1', supports: [] },
+            { id: 19, name: '门铃', type: '安防设备', location: '大门', status: 'online', icon: '🔔', energy: '0.2', supports: [] },
+            { id: 20, name: '扫地机器人', type: '自动化设备', location: '客厅', status: 'online', icon: '🤖', energy: '0.8', supports: [] },
+            { id: 21, name: '书房灯', type: '照明设备', location: '书房', status: 'online', icon: '💡', energy: '0.3', supports: ['brightness', 'color'] },
+            { id: 22, name: '空气净化器', type: '环境设备', location: '客厅', status: 'online', icon: '🌿', energy: '0.4', supports: ['brightness'] },
+            { id: 23, name: '加湿器', type: '环境设备', location: '卧室', status: 'online', icon: '💨', energy: '0.2', supports: ['brightness'] },
+            { id: 24, name: '智能开关', type: '自动化设备', location: '厨房', status: 'offline', icon: '🔌', energy: '0', supports: [] },
+        ];
 
-      function navigate(page) {
-        const pages = {
-          'dashboard': 'dashboard.html',
-          'devices': 'devices.html',
-          'scenes': 'controls.html',
-          'ai': 'settings.html',
-          'vision': 'settings.html',
-          'analytics': 'logs.html',
-          'settings': 'settings.html',
-          'users': 'settings.html',
-          'logs': 'logs.html',
-          'security': 'settings.html'
-        };
-        
-        if (pages[page]) {
-          window.location.href = pages[page];
+        let selectedDevices = new Set();
+        let currentTab = 'all';
+        let currentSort = 'name';
+        let currentDevice = null;
+
+        function renderDevices(filteredDevices = devices) {
+            const grid = document.getElementById('devicesGrid');
+            const resultsInfo = document.getElementById('resultsInfo');
+            
+            if (filteredDevices.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">没有找到匹配的设备</div>
+                        <div class="empty-state-hint">尝试调整搜索条件或筛选选项</div>
+                        <div class="empty-state-action">
+                            <button class="btn btn-secondary" onclick="resetFilters()">重置筛选</button>
+                        </div>
+                    </div>
+                `;
+                resultsInfo.textContent = '显示 0 台设备';
+                return;
+            }
+
+            grid.innerHTML = filteredDevices.map(device => `
+                <div class="device-card ${selectedDevices.has(device.id) ? 'selected' : ''}" data-id="${device.id}" onclick="openDeviceModal(${device.id})">
+                    <div class="device-header">
+                        <div class="device-icon">${device.icon}</div>
+                        <div class="device-checkbox ${selectedDevices.has(device.id) ? 'checked' : ''}" onclick="event.stopPropagation(); selectDevice(${device.id})"></div>
+                    </div>
+                    <div class="device-name">${device.name}</div>
+                    <div class="device-type">${device.type}</div>
+                    <div class="device-status ${device.status}">${device.status === 'online' ? '在线' : '离线'}</div>
+                    <div class="device-info">
+                        <div class="device-info-item">位置: <span>${device.location}</span></div>
+                        <div class="device-info-item">能耗: <span>${device.energy} kWh</span></div>
+                    </div>
+                </div>
+            `).join('');
+            
+            resultsInfo.textContent = `显示 ${filteredDevices.length} 台设备`;
         }
-      }
 
-      function toggleSidebar() {
-        document.querySelector('.sidebar').classList.toggle('open');
-      }
+        function selectDevice(deviceId) {
+            const card = document.querySelector(`.device-card[data-id="${deviceId}"]`);
+            const checkbox = card.querySelector('.device-checkbox');
+            
+            if (selectedDevices.has(deviceId)) {
+                selectedDevices.delete(deviceId);
+                card.classList.remove('selected');
+                checkbox.classList.remove('checked');
+            } else {
+                selectedDevices.add(deviceId);
+                card.classList.add('selected');
+                checkbox.classList.add('checked');
+            }
+            
+            updateBatchActions();
+        }
 
-      function filterDevices() {
-        const searchTerm = document.getElementById('device-search').value.toLowerCase();
-        const typeFilter = document.getElementById('type-filter').value;
-        const statusFilter = document.getElementById('status-filter').value;
-        
-        const cards = document.querySelectorAll('.device-card');
-        
-        cards.forEach(card => {
-          const name = card.querySelector('.device-name').textContent.toLowerCase();
-          const type = card.dataset.type;
-          const status = card.dataset.status;
-          
-          const matchSearch = name.includes(searchTerm);
-          const matchType = typeFilter === 'all' || type === typeFilter;
-          const matchStatus = statusFilter === 'all' || status === statusFilter;
-          
-          if (matchSearch && matchType && matchStatus) {
-            card.style.display = '';
-          } else {
-            card.style.display = 'none';
-          }
+        function selectAll() {
+            const filteredDevices = getFilteredDevices();
+            filteredDevices.forEach(device => selectedDevices.add(device.id));
+            document.querySelectorAll('.device-card').forEach(card => {
+                card.classList.add('selected');
+                card.querySelector('.device-checkbox').classList.add('checked');
+            });
+            updateBatchActions();
+            showToast('info', '全选', `已选择 ${filteredDevices.length} 台设备`);
+        }
+
+        function clearSelection() {
+            selectedDevices.clear();
+            document.querySelectorAll('.device-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.device-checkbox').classList.remove('checked');
+            });
+            updateBatchActions();
+        }
+
+        function updateBatchActions() {
+            const batchActions = document.getElementById('batchActions');
+            const selectedCount = document.getElementById('selectedCount');
+            
+            selectedCount.textContent = selectedDevices.size;
+            
+            if (selectedDevices.size > 0) {
+                batchActions.classList.add('visible');
+            } else {
+                batchActions.classList.remove('visible');
+            }
+        }
+
+        function getFilteredDevices() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const locationFilter = document.getElementById('locationFilter').value;
+
+            let filtered = devices.filter(device => {
+                const matchesSearch = device.name.toLowerCase().includes(searchTerm) || 
+                                     device.type.toLowerCase().includes(searchTerm) ||
+                                     device.location.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || device.status === statusFilter;
+                const matchesLocation = !locationFilter || device.location === locationFilter;
+                const matchesTab = currentTab === 'all' ||
+                                  (currentTab === 'lighting' && device.type.includes('照明')) ||
+                                  (currentTab === 'climate' && device.type.includes('温控')) ||
+                                  (currentTab === 'security' && device.type.includes('安防')) ||
+                                  (currentTab === 'sensors' && device.type.includes('传感')) ||
+                                  (currentTab === 'media' && device.type.includes('媒体'));
+
+                return matchesSearch && matchesStatus && matchesLocation && matchesTab;
+            });
+
+            filtered.sort((a, b) => {
+                switch(currentSort) {
+                    case 'name': return a.name.localeCompare(b.name);
+                    case 'type': return a.type.localeCompare(b.type);
+                    case 'location': return a.location.localeCompare(b.location);
+                    case 'energy': return parseFloat(b.energy) - parseFloat(a.energy);
+                    default: return 0;
+                }
+            });
+
+            return filtered;
+        }
+
+        function filterDevices() {
+            renderDevices(getFilteredDevices());
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('locationFilter').value = '';
+            document.getElementById('sortSelect').value = 'name';
+            currentSort = 'name';
+            currentTab = 'all';
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.tab[data-tab="all"]').classList.add('active');
+            renderDevices();
+        }
+
+        function openDeviceModal(deviceId) {
+            currentDevice = devices.find(d => d.id === deviceId);
+            if (!currentDevice) return;
+
+            document.getElementById('deviceName').textContent = currentDevice.name;
+            document.getElementById('deviceType').textContent = currentDevice.type;
+            document.getElementById('deviceLocation').textContent = currentDevice.location;
+            document.getElementById('deviceStatus').textContent = currentDevice.status === 'online' ? '在线' : '离线';
+            document.getElementById('deviceStatus').style.color = currentDevice.status === 'online' ? '#52c41a' : '#ff4d4f';
+
+            const controlSection = document.getElementById('controlSection');
+            const colorRow = document.getElementById('colorRow');
+            const tempRow = document.getElementById('tempRow');
+
+            if (currentDevice.supports.length === 0) {
+                controlSection.style.display = 'none';
+            } else {
+                controlSection.style.display = 'block';
+                colorRow.style.display = currentDevice.supports.includes('color') ? 'flex' : 'none';
+                tempRow.style.display = currentDevice.supports.includes('temperature') ? 'flex' : 'none';
+            }
+
+            drawEnergyChart();
+            document.getElementById('deviceModal').classList.add('active');
+        }
+
+        function drawEnergyChart() {
+            const canvas = document.getElementById('energyCanvas');
+            const ctx = canvas.getContext('2d');
+            const placeholder = document.getElementById('energyChartPlaceholder');
+            
+            const last7Days = [];
+            const today = new Date();
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                last7Days.push({
+                    date: `${date.getMonth() + 1}/${date.getDate()}`,
+                    value: Math.random() * 1.5 + 0.3
+                });
+            }
+
+            if (currentDevice.status === 'offline') {
+                canvas.style.display = 'none';
+                placeholder.style.display = 'block';
+                return;
+            }
+
+            canvas.style.display = 'block';
+            placeholder.style.display = 'none';
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            const chartWidth = width - padding * 2;
+            const chartHeight = height - padding * 2;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const maxValue = Math.max(...last7Days.map(d => d.value));
+            const minValue = 0;
+
+            ctx.fillStyle = '#f5f7fa';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i <= 4; i++) {
+                const y = padding + (chartHeight / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+
+                const value = (maxValue - (maxValue / 4) * i).toFixed(1);
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(value + ' kWh', padding - 5, y + 4);
+            }
+
+            const stepX = chartWidth / (last7Days.length - 1);
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#0088cc';
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+
+            last7Days.forEach((day, index) => {
+                const x = padding + index * stepX;
+                const y = padding + chartHeight - ((day.value - minValue) / (maxValue - minValue)) * chartHeight;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(padding, padding + chartHeight);
+            last7Days.forEach((day, index) => {
+                const x = padding + index * stepX;
+                const y = padding + chartHeight - ((day.value - minValue) / (maxValue - minValue)) * chartHeight;
+                ctx.lineTo(x, y);
+            });
+            ctx.lineTo(padding + chartWidth, padding + chartHeight);
+            ctx.closePath();
+            
+            const gradient = ctx.createLinearGradient(0, padding, 0, padding + chartHeight);
+            gradient.addColorStop(0, 'rgba(0, 136, 204, 0.3)');
+            gradient.addColorStop(1, 'rgba(0, 136, 204, 0.05)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            last7Days.forEach((day, index) => {
+                const x = padding + index * stepX;
+                const y = padding + chartHeight - ((day.value - minValue) / (maxValue - minValue)) * chartHeight;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.strokeStyle = '#0088cc';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(day.date, x, height - padding + 20);
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('deviceModal').classList.remove('active');
+            currentDevice = null;
+        }
+
+        function toggleDevice() {
+            if (currentDevice) {
+                const newStatus = currentDevice.status === 'online' ? 'offline' : 'online';
+                currentDevice.status = newStatus;
+                currentDevice.energy = newStatus === 'online' ? (currentDevice.energy || '0.1') : '0';
+                updateStats();
+                renderDevices(getFilteredDevices());
+                showToast('success', '操作成功', `已切换 ${currentDevice.name} 为${newStatus === 'online' ? '在线' : '离线'}状态`);
+                closeModal();
+            }
+        }
+
+        function applyControl() {
+            const brightness = document.getElementById('brightnessSlider').value;
+            const color = document.getElementById('colorPicker').value;
+            const temp = document.getElementById('tempSlider').value;
+            
+            showToast('success', '设置已应用', `亮度: ${brightness}%, 颜色: ${color}, 温度: ${temp}°C`);
+        }
+
+        let editingDeviceId = null;
+
+        function addDevice() {
+            editingDeviceId = null;
+            document.getElementById('editModalTitle').textContent = '添加新设备';
+            document.getElementById('editDeviceName').value = '';
+            document.getElementById('editDeviceType').value = '';
+            document.getElementById('editDeviceLocation').value = '';
+            document.getElementById('editDeviceIcon').value = '💡';
+            document.querySelectorAll('#editModal .icon-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector('#editModal .icon-option[data-icon="💡"]').classList.add('selected');
+            document.getElementById('editSupportBrightness').checked = false;
+            document.getElementById('editSupportColor').checked = false;
+            document.getElementById('editSupportTemperature').checked = false;
+            document.querySelector('input[name="editDeviceStatus"][value="online"]').checked = true;
+            document.getElementById('editModalSaveBtn').textContent = '添加设备';
+            document.getElementById('editModalSaveBtn').className = 'btn btn-primary';
+            document.getElementById('editModalDeleteBtn').style.display = 'none';
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function editDevice() {
+            if (!currentDevice) return;
+            
+            editingDeviceId = currentDevice.id;
+            document.getElementById('editModalTitle').textContent = '编辑设备';
+            document.getElementById('editDeviceName').value = currentDevice.name;
+            document.getElementById('editDeviceType').value = currentDevice.type;
+            document.getElementById('editDeviceLocation').value = currentDevice.location;
+            document.getElementById('editDeviceIcon').value = currentDevice.icon;
+            
+            document.querySelectorAll('#editModal .icon-option').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.icon === currentDevice.icon) {
+                    btn.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('editSupportBrightness').checked = currentDevice.supports.includes('brightness');
+            document.getElementById('editSupportColor').checked = currentDevice.supports.includes('color');
+            document.getElementById('editSupportTemperature').checked = currentDevice.supports.includes('temperature');
+            document.querySelector(`input[name="editDeviceStatus"][value="${currentDevice.status}"]`).checked = true;
+            
+            document.getElementById('editModalSaveBtn').textContent = '保存更改';
+            document.getElementById('editModalSaveBtn').className = 'btn btn-primary';
+            document.getElementById('editModalDeleteBtn').style.display = 'inline-flex';
+            
+            document.getElementById('editModal').classList.add('active');
+            closeModal();
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            editingDeviceId = null;
+        }
+
+        function selectEditIcon(icon) {
+            document.getElementById('editDeviceIcon').value = icon;
+            document.querySelectorAll('#editModal .icon-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`#editModal .icon-option[data-icon="${icon}"]`).classList.add('selected');
+        }
+
+        function saveEditDevice() {
+            const name = document.getElementById('editDeviceName').value.trim();
+            const type = document.getElementById('editDeviceType').value;
+            const location = document.getElementById('editDeviceLocation').value;
+            const icon = document.getElementById('editDeviceIcon').value;
+            const status = document.querySelector('input[name="editDeviceStatus"]:checked').value;
+
+            if (!name) {
+                showToast('error', '输入错误', '请输入设备名称');
+                return;
+            }
+            if (!type) {
+                showToast('error', '输入错误', '请选择设备类型');
+                return;
+            }
+            if (!location) {
+                showToast('error', '输入错误', '请选择设备位置');
+                return;
+            }
+
+            const supports = [];
+            if (document.getElementById('editSupportBrightness').checked) supports.push('brightness');
+            if (document.getElementById('editSupportColor').checked) supports.push('color');
+            if (document.getElementById('editSupportTemperature').checked) supports.push('temperature');
+
+            if (editingDeviceId) {
+                const deviceIndex = devices.findIndex(d => d.id === editingDeviceId);
+                if (deviceIndex !== -1) {
+                    devices[deviceIndex] = {
+                        ...devices[deviceIndex],
+                        name: name,
+                        type: type,
+                        location: location,
+                        status: status,
+                        icon: icon,
+                        supports: supports,
+                        energy: status === 'online' ? (devices[deviceIndex].energy || '0.1') : '0'
+                    };
+                    updateStats();
+                    renderDevices(getFilteredDevices());
+                    closeEditModal();
+                    showToast('success', '编辑成功', `已更新设备：${name}`);
+                }
+            } else {
+                const newDevice = {
+                    id: Math.max(...devices.map(d => d.id)) + 1,
+                    name: name,
+                    type: type,
+                    location: location,
+                    status: status,
+                    icon: icon,
+                    energy: status === 'online' ? '0.1' : '0',
+                    supports: supports
+                };
+
+                devices.push(newDevice);
+                updateStats();
+                renderDevices(getFilteredDevices());
+                closeEditModal();
+                showToast('success', '添加成功', `已添加设备：${name}`);
+            }
+        }
+
+        function deleteEditDevice() {
+            if (!editingDeviceId) return;
+            
+            const device = devices.find(d => d.id === editingDeviceId);
+            if (!device) return;
+            
+            if (confirm(`确定要删除设备"${device.name}"吗？此操作不可恢复。`)) {
+                const deviceIndex = devices.findIndex(d => d.id === editingDeviceId);
+                devices.splice(deviceIndex, 1);
+                updateStats();
+                renderDevices(getFilteredDevices());
+                closeEditModal();
+                showToast('success', '删除成功', `已删除设备：${device.name}`);
+            }
+        }
+
+        function updateStats() {
+            const total = devices.length;
+            const online = devices.filter(d => d.status === 'online').length;
+            const offline = devices.filter(d => d.status === 'offline').length;
+            const todayEnergy = devices.reduce((sum, d) => sum + parseFloat(d.energy || 0), 0).toFixed(1);
+
+            document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = total;
+            document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = online;
+            document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = offline;
+            document.querySelector('.stat-card:nth-child(4) .stat-value').textContent = todayEnergy;
+        }
+
+        function batchToggle() {
+            showToast('success', '批量操作', `已切换 ${selectedDevices.size} 台设备状态`);
+            clearSelection();
+        }
+
+        function batchUpdate() {
+            showToast('success', '批量更新', `已更新 ${selectedDevices.size} 台设备固件`);
+            clearSelection();
+        }
+
+        function batchDelete() {
+            if (confirm(`确定要删除选中的 ${selectedDevices.size} 台设备吗？此操作不可恢复。`)) {
+                selectedDevices.forEach(deviceId => {
+                    const index = devices.findIndex(d => d.id === deviceId);
+                    if (index !== -1) {
+                        devices.splice(index, 1);
+                    }
+                });
+                updateStats();
+                renderDevices(getFilteredDevices());
+                clearSelection();
+                showToast('success', '批量删除', `已删除 ${selectedDevices.size} 台设备`);
+            }
+        }
+
+        function showToast(type, title, message) {
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type]}</span>
+                <div class="toast-message">
+                    <strong>${title}</strong><br>
+                    ${message}
+                </div>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentTab = this.dataset.tab;
+                clearSelection();
+                filterDevices();
+            });
         });
-      }
 
-      function filterByGroup(group) {
-        currentGroup = group;
-        
-        document.querySelectorAll('.group-tab').forEach(tab => {
-          tab.classList.remove('active');
-          if (tab.textContent.includes(group === 'all' ? '全部' : 
-            group === 'living-room' ? '客厅' : 
-            group === 'bedroom' ? '卧室' : 
-            group === 'kitchen' ? '厨房' : '浴室')) {
-            tab.classList.add('active');
-          }
+        document.getElementById('searchInput').addEventListener('input', filterDevices);
+        document.getElementById('statusFilter').addEventListener('change', filterDevices);
+        document.getElementById('locationFilter').addEventListener('change', filterDevices);
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            currentSort = this.value;
+            filterDevices();
         });
-        
-        filterDevices();
-      }
 
-      function setView(view) {
-        document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        const grid = document.getElementById('devices-grid');
-        if (view === 'grid') {
-          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
-        } else {
-          grid.style.gridTemplateColumns = '1fr';
-        }
-      }
+        document.getElementById('brightnessSlider').addEventListener('input', function() {
+            document.getElementById('brightnessValue').textContent = this.value + '%';
+        });
 
-      function selectDevice(card) {
-        const checkbox = card.querySelector('.device-checkbox');
-        checkbox.classList.toggle('checked');
-        
-        if (checkbox.classList.contains('checked')) {
-          selectedDevices.add(card.dataset.id);
-          card.classList.add('selected');
-        } else {
-          selectedDevices.delete(card.dataset.id);
-          card.classList.remove('selected');
-        }
-        
-        updateBatchActions();
-      }
+        document.getElementById('tempSlider').addEventListener('input', function() {
+            document.getElementById('tempValue').textContent = this.value + '°C';
+        });
 
-      function updateBatchActions() {
-        const count = selectedDevices.size;
-        document.getElementById('selected-count').textContent = count;
-        const batchBar = document.getElementById('batch-actions');
-        
-        if (count > 0) {
-          batchBar.classList.add('show');
-        } else {
-          batchBar.classList.remove('show');
-        }
-      }
+        document.getElementById('deviceModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
 
-      function closeBatchActions() {
-        selectedDevices.clear();
-        document.querySelectorAll('.device-checkbox').forEach(cb => cb.classList.remove('checked'));
-        document.querySelectorAll('.device-card').forEach(card => card.classList.remove('selected'));
-        updateBatchActions();
-      }
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
 
-      function batchTurnOn() {
-        showNotification(`正在开启 ${selectedDevices.size} 个设备...`, 'info');
-        setTimeout(() => {
-          showNotification(`${selectedDevices.size} 个设备已开启`, 'success');
-          closeBatchActions();
-        }, 1500);
-      }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeEditModal();
+            }
+        });
 
-      function batchTurnOff() {
-        showNotification(`正在关闭 ${selectedDevices.size} 个设备...`, 'info');
-        setTimeout(() => {
-          showNotification(`${selectedDevices.size} 个设备已关闭`, 'success');
-          closeBatchActions();
-        }, 1500);
-      }
-
-      function toggleDevice(btn, state) {
-        const card = btn.closest('.device-card');
-        const name = card.querySelector('.device-name').textContent;
-        const statusText = card.querySelector('.status-text');
-        const statusDot = card.querySelector('.status-dot');
-        
-        if (state) {
-          statusText.textContent = '已开启';
-          statusDot.classList.remove('offline');
-          statusDot.classList.add('online');
-        } else {
-          statusText.textContent = '已关闭';
-          statusDot.classList.remove('online');
-          statusDot.classList.add('offline');
-        }
-        
-        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        showNotification(`${name} 已${state ? '开启' : '关闭'}`, 'success');
-      }
-
-      function setTemperature(btn, temp) {
-        const card = btn.closest('.device-card');
-        const name = card.querySelector('.device-name').textContent;
-        const statusText = card.querySelector('.status-text');
-        
-        statusText.textContent = `${temp}°C`;
-        
-        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        showNotification(`${name} 设为 ${temp}°C`, 'success');
-      }
-
-      function controlMedia(btn, action) {
-        const card = btn.closest('.device-card');
-        const name = card.querySelector('.device-name').textContent;
-        const statusText = card.querySelector('.status-text');
-        const statusDot = card.querySelector('.status-dot');
-        
-        const actions = {
-          'play': { text: '播放中', dot: 'online' },
-          'pause': { text: '已暂停', dot: 'offline' },
-          'stop': { text: '已停止', dot: 'offline' }
-        };
-        
-        statusText.textContent = actions[action].text;
-        statusDot.classList.remove('online', 'offline');
-        statusDot.classList.add(actions[action].dot);
-        
-        showNotification(`${name} ${actions[action].text}`, 'success');
-      }
-
-      function setCoverPosition(btn, pos) {
-        const card = btn.closest('.device-card');
-        const name = card.querySelector('.device-name').textContent;
-        const positions = { 'open': '打开', 'close': '关闭', 'half': '半开' };
-        
-        showNotification(`${name} 已${positions[pos]}`, 'success');
-      }
-
-      function toggleRecording(btn) {
-        const card = btn.closest('.device-card');
-        const name = card.querySelector('.device-name').textContent;
-        
-        btn.classList.toggle('active');
-        const isRecording = btn.classList.contains('active');
-        
-        showNotification(`${name} ${isRecording ? '开始录制' : '停止录制'}`, 'success');
-      }
-
-      function viewCamera() {
-        showNotification('正在打开摄像头预览...', 'info');
-      }
-
-      function lockDoor() {
-        showNotification('门锁已上锁', 'success');
-      }
-
-      function unlockDoor() {
-        showNotification('门锁已解锁', 'success');
-      }
-
-      function addDevice() {
-        showNotification('添加设备功能', 'info');
-      }
-
-      function refreshDevices() {
-        showNotification('正在刷新设备列表...', 'info');
-        setTimeout(() => {
-          showNotification('刷新完成', 'success');
-        }, 1000);
-      }
-
-      function showDeviceDetail(card) {
-        const name = card.querySelector('.device-name').textContent;
-        const type = card.querySelector('.device-location').textContent.split(' · ')[1];
-        const status = card.querySelector('.status-text').textContent;
-        
-        document.getElementById('modal-device-name').textContent = name;
-        document.getElementById('detail-id').textContent = card.dataset.id;
-        document.getElementById('detail-type').textContent = type;
-        document.getElementById('detail-location').textContent = card.querySelector('.device-location').textContent.split(' · ')[0];
-        document.getElementById('detail-status').textContent = status;
-        document.getElementById('detail-energy-today').textContent = '0.5 kWh';
-        document.getElementById('detail-energy-month').textContent = '15.2 kWh';
-        document.getElementById('detail-last-update').textContent = '2026-02-03 10:30';
-        document.getElementById('detail-firmware').textContent = 'v2.1.3';
-        
-        document.getElementById('detail-modal').classList.add('show');
-      }
-
-      function closeModal() {
-        document.getElementById('detail-modal').classList.remove('show');
-      }
-
-      function editDevice() {
-        showNotification('编辑设备功能', 'info');
-        closeModal();
-      }
-
-      function showNotifications() {
-        showNotification('您有3条未读通知', 'info');
-      }
-
-      function showUserMenu() {
-        showNotification('用户菜单', 'info');
-      }
-
-      function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-          <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '💡'}</span>
-          <span>${message}</span>
-        `;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => notification.classList.add('show'), 10);
-        
-        setTimeout(() => {
-          notification.classList.remove('show');
-          setTimeout(() => notification.remove(), 400);
-        }, 3000);
-      }
+        renderDevices();
     </script>
 </body>
 </html>
