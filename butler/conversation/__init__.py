@@ -1,5 +1,5 @@
-from .context_manager import ConversationContext, ContextManager
-from .dialogue_engine import DialogueEngine, DialogueMessage, DialogueTurn
+from .context_manager import ConversationContext, ContextManager, DialogueMessage
+from .dialogue_engine import DialogueEngine, DialogueTurn
 from .reference_resolver import ReferenceResolver
 from .intent_classifier import IntentClassifier, Intent, IntentType
 

@@ -17,6 +17,23 @@ class TriggerType(Enum):
     MQTT = "mqtt"
 
 @dataclass
+class TriggerData:
+    trigger_id: str
+    trigger_type: str
+    timestamp: str
+    trigger_count: int
+    context: Dict[str, Any]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "trigger_id": self.trigger_id,
+            "trigger_type": self.trigger_type,
+            "timestamp": self.timestamp,
+            "trigger_count": self.trigger_count,
+            "context": self.context
+        }
+
+@dataclass
 class TriggerConfig:
     trigger_id: str
     trigger_type: TriggerType

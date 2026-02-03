@@ -4,9 +4,30 @@ import json
 import logging
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
+try:
+    from dotenv import load_dotenv
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
+    logger.warning("python-dotenv not installed, .env file support disabled")
+
+def _load_env_files():
+    if DOTENV_AVAILABLE:
+        env_files = [
+            Path.cwd() / ".env",
+            Path(__file__).parent.parent.parent / ".env",
+        ]
+        for env_file in env_files:
+            if env_file.exists():
+                load_dotenv(env_file, override=False)
+                logger.debug(f"Loaded environment from {env_file}")
+
+_load_env_files()
 
 
 def _load_json(path: str) -> Dict[str, Any]:
@@ -317,6 +338,27 @@ class ButlerConfig:
     dashan_mqtt_port: int = 1883
     dashan_mqtt_username: Optional[str] = None
     dashan_mqtt_password: Optional[str] = None
+    memory_enabled: bool = True
+    memory_db_path: str = "butler/data/memory_vectors.db"
+    memory_embedding_dims: int = 1024
+    memory_enable_fts: bool = True
+    memory_auto_sync: bool = True
+    memory_sync_interval_sec: int = 60
+    memory_chunk_size: int = 500
+    memory_chunk_overlap: int = 50
+    embedding_provider: str = "glm"
+    embedding_api_key: str = ""
+    embedding_model: str = "embedding-2"
+    embedding_timeout_sec: int = 60
+    agent_streaming_enabled: bool = True
+    agent_max_context_tokens: int = 8192
+    agent_max_tool_iterations: int = 5
+    session_db_path: str = "butler/data/sessions.db"
+    session_cache_enabled: bool = True
+    workspace_dir: str = "workspace"
+    workspace_auto_init: bool = True
+    skills_enabled: bool = True
+    skills_dir: str = "butler/skills"
 
 
 def load_config(path: Optional[str] = None) -> ButlerConfig:

@@ -3,6 +3,7 @@ from .blueprint import Blueprint, BlueprintParameter, BlueprintTemplate
 from .trigger import Trigger, TriggerType, StateTrigger, TimeTrigger, EventTrigger
 from .condition import Condition, ConditionType, StateCondition, TimeCondition, DeviceCondition
 from .action import Action, ActionType, ServiceAction, ScriptAction, DelayAction, NotifyAction
+from .scene_engine import SceneEngine, Scene
 
 __all__ = [
     "AutomationEngine",
@@ -25,5 +26,7 @@ __all__ = [
     "ServiceAction",
     "ScriptAction",
     "DelayAction",
-    "NotifyAction"
+    "NotifyAction",
+    "SceneEngine",
+    "Scene"
 ]

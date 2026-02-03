@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Callable, Set
 from dataclasses import dataclass, field
 from datetime import datetime
 import uuid
+from enum import Enum
 
 from .trigger import Trigger, TriggerConfig, StateTrigger, TimeTrigger, EventTrigger
 from .condition import Condition, ConditionConfig, StateCondition, AndCondition, OrCondition
@@ -14,6 +15,14 @@ from .blueprint import Blueprint, BlueprintTemplate
 from ..core.entity_model import Entity, Automation
 
 logger = logging.getLogger(__name__)
+
+
+class ExecutionMode(Enum):
+    SINGLE = "single"
+    RESTART = "restart"
+    QUEUED = "queued"
+    PARALLEL = "parallel"
+
 
 @dataclass
 class AutomationConfig:

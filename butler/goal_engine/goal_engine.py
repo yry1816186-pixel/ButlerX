@@ -39,6 +39,32 @@ class GoalStatus(Enum):
 
 
 @dataclass
+class GoalConfig:
+    goal_id: str
+    template_id: str
+    name: str
+    description: Optional[str] = None
+    priority: int = 0
+    enabled: bool = True
+    auto_start: bool = False
+    conditions: List[Dict[str, Any]] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "goal_id": self.goal_id,
+            "template_id": self.template_id,
+            "name": self.name,
+            "description": self.description,
+            "priority": self.priority,
+            "enabled": self.enabled,
+            "auto_start": self.auto_start,
+            "conditions": self.conditions,
+            "metadata": self.metadata,
+        }
+
+
+@dataclass
 class Goal:
     goal_id: str
     template_id: str

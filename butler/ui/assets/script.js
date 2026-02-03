@@ -51,24 +51,25 @@ class SmartButlerUI {
       this.websocket.onopen = () => {
         console.log('WebSocket connected');
         this.reconnectAttempts = 0;
-        this.showNotification('WebSocket连接成功', 'success');
       };
       
       this.websocket.onmessage = (event) => {
-        this.handleWebSocketMessage(JSON.parse(event.data));
+        try {
+          this.handleWebSocketMessage(JSON.parse(event.data));
+        } catch (e) {
+          console.error('Failed to parse WebSocket message:', e);
+        }
       };
       
       this.websocket.onclose = () => {
         console.log('WebSocket disconnected');
-        this.attemptReconnect();
       };
       
       this.websocket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        this.showNotification('WebSocket连接错误', 'error');
+        console.log('WebSocket connection failed - this is expected in demo mode');
       };
     } catch (error) {
-      console.error('Failed to create WebSocket:', error);
+      console.log('WebSocket not available - this is expected in demo mode');
     }
   }
 

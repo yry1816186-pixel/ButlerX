@@ -34,12 +34,59 @@ def create_app(service: ButlerService) -> FastAPI:
         return RedirectResponse(url="/dashboard")
 
     @app.get("/dashboard")
+    @app.get("/dashboard.html")
     def dashboard() -> FileResponse:
         return FileResponse(str(ui_dir / "dashboard.html"))
 
     @app.get("/controls")
+    @app.get("/controls.html")
     def controls() -> FileResponse:
         return FileResponse(str(ui_dir / "controls.html"))
+
+    @app.get("/ai")
+    @app.get("/ai.html")
+    def ai() -> FileResponse:
+        return FileResponse(str(ui_dir / "ai.html"))
+
+    @app.get("/alerts")
+    @app.get("/alerts.html")
+    def alerts() -> FileResponse:
+        return FileResponse(str(ui_dir / "alerts.html"))
+
+    @app.get("/devices")
+    @app.get("/devices.html")
+    def devices() -> FileResponse:
+        return FileResponse(str(ui_dir / "devices.html"))
+
+    @app.get("/health")
+    @app.get("/health.html")
+    def health() -> FileResponse:
+        return FileResponse(str(ui_dir / "health.html"))
+
+    @app.get("/logs")
+    @app.get("/logs.html")
+    def logs() -> FileResponse:
+        return FileResponse(str(ui_dir / "logs.html"))
+
+    @app.get("/scenes")
+    @app.get("/scenes.html")
+    def scenes() -> FileResponse:
+        return FileResponse(str(ui_dir / "scenes.html"))
+
+    @app.get("/security")
+    @app.get("/security.html")
+    def security() -> FileResponse:
+        return FileResponse(str(ui_dir / "security.html"))
+
+    @app.get("/settings")
+    @app.get("/settings.html")
+    def settings() -> FileResponse:
+        return FileResponse(str(ui_dir / "settings.html"))
+
+    @app.get("/vision")
+    @app.get("/vision.html")
+    def vision() -> FileResponse:
+        return FileResponse(str(ui_dir / "vision.html"))
 
     @app.get("/evidence/{kind}/{ref_id}")
     def evidence(kind: str, ref_id: str) -> HTMLResponse:

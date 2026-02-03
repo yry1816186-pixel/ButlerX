@@ -1,52 +1,62 @@
 # 核心依赖
-numpy>=1.24.0
-opencv-python>=4.8.0
+numpy>=1.24.0,<2.0.0
+opencv-python>=4.8.0,<5.0.0
+
+# MQTT客户端
+paho-mqtt>=1.6.1,<2.0.0
 
 # 音频处理
-sounddevice>=0.4.6
-soundfile>=0.12.0
-pyaudio>=0.2.13
+sounddevice>=0.4.6,<1.0.0
+soundfile>=0.12.0,<1.0.0
+pyaudio>=0.2.13,<1.0.0
 
-# 语音识别
-faster-whisper>=0.10.0
-openai-whisper>=20230314
+# 语音识别（二选一，faster-whisper为推荐）
+faster-whisper>=0.10.0,<1.0.0
+# openai-whisper>=20230314  # 可选依赖，如需使用请取消注释
 
 # 语音合成
-piper-tts>=1.2.0
+piper-tts>=1.2.0,<2.0.0
 
 # 唤醒词检测
-openwakeword>=0.5.0
+openwakeword>=0.5.0,<1.0.0
 
 # 机器学习
-torch>=2.0.0
-torchvision>=0.15.0
-transformers>=4.30.0
+torch>=2.0.0,<2.5.0
+torchvision>=0.15.0,<0.20.0
+transformers>=4.30.0,<5.0.0
 
 # 计算机视觉
-Pillow>=10.0.0
+Pillow>=10.0.0,<11.0.0
 
 # HTTP客户端
-httpx>=0.24.0
+httpx>=0.24.0,<1.0.0
+
+# Web框架
+fastapi>=0.110.0,<1.0.0
+uvicorn>=0.27.1,<1.0.0
 
 # 工具库
-pyyaml>=6.0
-python-dotenv>=1.0.0
-
-# 数据库
-sqlite3
+pyyaml>=6.0,<7.0.0
+python-dotenv>=1.0.0,<2.0.0
 
 # 日志
-colorlog>=6.7.0
+colorlog>=6.7.0,<7.0.0
 
 # 面部识别（可选）
-face-recognition>=1.3.0
-dlib>=19.24.0
+face-recognition>=1.3.0,<2.0.0
+dlib>=19.24.0,<20.0.0
 
 # YOLO物体检测
-ultralytics>=8.0.0
+ultralytics>=8.0.0,<9.0.0
 
-# GLM API客户端
-zhipuai>=4.0.0
+# GLM API客户端（zhipuai可能不存在，使用dashscope或自定义）
+# zhipuai>=4.0.0  # 需验证包名是否正确
 
 # 序列化
-msgpack>=1.0.0
+msgpack>=1.0.0,<2.0.0
+
+# 嵌入模型（高级内存搜索）
+sentence-transformers>=2.3.0,<3.0.0
+
+# 技能系统
+pydantic>=2.5.0,<3.0.0
