@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>场景控制 - Smart Butler</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    :root {
+      --primary-color: #0088cc;
+      --primary-light: #e6f4fa;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --info-color: #3b82f6;
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e8ecf1;
+      --text-primary: #1a1a2e;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-color);
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      margin-bottom: 24px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 12px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      font-size: 18px;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .breadcrumbs a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--primary-color);
+    }
+
+    .breadcrumbs span {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .notification-btn {
+      position: relative;
+      background: var(--bg-tertiary);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: var(--transition);
+    }
+
+    .notification-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--danger-color);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px 6px 6px;
+      background: var(--bg-tertiary);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .user-profile:hover {
+      background: var(--primary-light);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0077b3;
+      box-shadow: var(--shadow-md);
+    }
+
+    .scene-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .scene-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .scene-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+      border-color: var(--primary-color);
+    }
+
+    .scene-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .scene-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .scene-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .scene-devices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .scene-device {
+      font-size: 11px;
+      padding: 4px 10px;
+      background: var(--bg-primary);
+      border-radius: 10px;
+      color: var(--text-secondary);
+    }
+
+    .scene-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .scene-status.active {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+
+    .scene-status.inactive {
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .mobile-toggle {
+        display: block;
+      }
+      
+      .scene-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">SMART BUTLER</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">主菜单</div>
+        <div class="nav-item" onclick="navigate('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span>仪表盘</span>
+        </div>
+        <div class="nav-item" onclick="navigate('devices')">
+          <span class="nav-icon">🔌</span>
+          <span>设备管理</span>
+        </div>
+        <div class="nav-item" onclick="navigate('health')">
+          <span class="nav-icon">💊</span>
+          <span>系统健康</span>
+        </div>
+        <div class="nav-item" onclick="navigate('alerts')">
+          <span class="nav-icon">🔔</span>
+          <span>告警中心</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">功能</div>
+        <div class="nav-item active" onclick="navigate('scenes')">
+          <span class="nav-icon">🎬</span>
+          <span>场景控制</span>
+        </div>
+        <div class="nav-item" onclick="navigate('ai')">
+          <span class="nav-icon">🤖</span>
+          <span>AI配置</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">监控</div>
+        <div class="nav-item" onclick="navigate('vision')">
+          <span class="nav-icon">📹</span>
+          <span>视觉监控</span>
+        </div>
+        <div class="nav-item" onclick="navigate('logs')">
+          <span class="nav-icon">📝</span>
+          <span>系统日志</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">系统</div>
+        <div class="nav-item" onclick="navigate('settings')">
+          <span class="nav-icon">⚙️</span>
+          <span>系统设置</span>
+        </div>
+        <div class="nav-item" onclick="navigate('security')">
+          <span class="nav-icon">🔐</span>
+          <span>权限安全</span>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="breadcrumbs">
+          <a href="#" onclick="navigate('dashboard')">首页</a>
+          <span>/</span>
+          <span>场景控制</span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button class="notification-btn">
+          🔔
+          <span class="notification-badge">3</span>
+        </button>
+        <div class="user-profile">
+          <div class="user-avatar">A</div>
+          <span class="user-name">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">场景控制</h1>
+          <p class="page-subtitle">一键执行预设场景，智能管理家居设备</p>
+        </div>
+        <button class="btn btn-primary" onclick="createScene()">+ 新建场景</button>
+      </div>
+
+      <div class="scene-grid">
+        <div class="scene-card" onclick="activateScene('home')">
+          <div class="scene-icon">🏠</div>
+          <div class="scene-name">回家模式</div>
+          <div class="scene-desc">打开客厅和卧室灯光，空调调至舒适温度，播放舒缓音乐</div>
+          <div class="scene-devices">
+            <span class="scene-device">客厅主灯</span>
+            <span class="scene-device">卧室灯</span>
+            <span class="scene-device">客厅空调</span>
+            <span class="scene-device">智能音箱</span>
+          </div>
+          <div class="scene-status active">● 已激活</div>
+        </div>
+
+        <div class="scene-card" onclick="activateScene('away')">
+          <div class="scene-icon">🚶</div>
+          <div class="scene-name">离家模式</div>
+          <div class="scene-desc">关闭所有灯光和空调，启动安防监控，智能门锁上锁</div>
+          <div class="scene-devices">
+            <span class="scene-device">全部灯光</span>
+            <span class="scene-device">全部空调</span>
+            <span class="scene-device">门锁</span>
+            <span class="scene-device">安防系统</span>
+          </div>
+          <div class="scene-status inactive">○ 未激活</div>
+        </div>
+
+        <div class="scene-card" onclick="activateScene('sleep')">
+          <div class="scene-icon">🌙</div>
+          <div class="scene-name">睡眠模式</div>
+          <div class="scene-desc">关闭所有灯光，调暗夜灯，空调调至睡眠温度，启动勿扰模式</div>
+          <div class="scene-devices">
+            <span class="scene-device">全部灯光</span>
+            <span class="scene-device">夜灯</span>
+            <span class="scene-device">卧室空调</span>
+            <span class="scene-device">勿扰模式</span>
+          </div>
+          <div class="scene-status inactive">○ 未激活</div>
+        </div>
+
+        <div class="scene-card" onclick="activateScene('morning')">
+          <div class="scene-icon">🌅</div>
+          <div class="scene-name">早安模式</div>
+          <div class="scene-desc">逐渐调亮灯光，播放轻柔音乐，打开窗帘，播报天气和日程</div>
+          <div class="scene-devices">
+            <span class="scene-device">卧室灯</span>
+            <span class="scene-device">客厅灯</span>
+            <span class="scene-device">窗帘</span>
+            <span class="scene-device">智能音箱</span>
+          </div>
+          <div class="scene-status inactive">○ 未激活</div>
+        </div>
+
+        <div class="scene-card" onclick="activateScene('movie')">
+          <div class="scene-icon">🎬</div>
+          <div class="scene-name">观影模式</div>
+          <div class="scene-desc">调暗灯光，关闭窗帘，空调调至观影温度，开启家庭影院系统</div>
+          <div class="scene-devices">
+            <span class="scene-device">客厅灯光</span>
+            <span class="scene-device">窗帘</span>
+            <span class="scene-device">空调</span>
+            <span class="scene-device">家庭影院</span>
+          </div>
+          <div class="scene-status inactive">○ 未激活</div>
+        </div>
+
+        <div class="scene-card" onclick="activateScene('eco')">
+          <div class="scene-icon">🌿</div>
+          <div class="scene-name">节能模式</div>
+          <div class="scene-desc">关闭不必要的设备，优化空调设置，启用智能节能策略</div>
+          <div class="scene-devices">
+            <span class="scene-device">空调</span>
+            <span class="scene-device">灯光</span>
+            <span class="scene-device">智能插座</span>
+          </div>
+          <div class="scene-status inactive">○ 未激活</div>
+        </div>
+
+        <div class="scene-card" onclick="activateScene('party')">
+          <div class="scene-icon">🎉</div>
+          <div class="scene-name">派对模式</div>
+          <div class="scene-desc">开启彩色灯光循环，播放动感音乐，营造派对氛围</div>
+          <div class="scene-devices">
+            <span class="scene-device">客厅灯带</span>
+            <span class="scene-device">音响系统</span>
+          </div>
+          <div class="scene-status inactive">○ 未激活</div>
+        </div>
+
+        <div class="scene-card" onclick="activateScene('work')">
+          <div class="scene-icon">💼</div>
+          <div class="scene-name">工作模式</div>
+          <div class="scene-desc">开启工作台灯光，调整室内温度，屏蔽通知提醒，提高专注度</div>
+          <div class="scene-devices">
+            <span class="scene-device">台灯</span>
+            <span class="scene-device">空调</span>
+            <span class="scene-device">勿扰模式</span>
+          </div>
+          <div class="scene-status inactive">○ 未激活</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/script.js"></script>
+  <script>
+    function navigate(page) {
+      window.location.href = page + '.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function activateScene(sceneName) {
+      showNotification(`场景 "${getSceneName(sceneName)}" 已激活`, 'success');
+    }
+
+    function createScene() {
+      showNotification('场景创建功能开发中...', 'info');
+    }
+
+    function getSceneName(sceneName) {
+      const names = {
+        home: '回家模式',
+        away: '离家模式',
+        sleep: '睡眠模式',
+        morning: '早安模式',
+        movie: '观影模式',
+        eco: '节能模式',
+        party: '派对模式',
+        work: '工作模式'
+      };
+      return names[sceneName] || sceneName;
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+      `;
+
+      const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+      };
+
+      notification.style.borderLeft = `4px solid ${colors[type]}`;
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>权限与安全管理 - Smart Butler</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    :root {
+      --primary-color: #0088cc;
+      --primary-light: #e6f4fa;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --info-color: #3b82f6;
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e8ecf1;
+      --text-primary: #1a1a2e;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-color);
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      margin-bottom: 24px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 12px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      font-size: 18px;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .breadcrumbs a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--primary-color);
+    }
+
+    .breadcrumbs span {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .notification-btn {
+      position: relative;
+      background: var(--bg-tertiary);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: var(--transition);
+    }
+
+    .notification-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--danger-color);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px 6px 6px;
+      background: var(--bg-tertiary);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .user-profile:hover {
+      background: var(--primary-light);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+
+    .tab:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .tab.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .section-body {
+      padding: 20px;
+    }
+
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .user-card {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      transition: var(--transition);
+    }
+
+    .user-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-color);
+    }
+
+    .user-card-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .user-card-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 22px;
+    }
+
+    .user-card-info {
+      flex: 1;
+    }
+
+    .user-card-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .user-card-email {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .user-card-role {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .user-card-role.admin {
+      background: #dbeafe;
+      color: var(--info-color);
+    }
+
+    .user-card-role.user {
+      background: #d1fae5;
+      color: var(--success-color);
+    }
+
+    .user-card-role.guest {
+      background: #f3f4f6;
+      color: var(--text-secondary);
+    }
+
+    .user-card-status {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .user-card-status .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .user-card-status .dot.online {
+      background: var(--success-color);
+    }
+
+    .user-card-status .dot.offline {
+      background: var(--text-secondary);
+    }
+
+    .user-card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+      flex: 1;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0077b3;
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+
+    .role-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .role-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-sm);
+    }
+
+    .role-info {
+      flex: 1;
+    }
+
+    .role-name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .role-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .role-permissions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .role-permission {
+      font-size: 11px;
+      padding: 3px 8px;
+      background: var(--bg-secondary);
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+
+    .role-users {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: right;
+    }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .log-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .log-table td {
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .log-table tr:hover {
+      background: var(--bg-primary);
+    }
+
+    .log-type {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .log-type.login {
+      background: #d1fae5;
+      color: var(--success-color);
+    }
+
+    .log-type.logout {
+      background: #f3f4f6;
+      color: var(--text-secondary);
+    }
+
+    .log-type.create {
+      background: #dbeafe;
+      color: var(--info-color);
+    }
+
+    .log-type.update {
+      background: #fef3c7;
+      color: var(--warning-color);
+    }
+
+    .log-type.delete {
+      background: #fee2e2;
+      color: var(--danger-color);
+    }
+
+    .log-type.error {
+      background: #fee2e2;
+      color: var(--danger-color);
+    }
+
+    .log-toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      background: var(--bg-secondary);
+    }
+
+    .filter-select {
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      background: var(--bg-secondary);
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      background: var(--bg-secondary);
+      box-sizing: border-box;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .modal-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .mobile-toggle {
+        display: block;
+      }
+      
+      .user-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .log-table {
+        font-size: 12px;
+      }
+      
+      .log-table th,
+      .log-table td {
+        padding: 8px 10px;
+      }
+      
+      .tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">SMART BUTLER</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">主菜单</div>
+        <div class="nav-item" onclick="navigate('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span>仪表盘</span>
+        </div>
+        <div class="nav-item" onclick="navigate('devices')">
+          <span class="nav-icon">🔌</span>
+          <span>设备管理</span>
+        </div>
+        <div class="nav-item" onclick="navigate('health')">
+          <span class="nav-icon">💊</span>
+          <span>系统健康</span>
+        </div>
+        <div class="nav-item" onclick="navigate('alerts')">
+          <span class="nav-icon">🔔</span>
+          <span>告警中心</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">监控</div>
+        <div class="nav-item" onclick="navigate('vision')">
+          <span class="nav-icon">📹</span>
+          <span>视觉监控</span>
+        </div>
+        <div class="nav-item" onclick="navigate('logs')">
+          <span class="nav-icon">📝</span>
+          <span>系统日志</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">系统</div>
+        <div class="nav-item" onclick="navigate('settings')">
+          <span class="nav-icon">⚙️</span>
+          <span>系统设置</span>
+        </div>
+        <div class="nav-item active" onclick="navigate('security')">
+          <span class="nav-icon">🔐</span>
+          <span>权限安全</span>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="breadcrumbs">
+          <a href="#" onclick="navigate('dashboard')">首页</a>
+          <span>/</span>
+          <span>权限安全</span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button class="notification-btn">
+          🔔
+          <span class="notification-badge">3</span>
+        </button>
+        <div class="user-profile">
+          <div class="user-avatar">A</div>
+          <span class="user-name">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1 class="page-title">权限与安全管理</h1>
+        <p class="page-subtitle">管理用户账户、角色权限和操作审计日志</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('users')">用户管理</button>
+        <button class="tab" onclick="switchTab('roles')">角色权限</button>
+        <button class="tab" onclick="switchTab('audit')">审计日志</button>
+      </div>
+
+      <div class="tab-content active" id="users-tab">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">用户列表 (5)</div>
+            <button class="btn btn-primary" onclick="showAddUserModal()">+ 添加用户</button>
+          </div>
+          <div class="section-body">
+            <div class="user-grid">
+              <div class="user-card">
+                <div class="user-card-header">
+                  <div class="user-card-avatar">A</div>
+                  <div class="user-card-info">
+                    <div class="user-card-name">管理员</div>
+                    <div class="user-card-email">admin@smartbutler.local</div>
+                  </div>
+                </div>
+                <div class="user-card-status">
+                  <span class="dot online"></span>在线
+                </div>
+                <div style="margin-bottom: 12px;">
+                  <span class="user-card-role admin">管理员</span>
+                </div>
+                <div class="user-card-actions">
+                  <button class="btn btn-secondary" onclick="editUser(1)">编辑</button>
+                </div>
+              </div>
+
+              <div class="user-card">
+                <div class="user-card-header">
+                  <div class="user-card-avatar" style="background: linear-gradient(135deg, #10b981, #34d399);">Z</div>
+                  <div class="user-card-info">
+                    <div class="user-card-name">张三</div>
+                    <div class="user-card-email">zhangsan@smartbutler.local</div>
+                  </div>
+                </div>
+                <div class="user-card-status">
+                  <span class="dot online"></span>在线
+                </div>
+                <div style="margin-bottom: 12px;">
+                  <span class="user-card-role user">普通用户</span>
+                </div>
+                <div class="user-card-actions">
+                  <button class="btn btn-secondary" onclick="editUser(2)">编辑</button>
+                  <button class="btn btn-danger" onclick="deleteUser(2)">删除</button>
+                </div>
+              </div>
+
+              <div class="user-card">
+                <div class="user-card-header">
+                  <div class="user-card-avatar" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">L</div>
+                  <div class="user-card-info">
+                    <div class="user-card-name">李四</div>
+                    <div class="user-card-email">lisi@smartbutler.local</div>
+                  </div>
+                </div>
+                <div class="user-card-status">
+                  <span class="dot offline"></span>离线
+                </div>
+                <div style="margin-bottom: 12px;">
+                  <span class="user-card-role user">普通用户</span>
+                </div>
+                <div class="user-card-actions">
+                  <button class="btn btn-secondary" onclick="editUser(3)">编辑</button>
+                  <button class="btn btn-danger" onclick="deleteUser(3)">删除</button>
+                </div>
+              </div>
+
+              <div class="user-card">
+                <div class="user-card-header">
+                  <div class="user-card-avatar" style="background: linear-gradient(135deg, #64748b, #94a3b8);">W</div>
+                  <div class="user-card-info">
+                    <div class="user-card-name">王五</div>
+                    <div class="user-card-email">wangwu@smartbutler.local</div>
+                  </div>
+                </div>
+                <div class="user-card-status">
+                  <span class="dot offline"></span>离线
+                </div>
+                <div style="margin-bottom: 12px;">
+                  <span class="user-card-role guest">访客</span>
+                </div>
+                <div class="user-card-actions">
+                  <button class="btn btn-secondary" onclick="editUser(4)">编辑</button>
+                  <button class="btn btn-danger" onclick="deleteUser(4)">删除</button>
+                </div>
+              </div>
+
+              <div class="user-card">
+                <div class="user-card-header">
+                  <div class="user-card-avatar" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">X</div>
+                  <div class="user-card-info">
+                    <div class="user-card-name">小明</div>
+                    <div class="user-card-email">xiaoming@smartbutler.local</div>
+                  </div>
+                </div>
+                <div class="user-card-status">
+                  <span class="dot online"></span>在线
+                </div>
+                <div style="margin-bottom: 12px;">
+                  <span class="user-card-role user">普通用户</span>
+                </div>
+                <div class="user-card-actions">
+                  <button class="btn btn-secondary" onclick="editUser(5)">编辑</button>
+                  <button class="btn btn-danger" onclick="deleteUser(5)">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="roles-tab">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">角色权限 (3)</div>
+            <button class="btn btn-primary" onclick="showAddRoleModal()">+ 添加角色</button>
+          </div>
+          <div class="section-body">
+            <div class="role-list">
+              <div class="role-item">
+                <div class="role-info">
+                  <div class="role-name">管理员</div>
+                  <div class="role-desc">拥有系统所有权限，可管理用户、设备和系统配置</div>
+                  <div class="role-permissions">
+                    <span class="role-permission">用户管理</span>
+                    <span class="role-permission">设备控制</span>
+                    <span class="role-permission">系统配置</span>
+                    <span class="role-permission">日志查看</span>
+                  </div>
+                </div>
+                <div class="role-users">1 位用户</div>
+                <button class="btn btn-secondary" style="margin-left: 16px;" onclick="editRole(1)">编辑</button>
+              </div>
+
+              <div class="role-item">
+                <div class="role-info">
+                  <div class="role-name">普通用户</div>
+                  <div class="role-desc">可控制设备、查看数据、执行场景，无法管理系统配置</div>
+                  <div class="role-permissions">
+                    <span class="role-permission">设备控制</span>
+                    <span class="role-permission">数据查看</span>
+                    <span class="role-permission">场景执行</span>
+                  </div>
+                </div>
+                <div class="role-users">3 位用户</div>
+                <button class="btn btn-secondary" style="margin-left: 16px;" onclick="editRole(2)">编辑</button>
+              </div>
+
+              <div class="role-item">
+                <div class="role-info">
+                  <div class="role-name">访客</div>
+                  <div class="role-desc">仅可查看系统状态，无法执行控制操作</div>
+                  <div class="role-permissions">
+                    <span class="role-permission">状态查看</span>
+                  </div>
+                </div>
+                <div class="role-users">1 位用户</div>
+                <button class="btn btn-secondary" style="margin-left: 16px;" onclick="editRole(3)">编辑</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="audit-tab">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">审计日志</div>
+            <button class="btn btn-secondary" onclick="exportLogs()">导出日志</button>
+          </div>
+          <div class="section-body">
+            <div class="log-toolbar">
+              <input type="text" class="search-input" placeholder="搜索日志..." id="log-search" onkeyup="filterLogs()">
+              <select class="filter-select" id="type-filter" onchange="filterLogs()">
+                <option value="all">所有类型</option>
+                <option value="login">登录</option>
+                <option value="logout">登出</option>
+                <option value="create">创建</option>
+                <option value="update">更新</option>
+                <option value="delete">删除</option>
+                <option value="error">错误</option>
+              </select>
+              <select class="filter-select" id="date-filter" onchange="filterLogs()">
+                <option value="all">所有时间</option>
+                <option value="today">今天</option>
+                <option value="week">最近7天</option>
+                <option value="month">最近30天</option>
+              </select>
+            </div>
+            <table class="log-table">
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>类型</th>
+                  <th>用户</th>
+                  <th>操作</th>
+                  <th>IP地址</th>
+                </tr>
+              </thead>
+              <tbody id="log-table-body">
+                <tr>
+                  <td>2026-02-03 14:32:15</td>
+                  <td><span class="log-type login">登录</span></td>
+                  <td>管理员</td>
+                  <td>用户登录系统</td>
+                  <td>192.168.1.100</td>
+                </tr>
+                <tr>
+                  <td>2026-02-03 14:30:42</td>
+                  <td><span class="log-type update">更新</span></td>
+                  <td>张三</td>
+                  <td>修改设备配置</td>
+                  <td>192.168.1.101</td>
+                </tr>
+                <tr>
+                  <td>2026-02-03 14:28:33</td>
+                  <td><span class="log-type create">创建</span></td>
+                  <td>管理员</td>
+                  <td>创建新用户</td>
+                  <td>192.168.1.100</td>
+                </tr>
+                <tr>
+                  <td>2026-02-03 14:25:18</td>
+                  <td><span class="log-type error">错误</span></td>
+                  <td>李四</td>
+                  <td>设备连接失败</td>
+                  <td>192.168.1.102</td>
+                </tr>
+                <tr>
+                  <td>2026-02-03 14:22:05</td>
+                  <td><span class="log-type logout">登出</span></td>
+                  <td>王五</td>
+                  <td>用户登出系统</td>
+                  <td>192.168.1.103</td>
+                </tr>
+                <tr>
+                  <td>2026-02-03 14:18:42</td>
+                  <td><span class="log-type login">登录</span></td>
+                  <td>小明</td>
+                  <td>用户登录系统</td>
+                  <td>192.168.1.104</td>
+                </tr>
+                <tr>
+                  <td>2026-02-03 14:15:33</td>
+                  <td><span class="log-type update">更新</span></td>
+                  <td>管理员</td>
+                  <td>修改系统配置</td>
+                  <td>192.168.1.100</td>
+                </tr>
+                <tr>
+                  <td>2026-02-03 14:12:18</td>
+                  <td><span class="log-type delete">删除</span></td>
+                  <td>管理员</td>
+                  <td>删除过期日志</td>
+                  <td>192.168.1.100</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="user-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">添加用户</div>
+        <button class="modal-close" onclick="closeModal('user-modal')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">用户名</label>
+          <input type="text" class="form-input" placeholder="请输入用户名">
+        </div>
+        <div class="form-group">
+          <label class="form-label">邮箱</label>
+          <input type="email" class="form-input" placeholder="请输入邮箱地址">
+        </div>
+        <div class="form-group">
+          <label class="form-label">密码</label>
+          <input type="password" class="form-input" placeholder="请输入密码">
+        </div>
+        <div class="form-group">
+          <label class="form-label">角色</label>
+          <select class="form-input">
+            <option>普通用户</option>
+            <option>管理员</option>
+            <option>访客</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('user-modal')">取消</button>
+        <button class="btn btn-primary" onclick="saveUser()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/script.js"></script>
+  <script>
+    function navigate(page) {
+      window.location.href = page + '.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      event.target.classList.add('active');
+      document.getElementById(tabName + '-tab').classList.add('active');
+    }
+
+    function showAddUserModal() {
+      document.getElementById('user-modal').classList.add('open');
+    }
+
+    function showAddRoleModal() {
+      showNotification('角色编辑功能开发中...', 'info');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('open');
+    }
+
+    function editUser(userId) {
+      showNotification('编辑用户功能开发中...', 'info');
+    }
+
+    function deleteUser(userId) {
+      if (confirm('确定要删除该用户吗？')) {
+        showNotification('用户已删除', 'success');
+      }
+    }
+
+    function editRole(roleId) {
+      showNotification('编辑角色功能开发中...', 'info');
+    }
+
+    function saveUser() {
+      showNotification('用户已添加', 'success');
+      closeModal('user-modal');
+    }
+
+    function filterLogs() {
+      const searchValue = document.getElementById('log-search').value.toLowerCase();
+      const typeFilter = document.getElementById('type-filter').value;
+      const rows = document.querySelectorAll('#log-table-body tr');
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const typeSpan = row.querySelector('.log-type');
+        const type = typeSpan ? typeSpan.textContent.toLowerCase() : '';
+
+        const searchMatch = text.includes(searchValue);
+        const typeMatch = typeFilter === 'all' || type.includes(typeFilter);
+
+        if (searchMatch && typeMatch) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    function exportLogs() {
+      showNotification('日志导出中...', 'info');
+      setTimeout(() => {
+        showNotification('日志导出成功', 'success');
+      }, 1500);
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+      `;
+
+      const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+      };
+
+      notification.style.borderLeft = `4px solid ${colors[type]}`;
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

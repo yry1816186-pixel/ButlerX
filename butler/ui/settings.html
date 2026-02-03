@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系统设置 - Smart Butler</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    :root {
+      --primary-color: #0088cc;
+      --primary-light: #e6f4fa;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --info-color: #3b82f6;
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e8ecf1;
+      --text-primary: #1a1a2e;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-color);
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      margin-bottom: 24px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 12px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      font-size: 18px;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .breadcrumbs a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--primary-color);
+    }
+
+    .breadcrumbs span {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .notification-btn {
+      position: relative;
+      background: var(--bg-tertiary);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: var(--transition);
+    }
+
+    .notification-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--danger-color);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px 6px 6px;
+      background: var(--bg-tertiary);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .user-profile:hover {
+      background: var(--primary-light);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .tab.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+
+    .section-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge.success {
+      background: #d1fae5;
+      color: var(--success-color);
+    }
+
+    .badge.warning {
+      background: #fef3c7;
+      color: var(--warning-color);
+    }
+
+    .badge.error {
+      background: #fee2e2;
+      color: var(--danger-color);
+    }
+
+    .section-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      background: var(--bg-secondary);
+      box-sizing: border-box;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .switch-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--border-color);
+      transition: var(--transition);
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      transition: var(--transition);
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background: var(--success-color);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0077b3;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .camera-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .camera-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-sm);
+    }
+
+    .camera-icon {
+      font-size: 32px;
+    }
+
+    .camera-info {
+      flex: 1;
+    }
+
+    .camera-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .camera-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .camera-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-dot.online {
+      background: var(--success-color);
+      box-shadow: 0 0 8px var(--success-color);
+    }
+
+    .status-dot.offline {
+      background: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .mobile-toggle {
+        display: block;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        flex-wrap: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">SMART BUTLER</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">主菜单</div>
+        <div class="nav-item" onclick="navigate('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span>仪表盘</span>
+        </div>
+        <div class="nav-item" onclick="navigate('devices')">
+          <span class="nav-icon">🔌</span>
+          <span>设备管理</span>
+        </div>
+        <div class="nav-item" onclick="navigate('health')">
+          <span class="nav-icon">💊</span>
+          <span>系统健康</span>
+        </div>
+        <div class="nav-item" onclick="navigate('alerts')">
+          <span class="nav-icon">🔔</span>
+          <span>告警中心</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">功能</div>
+        <div class="nav-item" onclick="navigate('scenes')">
+          <span class="nav-icon">🎬</span>
+          <span>场景控制</span>
+        </div>
+        <div class="nav-item" onclick="navigate('ai')">
+          <span class="nav-icon">🤖</span>
+          <span>AI配置</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">监控</div>
+        <div class="nav-item" onclick="navigate('vision')">
+          <span class="nav-icon">📹</span>
+          <span>视觉监控</span>
+        </div>
+        <div class="nav-item" onclick="navigate('logs')">
+          <span class="nav-icon">📝</span>
+          <span>系统日志</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">系统</div>
+        <div class="nav-item active" onclick="navigate('settings')">
+          <span class="nav-icon">⚙️</span>
+          <span>系统设置</span>
+        </div>
+        <div class="nav-item" onclick="navigate('security')">
+          <span class="nav-icon">🔐</span>
+          <span>权限安全</span>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="breadcrumbs">
+          <a href="#" onclick="navigate('dashboard')">首页</a>
+          <span>/</span>
+          <span>系统设置</span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button class="notification-btn">
+          🔔
+          <span class="notification-badge">3</span>
+        </button>
+        <div class="user-profile">
+          <div class="user-avatar">A</div>
+          <span class="user-name">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <h1 class="page-title">系统设置</h1>
+        <p class="page-subtitle">配置系统各项参数和集成服务</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('ai')">AI配置</button>
+        <button class="tab" onclick="switchTab('vision')">视觉系统</button>
+        <button class="tab" onclick="switchTab('homeassistant')">Home Assistant</button>
+        <button class="tab" onclick="switchTab('system')">系统设置</button>
+        <button class="tab" onclick="switchTab('backup')">备份恢复</button>
+      </div>
+
+      <div class="tab-content active" id="ai-tab">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">GLM-4.7 大模型配置</div>
+            <span class="badge success">已连接</span>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label class="form-label">API Key</label>
+              <input type="password" class="form-input" value="sk-xxxxxxxxxxxx" placeholder="输入您的 API Key">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">模型选择</label>
+              <select class="form-input">
+                <option value="glm-4" selected>GLM-4 (推荐)</option>
+                <option value="glm-4-turbo">GLM-4 Turbo</option>
+                <option value="glm-3-turbo">GLM-3 Turbo</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">API 基础 URL</label>
+              <input type="text" class="form-input" value="https://open.bigmodel.cn/api/paas/v4" placeholder="https://open.bigmodel.cn/api/paas/v4">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">最大 Token 数</label>
+                <input type="number" class="form-input" value="4096">
+              </div>
+              <div class="form-group">
+                <label class="form-label">温度参数</label>
+                <input type="number" class="form-input" value="0.7" step="0.1" min="0" max="2">
+              </div>
+            </div>
+
+            <div class="switch-container">
+              <label class="form-label">启用流式响应</label>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-container">
+              <label class="form-label">启用对话记忆</label>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="saveAISettings()">保存配置</button>
+              <button class="btn btn-secondary" onclick="testAIConnection()">测试连接</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="vision-tab">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">视觉监控系统配置</div>
+            <span class="badge success">运行中</span>
+          </div>
+          <div class="section-body">
+            <div class="switch-container">
+              <label class="form-label">启用视觉监控</label>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">检测模型</label>
+              <select class="form-input">
+                <option value="yolov8n" selected>YOLOv8 Nano (快速)</option>
+                <option value="yolov8s">YOLOv8 Small (平衡)</option>
+                <option value="yolov8m">YOLOv8 Medium (精确)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">置信度阈值</label>
+              <input type="range" class="form-input" min="0" max="100" value="50">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">检测类别</label>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <label><input type="checkbox" checked> 人物</label>
+                <label><input type="checkbox" checked> 人脸</label>
+                <label><input type="checkbox"> 车辆</label>
+                <label><input type="checkbox"> 动物</label>
+                <label><input type="checkbox" checked> 门禁</label>
+                <label><input type="checkbox"> 包裹</label>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="saveVisionSettings()">保存配置</button>
+              <button class="btn btn-secondary" onclick="restartVisionSystem()">重启系统</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">摄像头管理</div>
+            <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">+ 添加摄像头</button>
+          </div>
+          <div class="section-body">
+            <div class="camera-list">
+              <div class="camera-item">
+                <div class="camera-icon">📷</div>
+                <div class="camera-info">
+                  <div class="camera-name">门口摄像头</div>
+                  <div class="camera-meta">rtsp://192.168.1.100:554/stream | 1080p</div>
+                </div>
+                <div class="camera-status">
+                  <span class="status-dot online"></span>
+                  <span>在线</span>
+                </div>
+                <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px;">配置</button>
+              </div>
+              <div class="camera-item">
+                <div class="camera-icon">📷</div>
+                <div class="camera-info">
+                  <div class="camera-name">客厅摄像头</div>
+                  <div class="camera-meta">rtsp://192.168.1.101:554/stream | 720p</div>
+                </div>
+                <div class="camera-status">
+                  <span class="status-dot online"></span>
+                  <span>在线</span>
+                </div>
+                <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px;">配置</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="homeassistant-tab">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">Home Assistant 集成</div>
+            <span class="badge success">已连接</span>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label class="form-label">Home Assistant URL</label>
+              <input type="text" class="form-input" value="http://192.168.1.50:8123" placeholder="http://your-ha-server:8123">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">访问令牌</label>
+              <input type="password" class="form-input" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." placeholder="输入您的访问令牌">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">MQTT Broker</label>
+              <input type="text" class="form-input" value="mqtt://192.168.1.50:1883" placeholder="mqtt://your-broker:1883">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">MQTT 用户名</label>
+                <input type="text" class="form-input" value="homeassistant">
+              </div>
+              <div class="form-group">
+                <label class="form-label">MQTT 密码</label>
+                <input type="password" class="form-input" value="********">
+              </div>
+            </div>
+
+            <div class="switch-container">
+              <label class="form-label">启用MQTT连接</label>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-container">
+              <label class="form-label">启用Webhook推送</label>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="saveHASettings()">保存配置</button>
+              <button class="btn btn-secondary" onclick="testHAConnection()">测试连接</button>
+              <button class="btn btn-secondary" onclick="syncHADevices()">同步设备</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="system-tab">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">系统配置</div>
+          </div>
+          <div class="section-body">
+            <div class="form-group">
+              <label class="form-label">系统名称</label>
+              <input type="text" class="form-input" value="Smart Butler">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">时区设置</label>
+              <select class="form-input">
+                <option value="Asia/Shanghai" selected>Asia/Shanghai (UTC+8)</option>
+                <option value="America/New_York">America/New_York (UTC-5)</option>
+                <option value="Europe/London">Europe/London (UTC+0)</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">语言</label>
+                <select class="form-input">
+                  <option value="zh-CN" selected>简体中文</option>
+                  <option value="en-US">English</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">主题</label>
+                <select class="form-input">
+                  <option value="light" selected>亮色主题</option>
+                  <option value="dark">暗色主题</option>
+                  <option value="auto">跟随系统</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="switch-container">
+              <label class="form-label">启用自动更新</label>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-container">
+              <label class="form-label">启用系统日志</label>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="saveSystemSettings()">保存配置</button>
+              <button class="btn btn-secondary" onclick="restartSystem()">重启系统</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="backup-tab">
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">数据备份</div>
+          </div>
+          <div class="section-body">
+            <div class="switch-container">
+              <label class="form-label">启用自动备份</label>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">备份频率</label>
+              <select class="form-input">
+                <option value="daily" selected>每天</option>
+                <option value="weekly">每周</option>
+                <option value="monthly">每月</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">保留备份数量</label>
+              <input type="number" class="form-input" value="7" min="1" max="30">
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="createBackup()">立即备份</button>
+              <button class="btn btn-secondary" onclick="restoreBackup()">恢复备份</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">
+            <div class="section-title">备份历史</div>
+          </div>
+          <div class="section-body">
+            <div style="font-size: 13px; color: var(--text-secondary);">
+              <div style="padding: 12px; border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>backup_2026-02-03_143022.zip</span>
+                  <span>2.3 GB</span>
+                </div>
+                <div style="margin-top: 4px;">2026-02-03 14:30:22</div>
+              </div>
+              <div style="padding: 12px; border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>backup_2026-02-02_143015.zip</span>
+                  <span>2.3 GB</span>
+                </div>
+                <div style="margin-top: 4px;">2026-02-02 14:30:15</div>
+              </div>
+              <div style="padding: 12px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>backup_2026-02-01_143008.zip</span>
+                  <span>2.2 GB</span>
+                </div>
+                <div style="margin-top: 4px;">2026-02-01 14:30:08</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/script.js"></script>
+  <script>
+    function navigate(page) {
+      window.location.href = page + '.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      event.target.classList.add('active');
+      document.getElementById(tabName + '-tab').classList.add('active');
+    }
+
+    function saveAISettings() {
+      showNotification('AI配置已保存', 'success');
+    }
+
+    function testAIConnection() {
+      showNotification('正在测试连接...', 'info');
+      setTimeout(() => {
+        showNotification('连接成功', 'success');
+      }, 2000);
+    }
+
+    function saveVisionSettings() {
+      showNotification('视觉系统配置已保存', 'success');
+    }
+
+    function restartVisionSystem() {
+      if (confirm('确定要重启视觉监控系统吗？')) {
+        showNotification('正在重启视觉监控系统...', 'info');
+      }
+    }
+
+    function saveHASettings() {
+      showNotification('Home Assistant配置已保存', 'success');
+    }
+
+    function testHAConnection() {
+      showNotification('正在测试连接...', 'info');
+      setTimeout(() => {
+        showNotification('连接成功', 'success');
+      }, 2000);
+    }
+
+    function syncHADevices() {
+      showNotification('正在同步设备...', 'info');
+      setTimeout(() => {
+        showNotification('设备同步成功', 'success');
+      }, 2000);
+    }
+
+    function saveSystemSettings() {
+      showNotification('系统配置已保存', 'success');
+    }
+
+    function restartSystem() {
+      if (confirm('确定要重启系统吗？这将中断所有服务。')) {
+        showNotification('系统正在重启...', 'warning');
+      }
+    }
+
+    function createBackup() {
+      showNotification('正在创建备份...', 'info');
+      setTimeout(() => {
+        showNotification('备份创建成功', 'success');
+      }, 3000);
+    }
+
+    function restoreBackup() {
+      showNotification('恢复功能开发中...', 'info');
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+      `;
+
+      const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+      };
+
+      notification.style.borderLeft = `4px solid ${colors[type]}`;
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

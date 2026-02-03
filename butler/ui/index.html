@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧管家 - Smart Butler</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .landing-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .landing-hero {
+      text-align: center;
+      z-index: 1;
+      padding: 40px;
+    }
+
+    .landing-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 72px;
+      font-weight: 900;
+      background: var(--gradient-neon);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      animation: neon-flicker 2s infinite;
+    }
+
+    .landing-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 60px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+    }
+
+    .landing-ai-core {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 60px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .landing-ai-core::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--gradient-neon) 0%, transparent 70%);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .landing-ai-core::after {
+      content: '';
+      position: absolute;
+      width: 120%;
+      height: 120%;
+      border: 2px solid rgba(0, 245, 255, 0.3);
+      border-radius: 50%;
+      animation: spin 10s linear infinite;
+    }
+
+    .landing-ai-icon {
+      font-size: 80px;
+      position: relative;
+      z-index: 1;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .landing-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto 60px;
+      padding: 0 40px;
+    }
+
+    .landing-feature-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(30px);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: var(--radius-xl);
+      padding: 40px 30px;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .landing-feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-neon);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+
+    .landing-feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .landing-feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-glow);
+      border-color: var(--primary);
+    }
+
+    .landing-feature-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--gradient-neon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 24px;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .landing-feature-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .landing-feature-description {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .landing-cta {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 0 40px;
+    }
+
+    .landing-cta .btn-primary {
+      padding: 18px 48px;
+      font-size: 16px;
+    }
+
+    .landing-cta .btn-secondary {
+      padding: 18px 48px;
+      font-size: 16px;
+    }
+
+    .landing-footer {
+      position: absolute;
+      bottom: 30px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .landing-stats {
+      display: flex;
+      gap: 60px;
+      justify-content: center;
+      margin: 60px 0;
+      flex-wrap: wrap;
+      padding: 0 40px;
+    }
+
+    .landing-stat {
+      text-align: center;
+    }
+
+    .landing-stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      background: var(--gradient-neon);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .landing-stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .orbit-ring {
+      position: absolute;
+      border: 1px solid rgba(0, 245, 255, 0.1);
+      border-radius: 50%;
+      animation: orbit 20s linear infinite;
+    }
+
+    .orbit-ring:nth-child(1) {
+      width: 400px;
+      height: 400px;
+      animation-duration: 30s;
+    }
+
+    .orbit-ring:nth-child(2) {
+      width: 600px;
+      height: 600px;
+      animation-duration: 45s;
+      animation-direction: reverse;
+    }
+
+    .orbit-ring:nth-child(3) {
+      width: 800px;
+      height: 800px;
+      animation-duration: 60s;
+    }
+
+    @keyframes orbit {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .data-stream {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      opacity: 0.02;
+    }
+
+    .data-column {
+      position: absolute;
+      top: -100%;
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      color: var(--primary);
+      animation: data-fall 10s linear infinite;
+      text-align: center;
+      width: 30px;
+    }
+
+    @keyframes data-fall {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(200vh); }
+    }
+
+    .welcome-section {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--gradient-neon);
+    }
+
+    .welcome-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .welcome-text {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+      justify-content: center;
+    }
+
+    .tech-badge {
+      padding: 8px 20px;
+      background: var(--bg-glass);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .tech-badge:hover {
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="data-stream" id="data-stream"></div>
+  
+  <div class="particles" id="particles"></div>
+  
+  <div class="scan-line"></div>
+  
+  <div class="orbit-ring"></div>
+  <div class="orbit-ring"></div>
+  <div class="orbit-ring"></div>
+
+  <div class="landing-container">
+    <div class="landing-hero">
+      <div class="landing-logo">SMART BUTLER</div>
+      <div class="landing-subtitle">AI驱动的智能家居管家系统</div>
+      
+      <div class="landing-ai-core">
+        <div class="landing-ai-icon">🤖</div>
+      </div>
+
+      <div class="landing-stats">
+        <div class="landing-stat">
+          <div class="landing-stat-value">24</div>
+          <div class="landing-stat-label">运行天数</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat-value">98.5%</div>
+          <div class="landing-stat-label">识别准确率</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat-value">1,847</div>
+          <div class="landing-stat-label">处理事件</div>
+        </div>
+        <div class="landing-stat">
+          <div class="landing-stat-value">12</div>
+          <div class="landing-stat-label">在线设备</div>
+        </div>
+      </div>
+
+      <div class="landing-cta">
+        <button class="btn-primary" onclick="enterDashboard()">进入控制台</button>
+        <button class="btn-secondary" onclick="learnMore()">了解更多</button>
+      </div>
+    </div>
+
+    <div class="welcome-section">
+      <div class="welcome-title">欢迎来到智慧管家</div>
+      <div class="welcome-text">
+        智慧管家是一个基于人工智能的智能家居管理系统，集成了 GLM-4.7 大语言模型、YOLO 视觉识别、人脸识别、语音助手等先进技术，为您提供智能、便捷、安全的家居生活体验。
+        通过自然语言交互、视觉感知和自动化场景，让您的家变得更加智能。
+      </div>
+      <div class="tech-stack">
+        <div class="tech-badge">GLM-4.7 AI</div>
+        <div class="tech-badge">YOLO Vision</div>
+        <div class="tech-badge">Face Recognition</div>
+        <div class="tech-badge">Voice Assistant</div>
+        <div class="tech-badge">Home Assistant</div>
+        <div class="tech-badge">MQTT</div>
+        <div class="tech-badge">OpenClaw</div>
+      </div>
+    </div>
+
+    <div class="landing-features">
+      <div class="landing-feature-card">
+        <div class="landing-feature-icon">🧠</div>
+        <div class="landing-feature-title">GLM-4.7 AI引擎</div>
+        <div class="landing-feature-description">基于智谱AI GLM-4.7大语言模型，提供强大的自然语言理解和生成能力，支持语音交互和智能对话。</div>
+      </div>
+      <div class="landing-feature-card">
+        <div class="landing-feature-icon">👁️</div>
+        <div class="landing-feature-title">YOLO视觉系统</div>
+        <div class="landing-feature-description">集成YOLO目标检测算法，实时识别人员和物体，支持人脸识别和智能安防监控。</div>
+      </div>
+      <div class="landing-feature-card">
+        <div class="landing-feature-icon">🎤</div>
+        <div class="landing-feature-title">语音助手</div>
+        <div class="landing-feature-description">24小时语音待命，通过自然语言指令控制智能设备，提供个性化智能建议。</div>
+      </div>
+      <div class="landing-feature-card">
+        <div class="landing-feature-icon">🏠</div>
+        <div class="landing-feature-title">智能场景</div>
+        <div class="landing-feature-description">AI自动学习和创建智能场景，根据用户习惯自动调整家居环境，提供舒适便捷的生活体验。</div>
+      </div>
+      <div class="landing-feature-card">
+        <div class="landing-feature-icon">🔒</div>
+        <div class="landing-feature-title">智能安防</div>
+        <div class="landing-feature-description">全方位智能安防监控，实时检测异常情况，及时预警通知，保护家庭安全。</div>
+      </div>
+      <div class="landing-feature-card">
+        <div class="landing-feature-icon">🔗</div>
+        <div class="landing-feature-title">开放集成</div>
+        <div class="landing-feature-description">支持Home Assistant、MQTT等多种协议，可集成各类智能设备，打造完整的智能家居生态。</div>
+      </div>
+    </div>
+
+    <div class="landing-footer">
+      © 2026 智慧管家 Smart Butler - Powered by GLM-4.7 & OpenClaw
+    </div>
+  </div>
+
+  <script>
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    function createDataStream() {
+      const container = document.getElementById('data-stream');
+      const chars = '01アイウエオカキクケコ';
+      
+      for (let i = 0; i < 20; i++) {
+        const column = document.createElement('div');
+        column.className = 'data-column';
+        column.style.left = (i * 5) + '%';
+        column.style.animationDelay = Math.random() * 10 + 's';
+        
+        let text = '';
+        for (let j = 0; j < 50; j++) {
+          text += chars.charAt(Math.floor(Math.random() * chars.length)) + '<br>';
+        }
+        column.innerHTML = text;
+        
+        container.appendChild(column);
+      }
+    }
+
+    function enterDashboard() {
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.className = 'loading-overlay';
+      loadingOverlay.innerHTML = `
+        <div class="loading-logo">SMART BUTLER</div>
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在初始化AI引擎...</div>
+      `;
+      document.body.appendChild(loadingOverlay);
+      
+      const loadingTexts = [
+        '正在初始化AI引擎...',
+        '加载GLM-4.7模型...',
+        '启动YOLO视觉系统...',
+        '连接智能设备...',
+        '准备就绪!'
+      ];
+      
+      let textIndex = 0;
+      const textInterval = setInterval(() => {
+        textIndex++;
+        if (textIndex < loadingTexts.length) {
+          loadingOverlay.querySelector('.loading-text').textContent = loadingTexts[textIndex];
+        }
+      }, 800);
+      
+      setTimeout(() => {
+        clearInterval(textInterval);
+        window.location.href = 'dashboard.html';
+      }, 4000);
+    }
+
+    function learnMore() {
+      showNotification('正在打开项目文档...', 'info');
+      setTimeout(() => {
+        window.open('https://github.com/YOUR_USERNAME/smart-butler', '_blank');
+      }, 1000);
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '💡'}</span>
+        <span>${message}</span>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.classList.add('show'), 10);
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 400);
+      }, 3000);
+    }
+
+    function animateStats() {
+      const statValues = document.querySelectorAll('.landing-stat-value');
+      
+      statValues.forEach(stat => {
+        const text = stat.textContent;
+        const hasPercent = text.includes('%');
+        const hasComma = text.includes(',');
+        const value = parseFloat(text.replace(/[^0-9.]/g, ''));
+        
+        let current = 0;
+        const increment = value / 50;
+        const interval = setInterval(() => {
+          current += increment;
+          if (current >= value) {
+            current = value;
+            clearInterval(interval);
+          }
+          
+          let displayValue = current.toFixed(0);
+          if (hasPercent) displayValue += '%';
+          if (hasComma) displayValue = displayValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+          
+          stat.textContent = displayValue;
+        }, 30);
+      });
+    }
+
+    function typeWriter(element, text, speed = 50) {
+      let i = 0;
+      element.innerHTML = '';
+      
+      function type() {
+        if (i < text.length) {
+          element.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      
+      type();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createParticles();
+      createDataStream();
+      
+      setTimeout(() => {
+        animateStats();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

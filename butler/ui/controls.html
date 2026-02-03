@@ -1,1445 +1,493 @@
-﻿﻿<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>智慧管家 · 控制台</title>
-    <link rel="stylesheet" href="/assets/style.css" />
-  </head>
-  <body>
-    <header class="app-shell">
-      <div class="topbar">
-        <div class="brand">
-          <div class="eyebrow">Butler Studio</div>
-          <h1>智慧管家控制台</h1>
-          <p>场景触发 · 智能协作 · 安全管控</p>
-        </div>
-        <nav>
-          <a href="/dashboard">概览</a>
-          <a class="active" href="/controls">控制台</a>
-        </nav>
-      </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧管家 - 设备控制中心</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">DEVICE CONTROL</div>
+      <nav>
+        <a href="dashboard.html">AI核心</a>
+        <a href="controls.html" class="active">设备控制</a>
+        <a href="settings.html">设置</a>
+        <a href="logs.html">日志</a>
+        <a href="index.html">首页</a>
+      </nav>
     </header>
 
-    <main class="app-shell layout">
-      <section class="stack">
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">指挥中心</h3>
-              <p class="panel-subtitle">快速演练、巡航和安全指令入口。</p>
+    <div class="tabs">
+      <button class="tab active" data-tab="devices">智能设备</button>
+      <button class="tab" data-tab="scenes">场景控制</button>
+      <button class="tab" data-tab="automation">AI自动化</button>
+      <button class="tab" data-tab="ir">红外遥控</button>
+    </div>
+
+    <div id="tab-devices" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">设备分类</div>
+          <button class="btn-primary">添加设备</button>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">照明系统</div>
+          <div class="device-grid">
+            <div class="device-card active" onclick="toggleDevice(this, 'light')">
+              <div class="device-icon">💡</div>
+              <div class="device-name">客厅主灯</div>
+              <div class="device-status">亮度 80%</div>
             </div>
-            <span class="chip">Quick Actions</span>
-          </div>
-          <div class="grid two-col">
-            <div class="stack">
-              <div class="scene-grid">
-                <article class="scene-card">
-                  <div class="scene-icon">入户</div>
-                  <h3>模拟入户</h3>
-                  <p>触发入户识别与通知链路</p>
-                  <div class="scene-actions">
-                    <button class="secondary" onclick="sendCommand('simulate_entry')">触发</button>
-                  </div>
-                </article>
-                <article class="scene-card">
-                  <div class="scene-icon">钥匙</div>
-                  <h3>寻找钥匙</h3>
-                  <p>调用视觉识别与通知能力</p>
-                  <div class="scene-actions">
-                    <button class="secondary" onclick="sendCommand('find_keys')">触发</button>
-                  </div>
-                </article>
-                <article class="scene-card">
-                  <div class="scene-icon">跌倒</div>
-                  <h3>模拟跌倒</h3>
-                  <p>演练关怀与应急流程</p>
-                  <div class="scene-actions">
-                    <button class="secondary" onclick="sendCommand('simulate_fall')">触发</button>
-                  </div>
-                </article>
-                <article class="scene-card">
-                  <div class="scene-icon">入侵</div>
-                  <h3>模拟入侵</h3>
-                  <p>高危告警流程演练</p>
-                  <div class="scene-actions">
-                    <button class="secondary" onclick="sendCommand('simulate_intrusion')">触发</button>
-                  </div>
-                </article>
-                <article class="scene-card">
-                  <div class="scene-icon">镜头</div>
-                  <h3>镜头对准入口</h3>
-                  <p>PTZ 入口预置位</p>
-                  <div class="scene-actions">
-                    <button class="secondary" onclick="sendCommand('ptz_goto_preset')">执行</button>
-                  </div>
-                </article>
-                <article class="scene-card">
-                  <div class="scene-icon">巡航</div>
-                  <h3>巡航任务</h3>
-                  <p>启动预设巡航轨迹</p>
-                  <div class="scene-actions">
-                    <button class="secondary" onclick="sendCommand('ptz_patrol')">开始</button>
-                    <button class="ghost" onclick="sendCommand('ptz_stop')">停止</button>
-                  </div>
-                </article>
-              </div>
-
-              <details class="details">
-                <summary>场景库</summary>
-                <div id="sceneList" class="data-list" style="margin-top: 12px;"></div>
-              </details>
+            <div class="device-card active" onclick="toggleDevice(this, 'light')">
+              <div class="device-icon">💡</div>
+              <div class="device-name">卧室灯</div>
+              <div class="device-status">亮度 50%</div>
             </div>
-
-            <div class="stack">
-              <div class="data-item">
-                <div class="data-title">
-                  <strong>隐私模式</strong>
-                  <span id="privacyChip" class="chip">--</span>
-                </div>
-                <p class="status" id="privacyHint">正在读取隐私状态...</p>
-                <div class="button-row">
-                  <button class="secondary" id="privacyButton" onclick="togglePrivacy()">
-                    切换隐私
-                  </button>
-                </div>
-              </div>
-
-              <div class="data-item">
-                <div class="data-title">
-                  <strong>自然语言目标</strong>
-                  <span class="badge ok">Goals</span>
-                </div>
-                <div class="field">
-                  <label for="goalInput">目标描述</label>
-                  <input
-                    id="goalInput"
-                    type="text"
-                    placeholder="例如：我想睡了 / 我想做饭 / 我想看电影"
-                  />
-                </div>
-                <div class="button-row">
-                  <button class="secondary" onclick="executeGoal()">执行目标</button>
-                  <button class="ghost" onclick="listGoals()">查看可用目标</button>
-                </div>
-                <p class="status" id="goalStatus">等待输入...</p>
-              </div>
-
-              <div class="data-item">
-                <div class="data-title">
-                  <strong>命令状态</strong>
-                  <span class="badge ok">UI</span>
-                </div>
-                <p class="status" id="statusText">等待操作...</p>
-                <p class="mono" id="commandTopic">butler/in/command</p>
-              </div>
+            <div class="device-card" onclick="toggleDevice(this, 'light')">
+              <div class="device-icon">💡</div>
+              <div class="device-name">厨房灯</div>
+              <div class="device-status">已关闭</div>
+            </div>
+            <div class="device-card active" onclick="toggleDevice(this, 'light')">
+              <div class="device-icon">🌈</div>
+              <div class="device-name">氛围灯</div>
+              <div class="device-status">RGB模式</div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">智能大脑控制台</h3>
-              <p class="panel-subtitle">
-                自然语言指令 + 多模态上下文，支持规划或执行。
-              </p>
+        <div class="section">
+          <div class="section-title">环境控制</div>
+          <div class="device-grid">
+            <div class="device-card active" onclick="toggleDevice(this, 'climate')">
+              <div class="device-icon">🌡️</div>
+              <div class="device-name">智能空调</div>
+              <div class="device-status">制冷 24°C</div>
             </div>
-            <span class="chip">Brain Console</span>
-          </div>
-          <div class="grid two-col">
-            <div>
-              <div class="field">
-                <label for="brainText">指令</label>
-                <textarea id="brainText" placeholder="例如：打开客厅灯并通知我"></textarea>
-              </div>
-              <div class="button-row">
-                <button class="ghost" onclick="callBrain('plan')">只规划</button>
-                <button class="secondary" onclick="callBrain('act')">规划并执行</button>
-              </div>
-              <p class="status" id="brainStatus" style="margin-top: 10px;">等待输入...</p>
-
-              <details class="details">
-                <summary>高级上下文</summary>
-                <div class="field" style="margin-top: 12px;">
-                  <label for="brainContext">上下文（JSON，可选）</label>
-                  <textarea
-                    id="brainContext"
-                    placeholder='{"room":"客厅","user":"Richard"}'
-                  ></textarea>
-                </div>
-                <div class="field">
-                  <label for="brainImages">图片（URL 或 Base64，可多行）</label>
-                  <textarea id="brainImages" placeholder="https://example.com/a.jpg"></textarea>
-                </div>
-                <div class="field">
-                  <label>
-                    <input type="checkbox" id="brainCache" checked />
-                    使用缓存
-                  </label>
-                </div>
-              </details>
+            <div class="device-card active" onclick="toggleDevice(this, 'climate')">
+              <div class="device-icon">💨</div>
+              <div class="device-name">空气净化器</div>
+              <div class="device-status">自动模式</div>
             </div>
-
-            <div class="stack">
-              <div class="data-item">
-                <div class="data-title">
-                  <strong>行动清单</strong>
-                </div>
-                <div class="tag-row" id="brainPlanActions">
-                  <span class="tag">暂无</span>
-                </div>
-              </div>
-              <div class="data-item">
-                <div class="data-title">
-                  <strong>执行反馈</strong>
-                </div>
-                <div class="tag-row" id="brainResultSummary">
-                  <span class="tag">暂无</span>
-                </div>
-              </div>
-              <div class="data-item">
-                <div class="data-title">
-                  <strong>视觉摘要</strong>
-                </div>
-                <div class="tag-row" id="brainVisionSummary">
-                  <span class="tag">暂无</span>
-                </div>
-              </div>
-              <div class="data-item">
-                <div class="data-title">
-                  <strong>决策轨迹</strong>
-                </div>
-                <div id="brainTrace" class="data-list"></div>
-              </div>
+            <div class="device-card active" onclick="toggleDevice(this, 'climate')">
+              <div class="device-icon">💧</div>
+              <div class="device-name">智能加湿器</div>
+              <div class="device-status">湿度 55%</div>
             </div>
           </div>
+        </div>
 
-          <details class="details">
-            <summary>查看原始 JSON</summary>
-            <pre class="output code" id="brainOutput">暂无</pre>
-          </details>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">设备控制中心</h3>
-              <p class="panel-subtitle">统一控制虚拟设备、HA 设备与红外设备。</p>
+        <div class="section">
+          <div class="section-title">影音娱乐</div>
+          <div class="device-grid">
+            <div class="device-card" onclick="toggleDevice(this, 'media')">
+              <div class="device-icon">📺</div>
+              <div class="device-name">智能电视</div>
+              <div class="device-status">已关闭</div>
             </div>
-            <span class="chip">Device Hub</span>
-          </div>
-          <div class="grid two-col">
-            <div>
-              <div class="field">
-                <label for="deviceId">设备 ID</label>
-                <input id="deviceId" type="text" placeholder="例如：light_living_room" />
-              </div>
-              <div class="button-row">
-                <button class="secondary" onclick="deviceTurnOn()">开启</button>
-                <button class="ghost" onclick="deviceTurnOff()">关闭</button>
-                <button class="ghost" onclick="deviceToggle()">切换</button>
-              </div>
-
-              <div class="field">
-                <label for="deviceBrightness">亮度 (0-255)</label>
-                <input id="deviceBrightness" type="number" min="0" max="255" value="255" />
-              </div>
-              <div class="button-row">
-                <button class="secondary" onclick="setBrightness()">设置亮度</button>
-              </div>
-
-              <div class="field">
-                <label for="deviceTemperature">温度 (°C)</label>
-                <input id="deviceTemperature" type="number" min="16" max="30" step="0.5" value="22" />
-              </div>
-              <div class="button-row">
-                <button class="secondary" onclick="setTemperature()">设置温度</button>
-              </div>
-
-              <div class="button-row">
-                <button class="ghost" onclick="getDeviceState()">读取状态</button>
-              </div>
+            <div class="device-card active" onclick="toggleDevice(this, 'media')">
+              <div class="device-icon">🔊</div>
+              <div class="device-name">音响系统</div>
+              <div class="device-status">播放中</div>
             </div>
-
-            <div class="stack">
-              <details class="details">
-                <summary>HVAC / 模式</summary>
-                <div class="field" style="margin-top: 12px;">
-                  <label for="deviceHvacMode">空调模式</label>
-                  <select id="deviceHvacMode">
-                    <option value="auto">auto</option>
-                    <option value="cool">cool</option>
-                    <option value="heat">heat</option>
-                    <option value="dry">dry</option>
-                    <option value="fan_only">fan_only</option>
-                    <option value="off">off</option>
-                  </select>
-                </div>
-                <div class="button-row">
-                  <button class="secondary" onclick="setHvacMode()">设置模式</button>
-                </div>
-              </details>
-
-              <details class="details">
-                <summary>窗帘 / 遮罩</summary>
-                <div class="button-row" style="margin-top: 12px;">
-                  <button class="secondary" onclick="openCover()">打开</button>
-                  <button class="ghost" onclick="closeCover()">关闭</button>
-                </div>
-              </details>
-
-              <details class="details">
-                <summary>媒体控制</summary>
-                <div class="field" style="margin-top: 12px;">
-                  <label for="deviceMediaId">媒体内容 ID</label>
-                  <input id="deviceMediaId" type="text" placeholder="spotify:track:..." />
-                </div>
-                <div class="field">
-                  <label for="deviceMediaType">媒体类型</label>
-                  <input id="deviceMediaType" type="text" value="music" />
-                </div>
-                <div class="button-row">
-                  <button class="secondary" onclick="playMedia()">播放媒体</button>
-                  <button class="ghost" onclick="pauseMedia()">暂停</button>
-                  <button class="ghost" onclick="stopMedia()">停止</button>
-                </div>
-              </details>
-
-              <pre class="output code" id="deviceOutput">暂无</pre>
+            <div class="device-card active" onclick="toggleDevice(this, 'media')">
+              <div class="device-icon">🎬</div>
+              <div class="device-name">投影仪</div>
+              <div class="device-status">影院模式</div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">红外控制</h3>
-              <p class="panel-subtitle">发送或学习红外遥控指令。</p>
+        <div class="section">
+          <div class="section-title">安防监控</div>
+          <div class="device-grid">
+            <div class="device-card active" onclick="toggleDevice(this, 'security')">
+              <div class="device-icon">📷</div>
+              <div class="device-name">门口摄像头</div>
+              <div class="device-status">录制中</div>
             </div>
-            <span class="chip">IR Control</span>
-          </div>
-          <div class="grid two-col">
-            <div>
-              <div class="field">
-                <label for="irDeviceId">IR 设备 ID</label>
-                <input id="irDeviceId" type="text" placeholder="例如：ir_tv" />
-              </div>
-              <div class="field">
-                <label for="irCommand">指令名称</label>
-                <input id="irCommand" type="text" placeholder="power_on" />
-              </div>
-              <div class="button-row">
-                <button class="secondary" onclick="sendIRCommand()">发送指令</button>
-              </div>
+            <div class="device-card active" onclick="toggleDevice(this, 'security')">
+              <div class="device-icon">🚪</div>
+              <div class="device-name">智能门锁</div>
+              <div class="device-status">已锁定</div>
             </div>
-            <div>
-              <div class="field">
-                <label for="irLearnName">学习指令名称</label>
-                <input id="irLearnName" type="text" placeholder="volume_up" />
-              </div>
-              <div class="field">
-                <label for="irDuration">学习时长 (秒)</label>
-                <input id="irDuration" type="number" min="1" step="0.5" value="5" />
-              </div>
-              <div class="button-row">
-                <button class="secondary" onclick="learnIRCommand()">学习指令</button>
-              </div>
+            <div class="device-card active" onclick="toggleDevice(this, 'security')">
+              <div class="device-icon">🔔</div>
+              <div class="device-name">智能门铃</div>
+              <div class="device-status">在线</div>
+            </div>
+            <div class="device-card active" onclick="toggleDevice(this, 'security')">
+              <div class="device-icon">📡</div>
+              <div class="device-name">传感器组</div>
+              <div class="device-status">4个在线</div>
             </div>
           </div>
-          <pre class="output code" id="irOutput">暂无</pre>
-        </section>
+        </div>
 
-        <section class="grid two-col">
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <h3 class="panel-title">语音工具</h3>
-                <p class="panel-subtitle">语音转写、唤醒检测、声纹管理。</p>
-              </div>
-              <span class="chip">Voice</span>
+        <div class="section">
+          <div class="section-title">窗帘窗户</div>
+          <div class="device-grid">
+            <div class="device-card" onclick="toggleDevice(this, 'curtain')">
+              <div class="device-icon">🪟</div>
+              <div class="device-name">客厅窗帘</div>
+              <div class="device-status">已关闭</div>
             </div>
-            <div class="field">
-              <label>麦克风录音</label>
-              <div class="button-row">
-                <button class="secondary" onclick="startRecording()">开始录音</button>
-                <button class="ghost" onclick="stopRecording()">停止录音</button>
-              </div>
-              <p class="status" id="voiceRecordStatus">未开始录音</p>
-              <audio id="voicePreview" controls></audio>
-            </div>
-            <div class="field">
-              <label for="voiceAudio">音频（Base64 / URL / 本地路径）</label>
-              <textarea id="voiceAudio" placeholder="Base64 或 https://..."></textarea>
-            </div>
-            <div class="field">
-              <label for="voiceLabel">声纹标签（可选）</label>
-              <input id="voiceLabel" type="text" placeholder="例如：主人" />
-            </div>
-            <div class="field">
-              <label for="voicePrintId">声纹 ID（可选）</label>
-              <input id="voicePrintId" type="text" placeholder="voiceprint-id" />
-            </div>
-            <div class="button-row">
-              <button class="secondary" onclick="voiceTranscribe()">语音转写</button>
-              <button class="ghost" onclick="voiceWake()">唤醒检测</button>
-              <button onclick="voiceEnroll()">录入声纹</button>
-              <button class="ghost" onclick="voiceVerify()">比对声纹</button>
-            </div>
-            <pre class="output code" id="voiceOutput">暂无</pre>
-          </section>
-
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <h3 class="panel-title">视觉实验室</h3>
-                <p class="panel-subtitle">上传图片进行目标检测和人脸识别。</p>
-              </div>
-              <span class="chip">Vision</span>
-            </div>
-            <div class="field">
-              <label for="visionImage">图片</label>
-              <input id="visionImage" type="file" accept="image/*" />
-            </div>
-            <div class="field">
-              <label for="visionLabel">人脸标签（入库/验证）</label>
-              <input id="visionLabel" type="text" placeholder="Alice" />
-            </div>
-            <div class="button-row">
-              <button onclick="visionDetectObjects()">目标检测</button>
-              <button class="ghost" onclick="visionDetectFaces()">人脸检测</button>
-              <button class="secondary" onclick="visionEnrollFace()">人脸入库</button>
-              <button class="secondary" onclick="visionVerifyFace()">身份验证</button>
-            </div>
-            <p class="status" id="visionStatus">等待图片...</p>
-            <pre class="output code" id="visionOutput">暂无</pre>
-          </section>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">网络工具</h3>
-              <p class="panel-subtitle">联网搜索与网关请求。</p>
-            </div>
-            <span class="chip">Network</span>
-          </div>
-          <div class="grid two-col">
-            <div>
-              <div class="field">
-                <label for="searchQuery">联网搜索</label>
-                <input id="searchQuery" type="text" placeholder="输入搜索关键词" />
-              </div>
-              <div class="button-row">
-                <button class="secondary" onclick="webSearch()">搜索</button>
-              </div>
-              <pre class="output code" id="searchOutput">暂无</pre>
-            </div>
-            <div>
-              <div class="field">
-                <label for="gatewayMethod">网关方法</label>
-                <input id="gatewayMethod" type="text" value="GET" />
-              </div>
-              <div class="field">
-                <label for="gatewayPath">网关路径</label>
-                <input id="gatewayPath" type="text" placeholder="/device/123/status" />
-              </div>
-              <div class="field">
-                <label for="gatewayBody">请求体 JSON（可选）</label>
-                <textarea id="gatewayBody" placeholder='{"power":"on"}'></textarea>
-              </div>
-              <div class="button-row">
-                <button class="secondary" onclick="gatewayRequest()">发送请求</button>
-              </div>
-              <pre class="output code" id="gatewayOutput">暂无</pre>
+            <div class="device-card" onclick="toggleDevice(this, 'curtain')">
+              <div class="device-icon">🪟</div>
+              <div class="device-name">卧室窗帘</div>
+              <div class="device-status">已关闭</div>
             </div>
           </div>
-        </section>
+        </div>
+      </div>
+    </div>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">规则工作台</h3>
-              <p class="panel-subtitle">规则优先于 LLM，用于确定性策略。</p>
-            </div>
-            <span class="chip">Rule Studio</span>
+    <div id="tab-scenes" class="tab-content" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">场景控制</div>
+          <button class="btn-primary">创建场景</button>
+        </div>
+        
+        <div class="scene-grid">
+          <div class="scene-card active" onclick="activateScene(this, 'home')">
+            <div class="scene-icon">🏠</div>
+            <div class="scene-name">回家模式</div>
+            <div class="scene-description">AI自动识别并激活</div>
           </div>
-          <p class="status" id="ruleStatus">规则未加载</p>
-          <details class="details">
-            <summary>打开规则编辑器</summary>
-            <div class="field" style="margin-top: 12px;">
-              <label for="ruleJson">规则 JSON</label>
-              <textarea id="ruleJson" placeholder="[]"></textarea>
-            </div>
-            <div class="field">
-              <label>
-                <input type="checkbox" id="rulePersist" />
-                保存到配置文件
+          <div class="scene-card" onclick="activateScene(this, 'away')">
+            <div class="scene-icon">🚪</div>
+            <div class="scene-name">离家模式</div>
+            <div class="scene-description">全屋智能安防开启</div>
+          </div>
+          <div class="scene-card" onclick="activateScene(this, 'morning')">
+            <div class="scene-icon">🌅</div>
+            <div class="scene-name">晨间模式</div>
+            <div class="scene-description">自动唤醒系统</div>
+          </div>
+          <div class="scene-card" onclick="activateScene(this, 'evening')">
+            <div class="scene-icon">🌙</div>
+            <div class="scene-name">晚间模式</div>
+            <div class="scene-description">智能调光与节能</div>
+          </div>
+          <div class="scene-card" onclick="activateScene(this, 'cinema')">
+            <div class="scene-icon">🎬</div>
+            <div class="scene-name">影院模式</div>
+            <div class="scene-description">沉浸式观影体验</div>
+          </div>
+          <div class="scene-card" onclick="activateScene(this, 'music')">
+            <div class="scene-icon">🎵</div>
+            <div class="scene-name">音乐模式</div>
+            <div class="scene-description">氛围灯光配合音乐</div>
+          </div>
+          <div class="scene-card" onclick="activateScene(this, 'reading')">
+            <div class="scene-icon">📚</div>
+            <div class="scene-name">阅读模式</div>
+            <div class="scene-description">舒适阅读光线</div>
+          </div>
+          <div class="scene-card" onclick="activateScene(this, 'sleep')">
+            <div class="scene-icon">😴</div>
+            <div class="scene-name">睡眠模式</div>
+            <div class="scene-description">智能调光与静音</div>
+          </div>
+          <div class="scene-card" onclick="activateScene(this, 'party')">
+            <div class="scene-icon">🎉</div>
+            <div class="scene-name">派对模式</div>
+            <div class="scene-description">RGB灯光与音乐同步</div>
+          </div>
+          <div class="scene-card" onclick="activateScene(this, 'security')">
+            <div class="scene-icon">🔒</div>
+            <div class="scene-name">安防模式</div>
+            <div class="scene-description">全面监控开启</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-automation" class="tab-content" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">AI智能自动化</div>
+          <button class="btn-primary">添加规则</button>
+        </div>
+
+        <div class="section">
+          <div class="card" style="margin-bottom: 20px; border-left: 3px solid var(--accent);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div style="font-weight: 700; font-size: 16px;">人脸识别开灯</div>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
               </label>
             </div>
-            <div class="button-row">
-              <button class="secondary" onclick="loadRules()">加载规则</button>
-              <button onclick="saveRules()">保存规则</button>
+            <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">
+              YOLO视觉系统检测到家庭成员回家时，GLM-4.7 AI自动分析并开启客厅灯光
             </div>
-          </details>
-        </section>
-      </section>
-
-      <aside class="stack sticky">
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">系统信号</h3>
-              <p class="panel-subtitle">模式、隐私与轮询状态。</p>
-            </div>
-            <span class="chip">Live</span>
-          </div>
-          <div class="kpi-grid" style="margin-top: 0;">
-            <div class="kpi-card">
-              <span class="kpi-label">事件</span>
-              <span class="kpi-value" id="statEvents">--</span>
-              <span class="status">最近 10 条</span>
-            </div>
-            <div class="kpi-card">
-              <span class="kpi-label">计划</span>
-              <span class="kpi-value" id="statPlans">--</span>
-              <span class="status">策略输出</span>
-            </div>
-            <div class="kpi-card">
-              <span class="kpi-label">结果</span>
-              <span class="kpi-value" id="statResults">--</span>
-              <span class="status">执行反馈</span>
-            </div>
-            <div class="kpi-card">
-              <span class="kpi-label">调度</span>
-              <span class="kpi-value" id="statSchedules">--</span>
-              <span class="status">待执行</span>
+            <div style="display: flex; gap: 10px;">
+              <span class="badge success">已启用</span>
+              <span class="badge info">触发 23 次</span>
             </div>
           </div>
-          <div class="separator"></div>
-          <div class="data-list">
-            <div class="data-item">
-              <div class="data-title">
-                <strong>模式</strong>
-                <span class="badge ok">状态</span>
-              </div>
-              <div class="data-meta" id="modeSignal">模式: --</div>
+
+          <div class="card" style="margin-bottom: 20px; border-left: 3px solid var(--accent);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div style="font-weight: 700; font-size: 16px;">温度自动调节</div>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
             </div>
-            <div class="data-item">
-              <div class="data-title">
-                <strong>隐私</strong>
-                <span class="badge ok">状态</span>
-              </div>
-              <div class="data-meta" id="privacySignal">隐私: --</div>
+            <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">
+              当室内温度超过28°C时，AI自动控制空调开启制冷模式
             </div>
-            <div class="data-item">
-              <div class="data-title">
-                <strong>轮询</strong>
-                <span class="badge ok">间隔</span>
-              </div>
-              <div class="data-meta" id="pollSignal">--</div>
+            <div style="display: flex; gap: 10px;">
+              <span class="badge success">已启用</span>
+              <span class="badge info">触发 5 次</span>
             </div>
           </div>
-        </section>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">实时动态</h3>
-              <p class="panel-subtitle">整合事件、计划、结果与调度。</p>
+          <div class="card" style="margin-bottom: 20px; border-left: 3px solid var(--orange);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div style="font-weight: 700; font-size: 16px;">夜间自动关灯</div>
+              <label class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+              </label>
             </div>
-            <span class="chip">Live Feed</span>
-          </div>
-          <div class="section-row" id="feedFilters">
-            <button class="filter-button active" data-filter="all">全部</button>
-            <button class="filter-button" data-filter="event">事件</button>
-            <button class="filter-button" data-filter="plan">计划</button>
-            <button class="filter-button" data-filter="result">结果</button>
-            <button class="filter-button" data-filter="schedule">调度</button>
-          </div>
-          <div class="button-row" style="margin-top: 10px;">
-            <button class="ghost" onclick="loadLogs()">刷新动态</button>
-            <button class="ghost" onclick="loadCapabilities()">加载能力</button>
-          </div>
-          <div id="activityFeed" class="feed" style="margin-top: 12px;"></div>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <h3 class="panel-title">能力清单</h3>
-              <p class="panel-subtitle">当前可调用的动作类型。</p>
+            <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">
+              晚上23:00时，AI自动关闭所有灯光设备
             </div>
-            <span class="chip">Capabilities</span>
+            <div style="display: flex; gap: 10px;">
+              <span class="badge warning">已禁用</span>
+            </div>
           </div>
-          <div id="brainCaps" class="caps-grid"></div>
-        </section>
-      </aside>
-    </main>
 
-    <footer class="app-shell footer">控制台已就绪。</footer>
-
-    <script>
-      const statusText = document.getElementById("statusText");
-      const modeSignal = document.getElementById("modeSignal");
-      const privacySignal = document.getElementById("privacySignal");
-      const pollSignal = document.getElementById("pollSignal");
-      const commandTopic = document.getElementById("commandTopic");
-      const privacyChip = document.getElementById("privacyChip");
-      const privacyHint = document.getElementById("privacyHint");
-      const privacyButton = document.getElementById("privacyButton");
-      const goalStatus = document.getElementById("goalStatus");
-      const brainStatus = document.getElementById("brainStatus");
-      const brainPlanActions = document.getElementById("brainPlanActions");
-      const brainResultSummary = document.getElementById("brainResultSummary");
-      const brainVisionSummary = document.getElementById("brainVisionSummary");
-      const brainTrace = document.getElementById("brainTrace");
-      const brainOutput = document.getElementById("brainOutput");
-      const activityFeed = document.getElementById("activityFeed");
-      const brainCaps = document.getElementById("brainCaps");
-      const sceneList = document.getElementById("sceneList");
-      const statEvents = document.getElementById("statEvents");
-      const statPlans = document.getElementById("statPlans");
-      const statResults = document.getElementById("statResults");
-      const statSchedules = document.getElementById("statSchedules");
-
-      const voiceAudio = document.getElementById("voiceAudio");
-      const voiceLabel = document.getElementById("voiceLabel");
-      const voicePrintId = document.getElementById("voicePrintId");
-      const voiceOutput = document.getElementById("voiceOutput");
-      const voiceRecordStatus = document.getElementById("voiceRecordStatus");
-      const voicePreview = document.getElementById("voicePreview");
-      const visionImage = document.getElementById("visionImage");
-      const visionLabel = document.getElementById("visionLabel");
-      const visionStatus = document.getElementById("visionStatus");
-      const visionOutput = document.getElementById("visionOutput");
-      const searchQuery = document.getElementById("searchQuery");
-      const searchOutput = document.getElementById("searchOutput");
-      const gatewayMethod = document.getElementById("gatewayMethod");
-      const gatewayPath = document.getElementById("gatewayPath");
-      const gatewayBody = document.getElementById("gatewayBody");
-      const gatewayOutput = document.getElementById("gatewayOutput");
-      const ruleJson = document.getElementById("ruleJson");
-      const rulePersist = document.getElementById("rulePersist");
-      const ruleStatus = document.getElementById("ruleStatus");
-
-      let privacyEnabled = false;
-      let cachedFeed = [];
-      let currentFilter = "all";
-      let mediaRecorder = null;
-      let recordedChunks = [];
-      let currentStream = null;
-
-      const fetchJson = async (path, options) => {
-        try {
-          const res = await fetch(path, options);
-          const data = await res.json();
-          if (!res.ok) {
-            throw new Error(data.error || res.statusText);
-          }
-          return data;
-        } catch (err) {
-          console.warn("Request failed:", path, err);
-          return null;
-        }
-      };
-
-      const formatTs = (ts) => {
-        if (!ts) return "未知";
-        return new Date(ts * 1000).toLocaleString();
-      };
-
-      const shorten = (value, limit = 60) => {
-        if (!value) return "";
-        const text = String(value);
-        return text.length > limit ? `${text.slice(0, limit)}...` : text;
-      };
-
-      const parseJsonOptional = (value) => {
-        if (!value) return null;
-        try {
-          return JSON.parse(value);
-        } catch (err) {
-          throw new Error("JSON 格式无效");
-        }
-      };
-
-      const createTag = (label) => {
-        const tag = document.createElement("span");
-        tag.className = "tag";
-        tag.textContent = label;
-        return tag;
-      };
-
-      const updatePrivacyUI = () => {
-        const label = privacyEnabled ? "开启" : "关闭";
-        privacyChip.textContent = `隐私 ${label}`;
-        privacyChip.className = privacyEnabled ? "chip alert" : "chip";
-        privacyHint.textContent = privacyEnabled
-          ? "隐私模式开启，摄像头动作已阻断。"
-          : "隐私模式关闭，摄像头动作可用。";
-        privacyButton.textContent = privacyEnabled ? "关闭隐私" : "开启隐私";
-        privacySignal.textContent = `隐私: ${label}`;
-      };
-
-      const loadState = async () => {
-        const data = await fetchJson("/api/state");
-        if (!data) return;
-        privacyEnabled = Boolean(data.privacy_mode);
-        updatePrivacyUI();
-        modeSignal.textContent = `模式: ${data.mode || "未知"}`;
-      };
-
-      const sendCommand = async (commandType, payload = {}) => {
-        statusText.textContent = `发送指令: ${commandType}`;
-        const result = await fetchJson("/api/command", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ command_type: commandType, payload }),
-        });
-        if (!result) {
-          statusText.textContent = "指令发送失败";
-        } else {
-          statusText.textContent = `指令已发送: ${commandType}`;
-        }
-        return result;
-      };
-
-      const togglePrivacy = async () => {
-        const desired = !privacyEnabled;
-        const result = await sendCommand("privacy_toggle", { enabled: desired });
-        if (result?.status === "ok") {
-          privacyEnabled = desired;
-          updatePrivacyUI();
-        }
-      };
-
-      const buildFeed = (data, schedules) => {
-        const feed = [];
-        (data.events || []).forEach((event) => {
-          feed.push({
-            kind: "event",
-            ts: event.ts,
-            title: event.type,
-            meta: `${event.source} · ${formatTs(event.ts)}`,
-            summary: shorten(JSON.stringify(event.payload || {}), 80),
-          });
-        });
-        (data.plans || []).forEach((plan) => {
-          feed.push({
-            kind: "plan",
-            ts: plan.created_ts,
-            title: plan.policy || "计划",
-            meta: formatTs(plan.created_ts),
-            summary: plan.reason || "策略输出",
-          });
-        });
-        (data.results || []).forEach((result) => {
-          feed.push({
-            kind: "result",
-            ts: result.ts,
-            title: result.action_type || "结果",
-            meta: `${result.status || "status"} · ${formatTs(result.ts)}`,
-            summary: shorten(JSON.stringify(result.output || {}), 80),
-          });
-        });
-        (schedules || []).forEach((schedule) => {
-          feed.push({
-            kind: "schedule",
-            ts: schedule.run_at,
-            title: schedule.note || "调度任务",
-            meta: `执行时间: ${formatTs(schedule.run_at)}`,
-            summary: `动作 ${schedule.actions?.length || 0}`,
-          });
-        });
-        feed.sort((a, b) => (b.ts || 0) - (a.ts || 0));
-        return feed;
-      };
-
-      const renderFeed = () => {
-        activityFeed.replaceChildren();
-        const filtered = cachedFeed.filter((item) =>
-          currentFilter === "all" ? true : item.kind === currentFilter
-        );
-        if (!filtered.length) {
-          const empty = document.createElement("div");
-          empty.className = "data-item";
-          empty.textContent = "暂无动态";
-          activityFeed.appendChild(empty);
-          return;
-        }
-
-        filtered.slice(0, 12).forEach((item) => {
-          const card = document.createElement("div");
-          card.className = "feed-item";
-          card.dataset.kind = item.kind;
-
-          const titleRow = document.createElement("div");
-          titleRow.className = "data-title";
-
-          const title = document.createElement("strong");
-          title.textContent = item.title;
-
-          const badge = document.createElement("span");
-          badge.className = "badge ok";
-          badge.textContent = item.kind;
-
-          titleRow.appendChild(title);
-          titleRow.appendChild(badge);
-
-          const meta = document.createElement("div");
-          meta.className = "data-meta";
-          meta.textContent = item.meta;
-
-          const summary = document.createElement("div");
-          summary.className = "tag-row";
-          summary.appendChild(createTag(item.summary || "--"));
-
-          card.appendChild(titleRow);
-          card.appendChild(meta);
-          card.appendChild(summary);
-          activityFeed.appendChild(card);
-        });
-      };
-
-      const loadLogs = async () => {
-        const data = await fetchJson("/api/dashboard");
-        const sched = await fetchJson("/api/schedules");
-        if (!data) return;
-        statEvents.textContent = (data.events || []).length;
-        statPlans.textContent = (data.plans || []).length;
-        statResults.textContent = (data.results || []).length;
-        statSchedules.textContent = (sched?.due || []).length;
-        cachedFeed = buildFeed(data, sched?.due || []);
-        renderFeed();
-      };
-
-      const loadCapabilities = async () => {
-        const data = await fetchJson("/api/brain/capabilities");
-        brainCaps.replaceChildren();
-        if (!data) {
-          brainCaps.appendChild(createTag("加载失败"));
-          return;
-        }
-        const actions = data.action_catalog || [];
-        if (!actions.length) {
-          brainCaps.appendChild(createTag("暂无"));
-          return;
-        }
-        actions.slice(0, 24).forEach((action) => {
-          const chip = document.createElement("span");
-          chip.className = "cap-chip";
-          chip.textContent = action.action_type || "action";
-          chip.title = JSON.stringify(action.params || {}, null, 0);
-          brainCaps.appendChild(chip);
-        });
-      };
-
-      const loadConfig = async () => {
-        const config = await fetchJson("/api/config");
-        if (!config) return;
-        const interval = config.ui?.poll_interval_ms || 5000;
-        pollSignal.textContent = `每 ${Math.round(interval / 1000)} 秒`;
-        if (commandTopic) {
-          const topic = (config.topics?.in_command || []).join(", ");
-          commandTopic.textContent = topic || "butler/in/command";
-        }
-      };
-
-      const loadScenes = async () => {
-        const data = await fetchJson("/api/scenes");
-        sceneList.replaceChildren();
-        if (!data?.scenes?.length) {
-          const empty = document.createElement("div");
-          empty.className = "data-item";
-          empty.textContent = "暂无场景";
-          sceneList.appendChild(empty);
-          return;
-        }
-        data.scenes.forEach((scene) => {
-          const card = document.createElement("div");
-          card.className = "data-item";
-
-          const titleRow = document.createElement("div");
-          titleRow.className = "data-title";
-
-          const title = document.createElement("strong");
-          title.textContent = scene.name || scene.scene_id;
-
-          const badge = document.createElement("span");
-          badge.className = "badge ok";
-          badge.textContent = "场景";
-
-          titleRow.appendChild(title);
-          titleRow.appendChild(badge);
-
-          const meta = document.createElement("div");
-          meta.className = "data-meta";
-          meta.textContent = scene.description || "";
-
-          const actions = document.createElement("div");
-          actions.className = "button-row";
-          const btn = document.createElement("button");
-          btn.className = "secondary";
-          btn.textContent = "激活";
-          btn.onclick = () => activateScene(scene.scene_id);
-          actions.appendChild(btn);
-
-          card.appendChild(titleRow);
-          if (meta.textContent) {
-            card.appendChild(meta);
-          }
-          card.appendChild(actions);
-          sceneList.appendChild(card);
-        });
-      };
-
-      const activateScene = async (sceneId) => {
-        const result = await fetchJson("/api/scenes/activate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ scene_id: sceneId }),
-        });
-        if (result?.error) {
-          alert(`场景激活失败: ${result.error}`);
-        } else {
-          alert(result?.message || "场景已激活");
-        }
-        loadLogs();
-      };
-
-      const updateBrainPanels = (data) => {
-        brainPlanActions.replaceChildren();
-        brainResultSummary.replaceChildren();
-        brainVisionSummary.replaceChildren();
-        brainTrace.replaceChildren();
-
-        const plan = data.plan;
-        if (plan?.actions?.length) {
-          plan.actions.forEach((action) => {
-            brainPlanActions.appendChild(createTag(action.action_type || "action"));
-          });
-        } else {
-          brainPlanActions.appendChild(createTag("暂无"));
-        }
-
-        if (data.results?.length) {
-          data.results.forEach((result) => {
-            brainResultSummary.appendChild(
-              createTag(`${result.action_type || "action"}: ${result.status || "ok"}`)
-            );
-          });
-        } else {
-          brainResultSummary.appendChild(createTag("暂无"));
-        }
-
-        if (data.vision) {
-          brainVisionSummary.appendChild(createTag(`${data.vision.model || "vision"}`));
-        } else {
-          brainVisionSummary.appendChild(createTag("暂无"));
-        }
-
-        (data.decision_trace || []).forEach((trace) => {
-          const item = document.createElement("div");
-          item.className = "data-item";
-          item.textContent = shorten(JSON.stringify(trace), 80);
-          brainTrace.appendChild(item);
-        });
-        if (!data.decision_trace?.length) {
-          const empty = document.createElement("div");
-          empty.className = "data-item";
-          empty.textContent = "暂无";
-          brainTrace.appendChild(empty);
-        }
-
-        brainOutput.textContent = JSON.stringify(data, null, 2) || "暂无";
-      };
-
-      const callBrain = async (mode) => {
-        const brainText = document.getElementById("brainText");
-        const brainContext = document.getElementById("brainContext");
-        const brainImages = document.getElementById("brainImages");
-        const brainCache = document.getElementById("brainCache");
-        const text = brainText.value.trim();
-        if (!text) {
-          alert("请输入指令");
-          return;
-        }
-        brainStatus.textContent = mode === "act" ? "正在执行..." : "正在规划...";
-        let context = {};
-        try {
-          context = parseJsonOptional(brainContext.value) || {};
-        } catch (err) {
-          brainStatus.textContent = err.message;
-          return;
-        }
-        const images = brainImages.value
-          .split("\n")
-          .map((line) => line.trim())
-          .filter(Boolean);
-        const payload = {
-          text,
-          context,
-          images,
-          cache: brainCache.checked,
-        };
-        const data = await fetchJson(`/api/brain/${mode}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!data) {
-          brainStatus.textContent = "请求失败";
-          return;
-        }
-        brainStatus.textContent = mode === "act" ? "执行完成" : "规划完成";
-        updateBrainPanels(data);
-        loadLogs();
-      };
-
-      const executeGoal = async () => {
-        const input = document.getElementById("goalInput");
-        const goal = input.value.trim();
-        if (!goal) {
-          alert("请输入目标");
-          return;
-        }
-        goalStatus.textContent = "执行中...";
-        const data = await fetchJson("/api/goals/execute", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: goal }),
-        });
-        if (!data) {
-          goalStatus.textContent = "执行失败";
-          return;
-        }
-        if (data.error) {
-          goalStatus.textContent = `错误: ${data.error}`;
-        } else {
-          goalStatus.textContent = data.message || "执行完成";
-        }
-        loadLogs();
-      };
-
-      const listGoals = async () => {
-        const data = await fetchJson("/api/goals");
-        if (data?.goals) {
-          const goals = data.goals.map((g) => g.name || g.text).join("\n");
-          alert(`可用目标:\n${goals}`);
-        }
-      };
-
-      const loadRules = async () => {
-        const data = await fetchJson("/api/brain/rules");
-        ruleJson.value = JSON.stringify(data?.rules || [], null, 2);
-        ruleStatus.textContent = "规则已加载";
-      };
-
-      const saveRules = async () => {
-        let rules = [];
-        try {
-          rules = JSON.parse(ruleJson.value || "[]");
-        } catch (err) {
-          ruleStatus.textContent = "规则 JSON 无效";
-          return;
-        }
-        const data = await fetchJson("/api/brain/rules", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ rules, persist: rulePersist.checked }),
-        });
-        if (!data || data.status === "error") {
-          ruleStatus.textContent = `保存失败: ${data?.error || "unknown"}`;
-          return;
-        }
-        ruleStatus.textContent = `已保存 (${data.rules_count || 0} 条规则)`;
-      };
-
-      const blobToBase64 = (blob) =>
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error("读取音频失败"));
-          reader.readAsDataURL(blob);
-        });
-
-      const stopStream = () => {
-        if (currentStream) {
-          currentStream.getTracks().forEach((track) => track.stop());
-          currentStream = null;
-        }
-      };
-
-      const startRecording = async () => {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          voiceRecordStatus.textContent = "浏览器不支持录音";
-          return;
-        }
-        if (mediaRecorder && mediaRecorder.state === "recording") {
-          voiceRecordStatus.textContent = "正在录音中";
-          return;
-        }
-        try {
-          currentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (err) {
-          voiceRecordStatus.textContent = "麦克风权限被拒绝";
-          return;
-        }
-        const mimeCandidates = [
-          "audio/webm;codecs=opus",
-          "audio/webm",
-          "audio/ogg;codecs=opus",
-          "audio/ogg",
-        ];
-        let mimeType = "";
-        if (window.MediaRecorder) {
-          mimeType = mimeCandidates.find((item) => MediaRecorder.isTypeSupported(item)) || "";
-        }
-        recordedChunks = [];
-        mediaRecorder = new MediaRecorder(
-          currentStream,
-          mimeType ? { mimeType } : undefined
-        );
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) {
-            recordedChunks.push(event.data);
-          }
-        };
-        mediaRecorder.onstop = async () => {
-          const blob = new Blob(recordedChunks, { type: mimeType || "audio/webm" });
-          recordedChunks = [];
-          voiceRecordStatus.textContent = "处理录音...";
-          try {
-            const base64 = await blobToBase64(blob);
-            voiceAudio.value = base64;
-            voicePreview.src = URL.createObjectURL(blob);
-            voiceRecordStatus.textContent = "录音完成，已写入输入框";
-          } catch (err) {
-            voiceRecordStatus.textContent = err.message;
-          } finally {
-            stopStream();
-          }
-        };
-        mediaRecorder.start();
-        voiceRecordStatus.textContent = "录音中...";
-      };
-
-      const stopRecording = () => {
-        if (!mediaRecorder || mediaRecorder.state !== "recording") {
-          voiceRecordStatus.textContent = "当前没有录音";
-          return;
-        }
-        mediaRecorder.stop();
-      };
-
-      const readVisionImage = () => {
-        if (!visionImage?.files?.length) {
-          return Promise.resolve(null);
-        }
-        const file = visionImage.files[0];
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = () => reject(new Error("读取图片失败"));
-          reader.readAsDataURL(file);
-        });
-      };
-
-      const setVisionOutput = (payload) => {
-        visionOutput.textContent = JSON.stringify(payload, null, 2);
-      };
-
-      const visionRequest = async (path, body) => {
-        visionStatus.textContent = "处理中...";
-        const data = await fetchJson(path, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        if (!data || data.status === "error") {
-          visionStatus.textContent = `失败: ${data?.error || "unknown"}`;
-          setVisionOutput(data || {});
-          return;
-        }
-        visionStatus.textContent = "完成";
-        setVisionOutput(data.output || data);
-      };
-
-      const visionDetectObjects = async () => {
-        const image = await readVisionImage();
-        if (!image) {
-          visionStatus.textContent = "请先选择图片";
-          return;
-        }
-        await visionRequest("/api/vision/detect", { image, model: "object" });
-      };
-
-      const visionDetectFaces = async () => {
-        const image = await readVisionImage();
-        if (!image) {
-          visionStatus.textContent = "请先选择图片";
-          return;
-        }
-        await visionRequest("/api/vision/detect", {
-          image,
-          model: "face",
-          match_faces: true,
-        });
-      };
-
-      const visionEnrollFace = async () => {
-        const image = await readVisionImage();
-        if (!image) {
-          visionStatus.textContent = "请先选择图片";
-          return;
-        }
-        const label = visionLabel.value.trim();
-        if (!label) {
-          visionStatus.textContent = "请输入人脸标签";
-          return;
-        }
-        await visionRequest("/api/face/enroll", { image, label });
-      };
-
-      const visionVerifyFace = async () => {
-        const image = await readVisionImage();
-        if (!image) {
-          visionStatus.textContent = "请先选择图片";
-          return;
-        }
-        const label = visionLabel.value.trim();
-        await visionRequest("/api/face/verify", { image, label: label || undefined });
-      };
-
-      const voiceTranscribe = async () => {
-        const audio = voiceAudio.value.trim();
-        if (!audio) {
-          voiceOutput.textContent = "请先输入音频";
-          return;
-        }
-        voiceOutput.textContent = "识别中...";
-        const data = await fetchJson("/api/voice/transcribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ audio }),
-        });
-        if (!data || data.status === "error") {
-          voiceOutput.textContent = `失败: ${data?.error || "unknown"}`;
-          return;
-        }
-        voiceOutput.textContent = JSON.stringify(data.output || data, null, 2);
-        loadLogs();
-      };
-
-      const voiceWake = async () => {
-        const audio = voiceAudio.value.trim();
-        if (!audio) {
-          voiceOutput.textContent = "请先输入音频";
-          return;
-        }
-        voiceOutput.textContent = "检测中...";
-        const data = await fetchJson("/api/voice/wake", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ audio }),
-        });
-        if (!data || data.status === "error") {
-          voiceOutput.textContent = `失败: ${data?.error || "unknown"}`;
-          return;
-        }
-        voiceOutput.textContent = JSON.stringify(data.output || data, null, 2);
-        loadLogs();
-      };
-
-      const voiceEnroll = async () => {
-        const audio = voiceAudio.value.trim();
-        const label = voiceLabel.value.trim();
-        if (!audio || !label) {
-          voiceOutput.textContent = "请填写音频与声纹标签";
-          return;
-        }
-        voiceOutput.textContent = "录入中...";
-        const data = await fetchJson("/api/voice/enroll", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ audio, label }),
-        });
-        if (!data || data.status === "error") {
-          voiceOutput.textContent = `失败: ${data?.error || "unknown"}`;
-          return;
-        }
-        voiceOutput.textContent = JSON.stringify(data.output || data, null, 2);
-        loadLogs();
-      };
-
-      const voiceVerify = async () => {
-        const audio = voiceAudio.value.trim();
-        if (!audio) {
-          voiceOutput.textContent = "请先输入音频";
-          return;
-        }
-        const payload = {
-          audio,
-          label: voiceLabel.value.trim() || undefined,
-          voiceprint_id: voicePrintId.value.trim() || undefined,
-        };
-        voiceOutput.textContent = "比对中...";
-        const data = await fetchJson("/api/voice/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!data || data.status === "error") {
-          voiceOutput.textContent = `失败: ${data?.error || "unknown"}`;
-          return;
-        }
-        voiceOutput.textContent = JSON.stringify(data.output || data, null, 2);
-        loadLogs();
-      };
-
-      const webSearch = async () => {
-        const query = searchQuery.value.trim();
-        if (!query) {
-          searchOutput.textContent = "请输入搜索关键词";
-          return;
-        }
-        searchOutput.textContent = "搜索中...";
-        const data = await fetchJson("/api/web/search", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query }),
-        });
-        if (!data || data.status === "error") {
-          searchOutput.textContent = `失败: ${data?.error || "unknown"}`;
-          return;
-        }
-        searchOutput.textContent = JSON.stringify(data.output || data, null, 2);
-        loadLogs();
-      };
-
-      const gatewayRequest = async () => {
-        const method = gatewayMethod.value.trim() || "GET";
-        const path = gatewayPath.value.trim();
-        if (!path) {
-          gatewayOutput.textContent = "请输入网关路径";
-          return;
-        }
-        let body = null;
-        try {
-          body = parseJsonOptional(gatewayBody.value);
-        } catch (err) {
-          gatewayOutput.textContent = err.message;
-          return;
-        }
-        gatewayOutput.textContent = "请求中...";
-        const data = await fetchJson("/api/gateway/request", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ method, path, body }),
-        });
-        if (!data || data.status === "error") {
-          gatewayOutput.textContent = `失败: ${data?.error || "unknown"}`;
-          return;
-        }
-        gatewayOutput.textContent = JSON.stringify(data.output || data, null, 2);
-        loadLogs();
-      };
-
-      const deviceTurnOn = async () => await deviceRequest("/api/devices/turn_on");
-      const deviceTurnOff = async () => await deviceRequest("/api/devices/turn_off");
-      const deviceToggle = async () => await deviceRequest("/api/devices/toggle");
-      const setBrightness = async () =>
-        await deviceRequest("/api/devices/set_brightness", {
-          brightness: parseInt(document.getElementById("deviceBrightness").value, 10),
-        });
-      const setTemperature = async () =>
-        await deviceRequest("/api/devices/set_temperature", {
-          temperature: parseFloat(document.getElementById("deviceTemperature").value),
-        });
-      const setHvacMode = async () =>
-        await deviceRequest("/api/devices/set_hvac_mode", {
-          mode: document.getElementById("deviceHvacMode").value,
-        });
-      const openCover = async () => await deviceRequest("/api/devices/open_cover");
-      const closeCover = async () => await deviceRequest("/api/devices/close_cover");
-      const playMedia = async () =>
-        await deviceRequest("/api/devices/play_media", {
-          media_content_id: document.getElementById("deviceMediaId").value.trim(),
-          media_content_type: document.getElementById("deviceMediaType").value.trim() || "music",
-        });
-      const pauseMedia = async () => await deviceRequest("/api/devices/pause");
-      const stopMedia = async () => await deviceRequest("/api/devices/stop");
-      const getDeviceState = async () => await deviceRequest("/api/devices/state");
-
-      const deviceRequest = async (path, extra = {}) => {
-        const deviceId = document.getElementById("deviceId").value.trim();
-        if (!deviceId) {
-          document.getElementById("deviceOutput").textContent = "请输入设备 ID";
-          return;
-        }
-        const payload = { device_id: deviceId, ...extra };
-        const data = await fetchJson(path, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        document.getElementById("deviceOutput").textContent = JSON.stringify(data, null, 2);
-        loadLogs();
-      };
-
-      const sendIRCommand = async () => {
-        const deviceId = document.getElementById("irDeviceId").value.trim();
-        const command = document.getElementById("irCommand").value.trim();
-        if (!deviceId || !command) {
-          document.getElementById("irOutput").textContent = "请输入设备 ID 和指令";
-          return;
-        }
-        const data = await fetchJson("/api/ir/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ device_id: deviceId, command }),
-        });
-        document.getElementById("irOutput").textContent = JSON.stringify(data, null, 2);
-        loadLogs();
-      };
-
-      const learnIRCommand = async () => {
-        const deviceId = document.getElementById("irDeviceId").value.trim();
-        const commandName = document.getElementById("irLearnName").value.trim();
-        const duration = parseFloat(document.getElementById("irDuration").value) || 5;
-        if (!deviceId || !commandName) {
-          document.getElementById("irOutput").textContent = "请输入设备 ID 和学习指令名称";
-          return;
-        }
-        const data = await fetchJson("/api/ir/learn", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ device_id: deviceId, command_name: commandName, duration }),
-        });
-        document.getElementById("irOutput").textContent = JSON.stringify(data, null, 2);
-        loadLogs();
-      };
-
-      document.getElementById("feedFilters").addEventListener("click", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLButtonElement)) return;
-        const filter = target.dataset.filter;
-        if (!filter) return;
-        currentFilter = filter;
-        document.querySelectorAll(".filter-button").forEach((btn) => {
-          btn.classList.toggle("active", btn.dataset.filter === filter);
-        });
-        renderFeed();
+          <div class="card" style="margin-bottom: 20px; border-left: 3px solid var(--accent);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div style="font-weight: 700; font-size: 16px;">离家安防开启</div>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">
+              AI检测到所有人离家时，自动开启全屋安防监控
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span class="badge success">已启用</span>
+              <span class="badge info">触发 8 次</span>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: 20px; border-left: 3px solid var(--accent);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div style="font-weight: 700; font-size: 16px;">语音指令响应</div>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">
+              GLM-4.7语音助手24小时待命，随时响应语音指令
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <span class="badge success">已启用</span>
+              <span class="badge info">响应 156 次</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-ir" class="tab-content" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">红外遥控中心</div>
+          <button class="btn-primary">学习遥控</button>
+        </div>
+
+        <div class="section">
+          <div class="section-title">电视遥控</div>
+          <div class="quick-actions">
+            <button class="quick-btn" onclick="sendIRCommand('tv', 'power')">
+              <span class="icon">🔴</span>
+              电源
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('tv', 'volume-up')">
+              <span class="icon">🔊</span>
+              音量+
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('tv', 'volume-down')">
+              <span class="icon">🔉</span>
+              音量-
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('tv', 'channel-up')">
+              <span class="icon">➕</span>
+              频道+
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('tv', 'channel-down')">
+              <span class="icon">➖</span>
+              频道-
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('tv', 'mute')">
+              <span class="icon">🔇</span>
+              静音
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('tv', 'home')">
+              <span class="icon">🏠</span>
+              主页
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('tv', 'back')">
+              <span class="icon">⬅️</span>
+              返回
+            </button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">空调遥控</div>
+          <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 24px;">
+            <span style="color: var(--text-secondary);">目标温度:</span>
+            <input type="range" class="range-slider" min="16" max="30" value="24" id="ac-temp">
+            <span id="ac-temp-value" style="font-weight: 700; font-size: 20px; color: var(--primary);">24°C</span>
+          </div>
+          <div class="quick-actions">
+            <button class="quick-btn" onclick="sendIRCommand('ac', 'power')">
+              <span class="icon">🔴</span>
+              电源
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('ac', 'cool')">
+              <span class="icon">❄️</span>
+              制冷
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('ac', 'heat')">
+              <span class="icon">🔥</span>
+              制热
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('ac', 'auto')">
+              <span class="icon">🔄</span>
+              自动
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('ac', 'fan')">
+              <span class="icon">💨</span>
+              送风
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('ac', 'dehumidify')">
+              <span class="icon">💧</span>
+              除湿
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('ac', 'swing')">
+              <span class="icon">🌬</span>
+              摆风
+            </button>
+            <button class="quick-btn" onclick="sendIRCommand('ac', 'turbo')">
+              <span class="icon">⚡</span>
+              强力
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/script.js"></script>
+  <script>
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        
+        this.classList.add('active');
+        document.getElementById('tab-' + this.dataset.tab).style.display = 'block';
       });
+    });
 
-      loadState();
-      loadConfig();
-      loadScenes();
-      loadLogs();
-      loadRules();
-      loadCapabilities();
-      setInterval(loadLogs, 4000);
-    </script>
-  </body>
+    function toggleDevice(card, type) {
+      card.classList.toggle('active');
+      const name = card.querySelector('.device-name').textContent;
+      const isActive = card.classList.contains('active');
+      const statusText = card.querySelector('.device-status');
+      
+      if (isActive) {
+        const activeStatuses = {
+          'light': '已开启',
+          'climate': '运行中',
+          'media': '播放中',
+          'security': '在线',
+          'curtain': '已开启'
+        };
+        statusText.textContent = activeStatuses[type] || '已开启';
+      } else {
+        statusText.textContent = '已关闭';
+      }
+      
+      showNotification(`${name} 已${isActive ? '开启' : '关闭'}`, 'success');
+    }
+
+    function activateScene(card, sceneId) {
+      document.querySelectorAll('.scene-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      const name = card.querySelector('.scene-name').textContent;
+      showNotification(`AI 正在激活 ${name}...`, 'info');
+      
+      setTimeout(() => {
+        showNotification(`${name} 已激活`, 'success');
+      }, 1500);
+    }
+
+    function sendIRCommand(device, command) {
+      const deviceNames = {
+        'tv': '电视',
+        'ac': '空调'
+      };
+      showNotification(`已发送 ${deviceNames[device]} ${command} 指令`, 'success');
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '💡'}</span>
+        <span>${message}</span>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => notification.classList.add('show'), 10);
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 400);
+      }, 3000);
+    }
+
+    const acTempSlider = document.getElementById('ac-temp');
+    const acTempValue = document.getElementById('ac-temp-value');
+    
+    if (acTempSlider && acTempValue) {
+      acTempSlider.addEventListener('input', function() {
+        acTempValue.textContent = this.value + '°C';
+      });
+    }
+
+    document.querySelectorAll('.device-card').forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        if (!this.classList.contains('active')) {
+          const statusText = this.querySelector('.device-status');
+          if (statusText.textContent === '已关闭') {
+            statusText.textContent = '点击开启';
+          }
+        }
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        if (!this.classList.contains('active')) {
+          this.querySelector('.device-status').textContent = '已关闭';
+        }
+      });
+    });
+  </script>
+</body>
 </html>

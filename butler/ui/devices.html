@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智慧管家 - 设备管理</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .page-container {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg-deep);
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-deep);
+    }
+
+    .top-bar {
+      height: 64px;
+      background: var(--bg-card);
+      border-bottom: 1px solid rgba(0, 136, 204, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    .content-area {
+      padding: 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 48px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 136, 204, 0.15);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 136, 204, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .filter-select {
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 136, 204, 0.15);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 140px;
+    }
+
+    .filter-select:hover {
+      border-color: var(--primary);
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 8px;
+    }
+
+    .view-btn {
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 136, 204, 0.15);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .view-btn.active {
+      background: var(--gradient-neon);
+      color: white;
+      border-color: transparent;
+    }
+
+    .view-btn:hover:not(.active) {
+      color: var(--text-primary);
+      border-color: var(--primary);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 136, 204, 0.15);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-icon:hover {
+      color: var(--text-primary);
+      border-color: var(--primary);
+      background: rgba(0, 136, 204, 0.05);
+    }
+
+    .btn-primary {
+      padding: 12px 24px;
+      background: var(--gradient-neon);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 136, 204, 0.2);
+    }
+
+    .tabs-container {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 24px;
+      background: var(--bg-card);
+      padding: 8px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0, 136, 204, 0.1);
+    }
+
+    .group-tab {
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .group-tab:hover {
+      background: rgba(0, 136, 204, 0.08);
+      color: var(--text-primary);
+    }
+
+    .group-tab.active {
+      background: var(--gradient-neon);
+      color: white;
+    }
+
+    .devices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .device-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 136, 204, 0.15);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .device-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(0, 136, 204, 0.15);
+      transform: translateY(-4px);
+    }
+
+    .device-card.selected {
+      border-color: var(--primary);
+      background: rgba(0, 136, 204, 0.05);
+    }
+
+    .device-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .device-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--gradient-neon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .device-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0, 136, 204, 0.3);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .device-checkbox.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .device-checkbox.checked::after {
+      content: '✓';
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .device-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .device-location {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .device-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-dot.online {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .status-dot.offline {
+      background: var(--pink);
+      box-shadow: 0 0 8px var(--pink);
+    }
+
+    .status-text {
+      color: var(--text-secondary);
+    }
+
+    .device-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .control-btn {
+      flex: 1;
+      padding: 10px;
+      background: var(--bg-dark);
+      border: 1px solid rgba(0, 136, 204, 0.1);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: transparent;
+    }
+
+    .control-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
+    }
+
+    .batch-actions-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 136, 204, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 16px 24px;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1000;
+    }
+
+    .batch-actions-bar.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .batch-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-right: 24px;
+      border-right: 1px solid rgba(0, 136, 204, 0.2);
+    }
+
+    .batch-count {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .batch-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .detail-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .detail-modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 136, 204, 0.2);
+      border-radius: var(--radius-xl);
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: modalIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px;
+      border-bottom: 1px solid rgba(0, 136, 204, 0.1);
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .modal-close {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 0, 136, 0.1);
+      color: var(--pink);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .detail-section {
+      margin-bottom: 24px;
+    }
+
+    .detail-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-section-title::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: var(--gradient-neon);
+      border-radius: 2px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .detail-item {
+      background: var(--bg-dark);
+      border: 1px solid rgba(0, 136, 204, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+    }
+
+    .detail-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .chart-placeholder {
+      background: var(--bg-dark);
+      border: 1px solid rgba(0, 136, 204, 0.1);
+      border-radius: var(--radius-md);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 24px;
+      border-top: 1px solid rgba(0, 136, 204, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+      }
+      .devices-grid {
+        grid-template-columns: 1fr;
+      }
+      .batch-actions-bar {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">SMART BUTLER</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">主菜单</div>
+          <div class="nav-item" onclick="navigate('dashboard')">
+            <span class="nav-icon">📊</span>
+            <span>仪表盘</span>
+          </div>
+          <div class="nav-item active" onclick="navigate('devices')">
+            <span class="nav-icon">🔌</span>
+            <span>设备管理</span>
+          </div>
+          <div class="nav-item" onclick="navigate('health')">
+            <span class="nav-icon">💊</span>
+            <span>系统健康</span>
+          </div>
+          <div class="nav-item" onclick="navigate('alerts')">
+            <span class="nav-icon">🔔</span>
+            <span>告警中心</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">功能</div>
+          <div class="nav-item" onclick="navigate('scenes')">
+            <span class="nav-icon">🎬</span>
+            <span>场景控制</span>
+          </div>
+          <div class="nav-item" onclick="navigate('ai')">
+            <span class="nav-icon">🤖</span>
+            <span>AI配置</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">监控</div>
+          <div class="nav-item" onclick="navigate('vision')">
+            <span class="nav-icon">📹</span>
+            <span>视觉监控</span>
+          </div>
+          <div class="nav-item" onclick="navigate('logs')">
+            <span class="nav-icon">📝</span>
+            <span>系统日志</span>
+          </div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">系统</div>
+          <div class="nav-item" onclick="navigate('settings')">
+            <span class="nav-icon">⚙️</span>
+            <span>系统设置</span>
+          </div>
+          <div class="nav-item" onclick="navigate('security')">
+            <span class="nav-icon">🔐</span>
+            <span>权限安全</span>
+          </div>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="system-info">
+          <div>系统版本: v2.0.1</div>
+          <div>运行时间: 24天12小时</div>
+          <div>最后更新: 2026-02-03</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <button class="refresh-btn" onclick="toggleSidebar()" style="font-size: 20px;">☰</button>
+          <div class="breadcrumb">
+            <span>智慧管家</span>
+            <span>/</span>
+            <a href="#">设备管理</a>
+          </div>
+        </div>
+        <div class="top-bar-right">
+          <div class="notification-badge" onclick="showNotifications()">
+            <span>🔔</span>
+            <span class="badge-count">3</span>
+          </div>
+          <div class="user-profile" onclick="showUserMenu()">
+            <div class="user-avatar">A</div>
+            <div class="user-name">管理员</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div class="page-title" style="margin-bottom: 24px;">
+          <span>设备管理</span>
+          <span class="refresh-btn" onclick="refreshDevices()" title="刷新">🔄</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="搜索设备..." id="device-search" onkeyup="filterDevices()">
+          </div>
+          <select class="filter-select" id="type-filter" onchange="filterDevices()">
+            <option value="all">所有类型</option>
+            <option value="light">照明</option>
+            <option value="climate">环境控制</option>
+            <option value="media">影音娱乐</option>
+            <option value="security">安防监控</option>
+            <option value="cover">窗帘窗户</option>
+          </select>
+          <select class="filter-select" id="status-filter" onchange="filterDevices()">
+            <option value="all">所有状态</option>
+            <option value="online">在线</option>
+            <option value="offline">离线</option>
+          </select>
+          <div class="view-toggle">
+            <button class="view-btn active" onclick="setView('grid')">▦</button>
+            <button class="view-btn" onclick="setView('list')">☰</button>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn-icon" onclick="addDevice()" title="添加设备">➕</button>
+            <button class="btn-icon" onclick="refreshDevices()" title="刷新">🔄</button>
+          </div>
+        </div>
+
+        <div class="tabs-container">
+          <button class="group-tab active" onclick="filterByGroup('all')">全部 (14)</button>
+          <button class="group-tab" onclick="filterByGroup('living-room')">客厅 (5)</button>
+          <button class="group-tab" onclick="filterByGroup('bedroom')">卧室 (4)</button>
+          <button class="group-tab" onclick="filterByGroup('kitchen')">厨房 (3)</button>
+          <button class="group-tab" onclick="filterByGroup('bathroom')">浴室 (2)</button>
+        </div>
+
+        <div class="devices-grid" id="devices-grid">
+          <div class="device-card" data-id="1" data-type="light" data-status="online" onclick="selectDevice(this)">
+            <div class="device-header">
+              <div class="device-icon">💡</div>
+              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+            </div>
+            <div class="device-name">客厅主灯</div>
+            <div class="device-location">客厅 · 智能照明</div>
+            <div class="device-status">
+              <span class="status-dot online"></span>
+              <span class="status-text">已开启</span>
+            </div>
+            <div class="device-controls">
+              <button class="control-btn active" onclick="event.stopPropagation(); toggleDevice(this, 1)">开</button>
+              <button class="control-btn" onclick="event.stopPropagation(); toggleDevice(this, 0)">关</button>
+            </div>
+          </div>
+
+          <div class="device-card" data-id="2" data-type="climate" data-status="online" onclick="selectDevice(this)">
+            <div class="device-header">
+              <div class="device-icon">❄️</div>
+              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+            </div>
+            <div class="device-name">客厅空调</div>
+            <div class="device-location">客厅 · 环境控制</div>
+            <div class="device-status">
+              <span class="status-dot online"></span>
+              <span class="status-text">制冷中</span>
+            </div>
+            <div class="device-controls">
+              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 18)">18°</button>
+              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 24)">24°</button>
+              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 26)">26°</button>
+            </div>
+          </div>
+
+          <div class="device-card" data-id="3" data-type="media" data-status="online" onclick="selectDevice(this)">
+            <div class="device-header">
+              <div class="device-icon">🔊</div>
+              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+            </div>
+            <div class="device-name">音响系统</div>
+            <div class="device-location">客厅 · 影音娱乐</div>
+            <div class="device-status">
+              <span class="status-dot online"></span>
+              <span class="status-text">播放中</span>
+            </div>
+            <div class="device-controls">
+              <button class="control-btn active" onclick="event.stopPropagation(); controlMedia(this, 'play')">▶</button>
+              <button class="control-btn" onclick="event.stopPropagation(); controlMedia(this, 'pause')">⏸</button>
+              <button class="control-btn" onclick="event.stopPropagation(); controlMedia(this, 'stop')">⏹</button>
+            </div>
+          </div>
+
+          <div class="device-card" data-id="4" data-type="cover" data-status="offline" onclick="selectDevice(this)">
+            <div class="device-header">
+              <div class="device-icon">🪟</div>
+              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+            </div>
+            <div class="device-name">客厅窗帘</div>
+            <div class="device-location">客厅 · 窗帘控制</div>
+            <div class="device-status">
+              <span class="status-dot offline"></span>
+              <span class="status-text">离线</span>
+            </div>
+            <div class="device-controls">
+              <button class="control-btn" onclick="event.stopPropagation(); setCoverPosition(this, 'open')">打开</button>
+              <button class="control-btn" onclick="event.stopPropagation(); setCoverPosition(this, 'close')">关闭</button>
+              <button class="control-btn" onclick="event.stopPropagation(); setCoverPosition(this, 'half')">半开</button>
+            </div>
+          </div>
+
+          <div class="device-card" data-id="5" data-type="security" data-status="online" onclick="selectDevice(this)">
+            <div class="device-header">
+              <div class="device-icon">📷</div>
+              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+            </div>
+            <div class="device-name">门口摄像头</div>
+            <div class="device-location">门口 · 安防监控</div>
+            <div class="device-status">
+              <span class="status-dot online"></span>
+              <span class="status-text">录制中</span>
+            </div>
+            <div class="device-controls">
+              <button class="control-btn active" onclick="event.stopPropagation(); toggleRecording(this)">录制</button>
+              <button class="control-btn" onclick="event.stopPropagation(); viewCamera()">查看</button>
+            </div>
+          </div>
+
+          <div class="device-card" data-id="6" data-type="light" data-status="online" onclick="selectDevice(this)">
+            <div class="device-header">
+              <div class="device-icon">💡</div>
+              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+            </div>
+            <div class="device-name">卧室主灯</div>
+            <div class="device-location">卧室 · 智能照明</div>
+            <div class="device-status">
+              <span class="status-dot online"></span>
+              <span class="status-text">已关闭</span>
+            </div>
+            <div class="device-controls">
+              <button class="control-btn" onclick="event.stopPropagation(); toggleDevice(this, 1)">开</button>
+              <button class="control-btn active" onclick="event.stopPropagation(); toggleDevice(this, 0)">关</button>
+            </div>
+          </div>
+
+          <div class="device-card" data-id="7" data-type="climate" data-status="online" onclick="selectDevice(this)">
+            <div class="device-header">
+              <div class="device-icon">❄️</div>
+              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+            </div>
+            <div class="device-name">卧室空调</div>
+            <div class="device-location">卧室 · 环境控制</div>
+            <div class="device-status">
+              <span class="status-dot online"></span>
+              <span class="status-text">24°C</span>
+            </div>
+            <div class="device-controls">
+              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 18)">18°</button>
+              <button class="control-btn active" onclick="event.stopPropagation(); setTemperature(this, 24)">24°</button>
+              <button class="control-btn" onclick="event.stopPropagation(); setTemperature(this, 26)">26°</button>
+            </div>
+          </div>
+
+          <div class="device-card" data-id="8" data-type="security" data-status="offline" onclick="selectDevice(this)">
+            <div class="device-header">
+              <div class="device-icon">🔒</div>
+              <div class="device-checkbox" onclick="event.stopPropagation()"></div>
+            </div>
+            <div class="device-name">智能门锁</div>
+            <div class="device-location">门口 · 安防监控</div>
+            <div class="device-status">
+              <span class="status-dot offline"></span>
+              <span class="status-text">离线</span>
+            </div>
+            <div class="device-controls">
+              <button class="control-btn" onclick="event.stopPropagation(); lockDoor()">上锁</button>
+              <button class="control-btn" onclick="event.stopPropagation(); unlockDoor()">开锁</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div class="batch-actions-bar" id="batch-actions">
+      <div class="batch-info">
+        <span class="batch-count" id="selected-count">0</span>
+        <span class="batch-label">个设备已选择</span>
+      </div>
+      <button class="btn-primary" onclick="batchTurnOn()">批量开启</button>
+      <button class="btn-primary" onclick="batchTurnOff()">批量关闭</button>
+      <button class="btn-icon" onclick="closeBatchActions()">✕</button>
+    </div>
+
+    <div class="detail-modal" id="detail-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title" id="modal-device-name">设备详情</div>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="detail-section">
+            <div class="detail-section-title">基本信息</div>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">设备ID</div>
+                <div class="detail-value" id="detail-id">-</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">设备类型</div>
+                <div class="detail-value" id="detail-type">-</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">设备位置</div>
+                <div class="detail-value" id="detail-location">-</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">当前状态</div>
+                <div class="detail-value" id="detail-status">-</div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <div class="detail-section-title">使用统计</div>
+            <div class="chart-placeholder">
+              📊 使用历史数据图表
+            </div>
+          </div>
+          <div class="detail-section">
+            <div class="detail-section-title">能耗数据</div>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">今日能耗</div>
+                <div class="detail-value" id="detail-energy-today">-</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">本月能耗</div>
+                <div class="detail-value" id="detail-energy-month">-</div>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section">
+            <div class="detail-section-title">维护信息</div>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">最后更新</div>
+                <div class="detail-value" id="detail-last-update">-</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">固件版本</div>
+                <div class="detail-value" id="detail-firmware">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" onclick="editDevice()">编辑设备</button>
+          <button class="btn-icon" onclick="closeModal()">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let selectedDevices = new Set();
+      let currentGroup = 'all';
+
+      function navigate(page) {
+        const pages = {
+          'dashboard': 'dashboard.html',
+          'devices': 'devices.html',
+          'scenes': 'controls.html',
+          'ai': 'settings.html',
+          'vision': 'settings.html',
+          'analytics': 'logs.html',
+          'settings': 'settings.html',
+          'users': 'settings.html',
+          'logs': 'logs.html',
+          'security': 'settings.html'
+        };
+        
+        if (pages[page]) {
+          window.location.href = pages[page];
+        }
+      }
+
+      function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('open');
+      }
+
+      function filterDevices() {
+        const searchTerm = document.getElementById('device-search').value.toLowerCase();
+        const typeFilter = document.getElementById('type-filter').value;
+        const statusFilter = document.getElementById('status-filter').value;
+        
+        const cards = document.querySelectorAll('.device-card');
+        
+        cards.forEach(card => {
+          const name = card.querySelector('.device-name').textContent.toLowerCase();
+          const type = card.dataset.type;
+          const status = card.dataset.status;
+          
+          const matchSearch = name.includes(searchTerm);
+          const matchType = typeFilter === 'all' || type === typeFilter;
+          const matchStatus = statusFilter === 'all' || status === statusFilter;
+          
+          if (matchSearch && matchType && matchStatus) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+
+      function filterByGroup(group) {
+        currentGroup = group;
+        
+        document.querySelectorAll('.group-tab').forEach(tab => {
+          tab.classList.remove('active');
+          if (tab.textContent.includes(group === 'all' ? '全部' : 
+            group === 'living-room' ? '客厅' : 
+            group === 'bedroom' ? '卧室' : 
+            group === 'kitchen' ? '厨房' : '浴室')) {
+            tab.classList.add('active');
+          }
+        });
+        
+        filterDevices();
+      }
+
+      function setView(view) {
+        document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        const grid = document.getElementById('devices-grid');
+        if (view === 'grid') {
+          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
+        } else {
+          grid.style.gridTemplateColumns = '1fr';
+        }
+      }
+
+      function selectDevice(card) {
+        const checkbox = card.querySelector('.device-checkbox');
+        checkbox.classList.toggle('checked');
+        
+        if (checkbox.classList.contains('checked')) {
+          selectedDevices.add(card.dataset.id);
+          card.classList.add('selected');
+        } else {
+          selectedDevices.delete(card.dataset.id);
+          card.classList.remove('selected');
+        }
+        
+        updateBatchActions();
+      }
+
+      function updateBatchActions() {
+        const count = selectedDevices.size;
+        document.getElementById('selected-count').textContent = count;
+        const batchBar = document.getElementById('batch-actions');
+        
+        if (count > 0) {
+          batchBar.classList.add('show');
+        } else {
+          batchBar.classList.remove('show');
+        }
+      }
+
+      function closeBatchActions() {
+        selectedDevices.clear();
+        document.querySelectorAll('.device-checkbox').forEach(cb => cb.classList.remove('checked'));
+        document.querySelectorAll('.device-card').forEach(card => card.classList.remove('selected'));
+        updateBatchActions();
+      }
+
+      function batchTurnOn() {
+        showNotification(`正在开启 ${selectedDevices.size} 个设备...`, 'info');
+        setTimeout(() => {
+          showNotification(`${selectedDevices.size} 个设备已开启`, 'success');
+          closeBatchActions();
+        }, 1500);
+      }
+
+      function batchTurnOff() {
+        showNotification(`正在关闭 ${selectedDevices.size} 个设备...`, 'info');
+        setTimeout(() => {
+          showNotification(`${selectedDevices.size} 个设备已关闭`, 'success');
+          closeBatchActions();
+        }, 1500);
+      }
+
+      function toggleDevice(btn, state) {
+        const card = btn.closest('.device-card');
+        const name = card.querySelector('.device-name').textContent;
+        const statusText = card.querySelector('.status-text');
+        const statusDot = card.querySelector('.status-dot');
+        
+        if (state) {
+          statusText.textContent = '已开启';
+          statusDot.classList.remove('offline');
+          statusDot.classList.add('online');
+        } else {
+          statusText.textContent = '已关闭';
+          statusDot.classList.remove('online');
+          statusDot.classList.add('offline');
+        }
+        
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        showNotification(`${name} 已${state ? '开启' : '关闭'}`, 'success');
+      }
+
+      function setTemperature(btn, temp) {
+        const card = btn.closest('.device-card');
+        const name = card.querySelector('.device-name').textContent;
+        const statusText = card.querySelector('.status-text');
+        
+        statusText.textContent = `${temp}°C`;
+        
+        document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        showNotification(`${name} 设为 ${temp}°C`, 'success');
+      }
+
+      function controlMedia(btn, action) {
+        const card = btn.closest('.device-card');
+        const name = card.querySelector('.device-name').textContent;
+        const statusText = card.querySelector('.status-text');
+        const statusDot = card.querySelector('.status-dot');
+        
+        const actions = {
+          'play': { text: '播放中', dot: 'online' },
+          'pause': { text: '已暂停', dot: 'offline' },
+          'stop': { text: '已停止', dot: 'offline' }
+        };
+        
+        statusText.textContent = actions[action].text;
+        statusDot.classList.remove('online', 'offline');
+        statusDot.classList.add(actions[action].dot);
+        
+        showNotification(`${name} ${actions[action].text}`, 'success');
+      }
+
+      function setCoverPosition(btn, pos) {
+        const card = btn.closest('.device-card');
+        const name = card.querySelector('.device-name').textContent;
+        const positions = { 'open': '打开', 'close': '关闭', 'half': '半开' };
+        
+        showNotification(`${name} 已${positions[pos]}`, 'success');
+      }
+
+      function toggleRecording(btn) {
+        const card = btn.closest('.device-card');
+        const name = card.querySelector('.device-name').textContent;
+        
+        btn.classList.toggle('active');
+        const isRecording = btn.classList.contains('active');
+        
+        showNotification(`${name} ${isRecording ? '开始录制' : '停止录制'}`, 'success');
+      }
+
+      function viewCamera() {
+        showNotification('正在打开摄像头预览...', 'info');
+      }
+
+      function lockDoor() {
+        showNotification('门锁已上锁', 'success');
+      }
+
+      function unlockDoor() {
+        showNotification('门锁已解锁', 'success');
+      }
+
+      function addDevice() {
+        showNotification('添加设备功能', 'info');
+      }
+
+      function refreshDevices() {
+        showNotification('正在刷新设备列表...', 'info');
+        setTimeout(() => {
+          showNotification('刷新完成', 'success');
+        }, 1000);
+      }
+
+      function showDeviceDetail(card) {
+        const name = card.querySelector('.device-name').textContent;
+        const type = card.querySelector('.device-location').textContent.split(' · ')[1];
+        const status = card.querySelector('.status-text').textContent;
+        
+        document.getElementById('modal-device-name').textContent = name;
+        document.getElementById('detail-id').textContent = card.dataset.id;
+        document.getElementById('detail-type').textContent = type;
+        document.getElementById('detail-location').textContent = card.querySelector('.device-location').textContent.split(' · ')[0];
+        document.getElementById('detail-status').textContent = status;
+        document.getElementById('detail-energy-today').textContent = '0.5 kWh';
+        document.getElementById('detail-energy-month').textContent = '15.2 kWh';
+        document.getElementById('detail-last-update').textContent = '2026-02-03 10:30';
+        document.getElementById('detail-firmware').textContent = 'v2.1.3';
+        
+        document.getElementById('detail-modal').classList.add('show');
+      }
+
+      function closeModal() {
+        document.getElementById('detail-modal').classList.remove('show');
+      }
+
+      function editDevice() {
+        showNotification('编辑设备功能', 'info');
+        closeModal();
+      }
+
+      function showNotifications() {
+        showNotification('您有3条未读通知', 'info');
+      }
+
+      function showUserMenu() {
+        showNotification('用户菜单', 'info');
+      }
+
+      function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+          <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '💡'}</span>
+          <span>${message}</span>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => notification.remove(), 400);
+        }, 3000);
+      }
+    </script>
+</body>
+</html>

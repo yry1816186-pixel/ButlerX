@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系统日志 - Smart Butler</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    :root {
+      --primary-color: #0088cc;
+      --primary-light: #e6f4fa;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --info-color: #3b82f6;
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e8ecf1;
+      --text-primary: #1a1a2e;
+      --text-secondary: #64748b;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      z-index: 100;
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-color);
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+
+    .nav-section {
+      margin-bottom: 24px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 12px 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .nav-item:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      font-size: 18px;
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .breadcrumbs a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .breadcrumbs a:hover {
+      color: var(--primary-color);
+    }
+
+    .breadcrumbs span {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .notification-btn {
+      position: relative;
+      background: var(--bg-tertiary);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: var(--transition);
+    }
+
+    .notification-btn:hover {
+      background: var(--primary-light);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: var(--danger-color);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px 6px 6px;
+      background: var(--bg-tertiary);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .user-profile:hover {
+      background: var(--primary-light);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .log-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .log-toolbar {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .log-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .log-filter-group label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .filter-select {
+      padding: 8px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      background: var(--bg-secondary);
+      cursor: pointer;
+    }
+
+    .filter-select:hover {
+      border-color: var(--primary-color);
+    }
+
+    .log-search-group {
+      flex: 1;
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 8px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      background: var(--bg-secondary);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0077b3;
+    }
+
+    .btn-secondary {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .log-content {
+      max-height: calc(100vh - 300px);
+      overflow-y: auto;
+    }
+
+    .log-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+    }
+
+    .log-item:hover {
+      background: var(--bg-primary);
+    }
+
+    .log-item:last-child {
+      border-bottom: none;
+    }
+
+    .log-time {
+      color: var(--text-secondary);
+      font-size: 12px;
+      white-space: nowrap;
+      min-width: 160px;
+    }
+
+    .log-level {
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      white-space: nowrap;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .log-level.success {
+      background: #d1fae5;
+      color: var(--success-color);
+    }
+
+    .log-level.info {
+      background: #dbeafe;
+      color: var(--info-color);
+    }
+
+    .log-level.warning {
+      background: #fef3c7;
+      color: var(--warning-color);
+    }
+
+    .log-level.error {
+      background: #fee2e2;
+      color: var(--danger-color);
+    }
+
+    .log-source {
+      color: var(--text-secondary);
+      font-size: 12px;
+      white-space: nowrap;
+      min-width: 100px;
+    }
+
+    .log-message {
+      flex: 1;
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .mobile-toggle {
+        display: block;
+      }
+      
+      .log-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .log-item {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .log-time,
+      .log-level,
+      .log-source {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">SMART BUTLER</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">主菜单</div>
+        <div class="nav-item" onclick="navigate('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span>仪表盘</span>
+        </div>
+        <div class="nav-item" onclick="navigate('devices')">
+          <span class="nav-icon">🔌</span>
+          <span>设备管理</span>
+        </div>
+        <div class="nav-item" onclick="navigate('health')">
+          <span class="nav-icon">💊</span>
+          <span>系统健康</span>
+        </div>
+        <div class="nav-item" onclick="navigate('alerts')">
+          <span class="nav-icon">🔔</span>
+          <span>告警中心</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">功能</div>
+        <div class="nav-item" onclick="navigate('scenes')">
+          <span class="nav-icon">🎬</span>
+          <span>场景控制</span>
+        </div>
+        <div class="nav-item" onclick="navigate('ai')">
+          <span class="nav-icon">🤖</span>
+          <span>AI配置</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">监控</div>
+        <div class="nav-item" onclick="navigate('vision')">
+          <span class="nav-icon">📹</span>
+          <span>视觉监控</span>
+        </div>
+        <div class="nav-item active" onclick="navigate('logs')">
+          <span class="nav-icon">📝</span>
+          <span>系统日志</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">系统</div>
+        <div class="nav-item" onclick="navigate('settings')">
+          <span class="nav-icon">⚙️</span>
+          <span>系统设置</span>
+        </div>
+        <div class="nav-item" onclick="navigate('security')">
+          <span class="nav-icon">🔐</span>
+          <span>权限安全</span>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="breadcrumbs">
+          <a href="#" onclick="navigate('dashboard')">首页</a>
+          <span>/</span>
+          <span>系统日志</span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button class="notification-btn">
+          🔔
+          <span class="notification-badge">3</span>
+        </button>
+        <div class="user-profile">
+          <div class="user-avatar">A</div>
+          <span class="user-name">管理员</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">系统日志</h1>
+          <p class="page-subtitle">查看系统运行日志和事件记录</p>
+        </div>
+        <button class="btn btn-secondary" onclick="exportLogs()">导出日志</button>
+      </div>
+
+      <div class="log-panel">
+        <div class="log-toolbar">
+          <div class="log-filter-group">
+            <label>日志级别:</label>
+            <select class="filter-select" id="log-level-filter" onchange="filterLogs()">
+              <option value="all">全部</option>
+              <option value="success">成功</option>
+              <option value="info">信息</option>
+              <option value="warning">警告</option>
+              <option value="error">错误</option>
+            </select>
+          </div>
+
+          <div class="log-filter-group">
+            <label>日志类型:</label>
+            <select class="filter-select" id="log-type-filter" onchange="filterLogs()">
+              <option value="all">全部</option>
+              <option value="ai">AI引擎</option>
+              <option value="vision">视觉系统</option>
+              <option value="device">设备控制</option>
+              <option value="security">安全</option>
+              <option value="system">系统</option>
+            </select>
+          </div>
+
+          <div class="log-filter-group">
+            <label>时间范围:</label>
+            <select class="filter-select" id="log-time-filter" onchange="filterLogs()">
+              <option value="15m">最近15分钟</option>
+              <option value="1h" selected>最近1小时</option>
+              <option value="24h">最近24小时</option>
+              <option value="7d">最近7天</option>
+              <option value="all">全部</option>
+            </select>
+          </div>
+
+          <div class="log-search-group">
+            <input type="text" class="search-input" id="log-search" placeholder="搜索日志..." onkeyup="filterLogs()">
+            <button class="btn btn-primary" onclick="filterLogs()">搜索</button>
+          </div>
+        </div>
+
+        <div class="log-content" id="log-list">
+          <div class="log-item" data-level="info" data-type="ai" data-time="14:32:15">
+            <div class="log-time">2026-02-03 14:32:15</div>
+            <div class="log-level info">INFO</div>
+            <div class="log-source">AI 引擎</div>
+            <div class="log-message">AI 引擎成功处理语音指令："打开客厅灯"</div>
+          </div>
+          <div class="log-item" data-level="warning" data-type="vision" data-time="14:30:42">
+            <div class="log-time">2026-02-03 14:30:42</div>
+            <div class="log-level warning">WARNING</div>
+            <div class="log-source">视觉监控</div>
+            <div class="log-message">门口摄像头检测到未知人员，置信度: 65%</div>
+          </div>
+          <div class="log-item" data-level="success" data-type="device" data-time="14:28:33">
+            <div class="log-time">2026-02-03 14:28:33</div>
+            <div class="log-level success">SUCCESS</div>
+            <div class="log-source">设备控制</div>
+            <div class="log-message">设备 "客厅主灯" 状态已更新: 开启</div>
+          </div>
+          <div class="log-item" data-level="error" data-type="system" data-time="14:25:18">
+            <div class="log-time">2026-02-03 14:25:18</div>
+            <div class="log-level error">ERROR</div>
+            <div class="log-source">系统</div>
+            <div class="log-message">磁盘空间警告: /var/log 使用率达到 85%</div>
+          </div>
+          <div class="log-item" data-level="info" data-type="ai" data-time="14:22:05">
+            <div class="log-time">2026-02-03 14:22:05</div>
+            <div class="log-level info">INFO</div>
+            <div class="log-source">AI 引擎</div>
+            <div class="log-message">场景 "回家模式" 自动激活</div>
+          </div>
+          <div class="log-item" data-level="success" data-type="device" data-time="14:18:42">
+            <div class="log-time">2026-02-03 14:18:42</div>
+            <div class="log-level success">SUCCESS</div>
+            <div class="log-source">设备控制</div>
+            <div class="log-message">设备 "卧室空调" 温度已设置: 24°C</div>
+          </div>
+          <div class="log-item" data-level="info" data-type="security" data-time="14:15:33">
+            <div class="log-time">2026-02-03 14:15:33</div>
+            <div class="log-level info">INFO</div>
+            <div class="log-source">安全</div>
+            <div class="log-message">用户 "张三" 登录系统</div>
+          </div>
+          <div class="log-item" data-level="warning" data-type="system" data-time="14:12:18">
+            <div class="log-time">2026-02-03 14:12:18</div>
+            <div class="log-level warning">WARNING</div>
+            <div class="log-source">系统</div>
+            <div class="log-message">Home Assistant 响应时间超过阈值 (5.2s)</div>
+          </div>
+          <div class="log-item" data-level="success" data-type="vision" data-time="14:08:42">
+            <div class="log-time">2026-02-03 14:08:42</div>
+            <div class="log-level success">SUCCESS</div>
+            <div class="log-source">视觉监控</div>
+            <div class="log-message">人脸识别成功: "管理员" (置信度: 98%)</div>
+          </div>
+          <div class="log-item" data-level="info" data-type="ai" data-time="14:05:33">
+            <div class="log-time">2026-02-03 14:05:33</div>
+            <div class="log-level info">INFO</div>
+            <div class="log-source">AI 引擎</div>
+            <div class="log-message">对话上下文已更新，共 5 条历史记录</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/script.js"></script>
+  <script>
+    function navigate(page) {
+      window.location.href = page + '.html';
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function filterLogs() {
+      const levelFilter = document.getElementById('log-level-filter').value;
+      const typeFilter = document.getElementById('log-type-filter').value;
+      const searchValue = document.getElementById('log-search').value.toLowerCase();
+      const logItems = document.querySelectorAll('.log-item');
+
+      logItems.forEach(item => {
+        const level = item.dataset.level;
+        const type = item.dataset.type;
+        const message = item.querySelector('.log-message').textContent.toLowerCase();
+
+        const levelMatch = levelFilter === 'all' || level === levelFilter;
+        const typeMatch = typeFilter === 'all' || type === typeFilter;
+        const searchMatch = message.includes(searchValue);
+
+        if (levelMatch && typeMatch && searchMatch) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function exportLogs() {
+      const logs = [];
+      document.querySelectorAll('.log-item').forEach(item => {
+        if (item.style.display !== 'none') {
+          logs.push({
+            time: item.querySelector('.log-time').textContent,
+            level: item.querySelector('.log-level').textContent,
+            source: item.querySelector('.log-source').textContent,
+            message: item.querySelector('.log-message').textContent
+          });
+        }
+      });
+
+      const content = logs.map(log => 
+        `[${log.time}] [${log.level}] [${log.source}] ${log.message}`
+      ).join('\n');
+
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `logs_${new Date().toISOString().slice(0,10)}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showNotification('日志导出成功', 'success');
+    }
+
+    function showNotification(message, type) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+      `;
+
+      const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        warning: '#f59e0b',
+        info: '#3b82f6'
+      };
+
+      notification.style.borderLeft = `4px solid ${colors[type]}`;
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
