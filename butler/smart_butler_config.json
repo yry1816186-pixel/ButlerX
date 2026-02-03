@@ -1,0 +1,81 @@
+{
+  "system": {
+    "name": "小管家",
+    "log_level": "INFO",
+    "log_file": "logs/smart_butler.log"
+  },
+  "wake_word": {
+    "enabled": true,
+    "word": "小管家",
+    "threshold": 0.5,
+    "model_path": "models/wakeword"
+  },
+  "asr": {
+    "provider": "faster-whisper",
+    "model": "small",
+    "language": "zh",
+    "device": "cpu",
+    "compute_type": "int8",
+    "timeout": 30
+  },
+  "tts": {
+    "enabled": true,
+    "model_path": "models/tts/zh_CN-xiaoyan-low",
+    "speaker_id": 0,
+    "sample_rate": 22050,
+    "noise_scale": 0.667,
+    "length_scale": 1.0,
+    "noise_w": 0.8
+  },
+  "llm": {
+    "enabled": true,
+    "api_key": "",
+    "base_url": "https://open.bigmodel.cn/api/paas/v4",
+    "model": "glm-4",
+    "temperature": 0.7,
+    "max_tokens": 1024,
+    "top_p": 0.8,
+    "timeout": 60
+  },
+  "vision": {
+    "enabled": true,
+    "camera_index": 0,
+    "camera_width": 640,
+    "camera_height": 480,
+    "detect_interval": 0.5,
+    "min_person_confidence": 0.5,
+    "min_object_confidence": 0.3,
+    "activity_detection": true,
+    "track_people": true,
+    "person_id_timeout": 5.0
+  },
+  "proactive": {
+    "enabled": true,
+    "min_confidence": 0.7,
+    "max_interactions_per_minute": 5,
+    "global_cooldown": 30,
+    "respect_user_mood": true
+  },
+  "dialogue": {
+    "max_history": 20,
+    "save_history": true,
+    "history_file": "data/conversation_history.json",
+    "user_name": "主人",
+    "current_room": "客厅"
+  },
+  "audio": {
+    "input_device": null,
+    "output_device": null,
+    "sample_rate": 16000,
+    "channels": 1,
+    "chunk_size": 1280
+  },
+  "features": {
+    "face_recognition": false,
+    "gesture_control": false,
+    "smart_home_control": true,
+    "schedule_reminders": true,
+    "weather_forecast": false,
+    "music_control": true
+  }
+}
