@@ -22,6 +22,23 @@ logger = logging.getLogger(__name__)
 
 
 class ButlerService:
+    """Core service for the Smart Butler system.
+
+    Manages MQTT communication, brain/planning, policy evaluation,
+    and coordination of all subsystems including tool execution,
+    scheduling, and device adapters.
+
+    Attributes:
+        config: Butler configuration instance
+        db: Database instance for persistence
+        policy: PolicyEngine for event evaluation
+        tool_runner: ToolRunner for action execution
+        brain: BrainPlanner for LLM-based planning
+        rule_engine: BrainRuleEngine for rule-based decisions
+        scheduler: Optional ScheduleRunner for timed tasks
+        dashan_adapter: Optional DaShanAdapter for robot control
+    """
+
     def __init__(self, config: ButlerConfig) -> None:
         self.config = config
         self.db = Database(config.db_path)
@@ -144,6 +161,11 @@ class ButlerService:
             logger.info("DaShan adapter initialized")
 
     def start(self) -> None:
+        """Start the Butler service.
+
+        Connects to MQTT broker, starts the scheduler,
+        and initializes the DaShan adapter if configured.
+        """
         logger.info("Connecting to MQTT %s:%s", self.mqtt_host, self.mqtt_port)
         self.client.reconnect_delay_set(
             min_delay=self.config.mqtt_reconnect_min_sec,
@@ -161,6 +183,11 @@ class ButlerService:
             self.dashan_adapter.connect()
 
     def stop(self) -> None:
+        """Stop the Butler service.
+
+        Gracefully shuts down all components including
+        brain client, scheduler, DaShan adapter, and MQTT connection.
+        """
         self.brain_client.close()
         if self.scheduler:
             self.scheduler.stop()

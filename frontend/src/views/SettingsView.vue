@@ -111,9 +111,9 @@ const sections = [
 
 const settings = ref({
   general: {
-    name: '智慧管家',
-    language: 'zh-CN',
-    timezone: 'Asia/Shanghai'
+    name: 'Smart Butler',
+    language: 'en-US',
+    timezone: 'America/New_York'
   },
   voice: {
     wakeWord: '管家',

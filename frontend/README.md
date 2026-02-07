@@ -1,6 +1,6 @@
 # Butler Smart Home Frontend
 
-A modern Vue.js 3 + TypeScript frontend for the Butler (智慧管家) smart home system.
+A modern Vue.js 3 + TypeScript frontend for Butler (Smart Butler) smart home system.
 
 ## Features
 

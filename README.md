@@ -1,10 +1,10 @@
-# 智慧管家核心 MVP
+# Smart Butler Core MVP
 
-基于事件驱动的智能家居中枢 MVP，包含 MQTT、Python 核心服务、SQLite 以及简洁的 Web UI。
+Event-driven smart home hub MVP, featuring MQTT, Python core service, SQLite, and a clean Web UI.
 
-## 核心创新功能
+## Core Innovative Features
 
-### 1. 智慧管家AI系统
+### 1. Smart Butler AI System
 - 基于GLM-4.7大语言模型的自然语言理解
 - 事件驱动的自动化规则引擎
 - 支持视觉识别和语音交互
@@ -35,7 +35,7 @@ docker-compose up --build
 
 3) 在控制台触发一条命令（例如"模拟入侵"）。
 
-控制台页面现在包含"AI 中枢控制台"和"规则编辑器"，位于：
+控制台页面现在包含"AI Core Console"和"Rule Editor"，位于：
 ```
 http://localhost:8000/controls
 ```
@@ -196,9 +196,9 @@ set UI_POLL_INTERVAL_MS=2000
 docker-compose up --build
 ```
 
-## AI 中枢 API（GLM 4.7）
+## AI Core API (GLM 4.7)
 
-核心服务现在暴露了用于语言 + 视觉规划的 AI 中枢接口：
+核心服务现在暴露了用于语言 + 视觉规划的 AI Core 接口：
 
 - `POST /api/brain/plan` -> 返回行动计划（不执行）
 - `POST /api/brain/act` -> 规划 + 执行
@@ -234,7 +234,7 @@ set GLM_MODEL_TEXT=glm-4.7
 set GLM_MODEL_VISION=glm-4.6v
 ```
 
-### AI 中枢参数（节省成本/稳定性）
+### AI Core Parameters (Cost Saving/Stability)
 
 ```
 set BRAIN_CACHE_TTL_SEC=30
@@ -733,28 +733,28 @@ curl -X POST http://localhost:8000/api/devices/set_temperature \
 ## 项目文件结构
 
 ```
-智慧管家/
+smart-butler/
 ├── butler/              # Butler Core
-│   ├── core/           # 核心引擎
-│   ├── adapters/       # 设备适配器
-│   ├── devices/        # 设备驱动
-│   ├── goal_engine/    # 目标引擎
-│   ├── brain/          # AI大脑
-│   ├── life_assistant/ # 生活助手模块
-│   └── ui/             # Web界面
-├── DaShan/             # DaShan机器人
-│   ├── host/           # 主控代码
-│   └── firmware/       # 固件
-├── mobile_camera/      # 可移动摄像头
-│   ├── hardware/       # 硬件设计
-│   ├── firmware/       # ESP32固件
-│   └── 3d_models/      # 3D打印文件
-├── docker/             # Docker配置
-├── scripts/            # 脚本工具
-├── docs/               # 文档
+│   ├── core/           # Core Engine
+│   ├── adapters/       # Device Adapters
+│   ├── devices/        # Device Drivers
+│   ├── goal_engine/    # Goal Engine
+│   ├── brain/          # AI Brain
+│   ├── life_assistant/ # Life Assistant Module
+│   └── ui/             # Web Interface
+├── DaShan/             # DaShan Robot
+│   ├── host/           # Host Code
+│   └── firmware/       # Firmware
+├── mobile_camera/      # Mobile Camera
+│   ├── hardware/       # Hardware Design
+│   ├── firmware/       # ESP32 Firmware
+│   └── 3d_models/      # 3D Print Files
+├── docker/             # Docker Configuration
+├── scripts/            # Script Tools
+├── docs/               # Documentation
 │   ├── OPENCLAW_INTEGRATION.md
 │   └── OPENCLAW_SKILLS_INTEGRATION.md
-└── README.md           # 项目说明
+└── README.md           # Project Documentation
 ```
 
 ## 安全性

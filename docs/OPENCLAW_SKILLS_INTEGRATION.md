@@ -1,14 +1,14 @@
-# OpenClaw Skills 集成指南
+# OpenClaw Skills Integration Guide
 
-本文档说明如何在智慧管家系统中集成和复用 OpenClaw Skills。
+This document explains how to integrate and reuse OpenClaw Skills in the Smart Butler system.
 
-## 概述
+## Overview
 
-OpenClaw Skills 是一套可重用的工具集合，包含 50+ 预置技能。智慧管家可以通过以下方式集成这些技能：
+OpenClaw Skills is a reusable toolkit collection with 50+ pre-built skills. Smart Butler can integrate these skills in the following ways:
 
-1. **直接调用 OpenClaw CLI** - 使用 `openclaw exec <skill>` 命令
-2. **调用本地服务** - 对于运行本地服务的技能（如 local-places）
-3. **封装为工具动作** - 将常用功能封装为智慧管家的动作类型
+1. **Directly call OpenClaw CLI** - Use `openclaw exec <skill>` command
+2. **Call local services** - For skills running local services (like local-places)
+3. **Wrap as tool actions** - Wrap common functions as Smart Butler action types
 
 ## 可用的有用技能
 
@@ -21,7 +21,7 @@ OpenClaw Skills 是一套可重用的工具集合，包含 50+ 预置技能。�
 curl -s "wttr.in/Beijing?format=3"
 ```
 
-**智慧管家集成示例**：
+**Smart Butler Integration Example**:
 ```python
 import requests
 
@@ -59,18 +59,18 @@ camsnap snap kitchen --out /tmp/shot.jpg
 camsnap clip kitchen --dur 5s --out /tmp/clip.mp4
 ```
 
-**智慧管家集成示例**：
+**Smart Butler Integration Example**:
 ```python
 import subprocess
 
 def camera_snapshot(camera_name: str, output_path: str) -> bool:
-    """从摄像头捕获截图"""
+    """Capture snapshot from camera"""
     cmd = ["camsnap", "snap", camera_name, "--out", output_path]
     result = subprocess.run(cmd, capture_output=True)
     return result.returncode == 0
 ```
 
-**动作定义**：
+**Action Definition**:
 ```json
 {
   "action_type": "camera_snapshot",
@@ -107,7 +107,7 @@ curl -X POST http://127.0.0.1:8000/places/search \
   }'
 ```
 
-**智慧管家集成示例**：
+**Smart Butler Integration Example**:
 ```python
 import requests
 
@@ -116,7 +116,7 @@ class LocalPlacesClient:
         self.base_url = base_url
 
     def search_nearby(self, query: str, lat: float, lng: float, radius_m: int = 1000) -> dict:
-        """搜索附近地点"""
+        """Search nearby places"""
         url = f"{self.base_url}/places/search"
         data = {
             "query": query,
@@ -128,12 +128,12 @@ class LocalPlacesClient:
         return response.json()
 ```
 
-**动作定义**：
+**Action Definition**:
 ```json
 {
   "action_type": "search_nearby_places",
   "params": {
-    "query": "咖啡店",
+    "query": "coffee shop",
     "lat": 39.9,
     "lng": 116.4,
     "radius_m": 1000
@@ -150,12 +150,12 @@ class LocalPlacesClient:
 openclaw logs session --id <session_id> --limit 10
 ```
 
-**智慧管家集成示例**：
+**Smart Butler Integration Example**:
 ```python
 from ..tools.openclaw_cli import OpenClawCLI
 
 def get_session_logs(session_id: str, limit: int = 10) -> dict:
-    """获取会话日志"""
+    """Get session logs"""
     openclaw = OpenClawCLI()
     cmd = [openclaw.cli_path, "logs", "session", "--id", session_id, "--limit", str(limit)]
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -164,17 +164,17 @@ def get_session_logs(session_id: str, limit: int = 10) -> dict:
 
 ### 5. Voice-Call（语音通话）📞
 
-**功能**：发起语音通话
+**功能**：Make voice calls
 
 **使用方式**：
 ```bash
 openclaw call <contact>
 ```
 
-**智慧管家集成示例**：
+**Smart Butler Integration Example**:
 ```python
 def make_voice_call(contact: str) -> dict:
-    """发起语音通话"""
+    """Make voice call"""
     cmd = ["openclaw", "call", contact]
     result = subprocess.run(cmd, capture_output=True, text=True)
     return {"returncode": result.returncode, "stdout": result.stdout}

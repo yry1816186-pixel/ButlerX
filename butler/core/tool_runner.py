@@ -3,6 +3,21 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from .config import ButlerConfig
+from .exceptions import (
+    ActionExecutionError,
+    DeviceError,
+    HomeAssistantError,
+    ImageGenerationError,
+    OpenClawError,
+    PrivacyModeError,
+    PTZError,
+    ScriptExecutionError,
+    SystemExecutionError,
+    ValidationError,
+    VisionError,
+    VoiceError,
+    WebSearchError,
+)
 from .models import ActionResult
 from .utils import new_uuid, utc_ts
 from ..tools.email_client import EmailClient
@@ -27,6 +42,34 @@ from ..goal_engine import GoalEngine
 
 
 class ToolRunner:
+    """Executes actions and manages tool integrations.
+
+    Coordinates all tool subsystems including PTZ cameras,
+    Home Assistant, email, image generation, voice, vision,
+    web search, OpenClaw, system execution, scripts, and devices.
+
+    Attributes:
+        config: Butler configuration instance
+        db: Database instance for persistence
+        ptz: PTZOnvif for camera control
+        ha: HomeAssistantAPI for smart home integration
+        email: EmailClient for email operations
+        image_gen: ImageGenerator for AI image creation
+        voice: VoiceClient for speech recognition
+        vision: VisionClient for computer vision
+        search: WebSearchClient for web queries
+        gateway: GatewayClient for HTTP gateway requests
+        sys_exec: SystemExec for command execution
+        openclaw: OpenClawCLI for OpenClaw integration
+        openclaw_gateway: Optional OpenClawGatewaySync for gateway mode
+        scripts: ScriptRunner for script execution
+        scheduler: Optional ScheduleRunner for task scheduling
+        device_hub: DeviceControlHub for unified device control
+        ir_controller: IRController for infrared control
+        scene_engine: SceneEngine for scene automation
+        goal_engine: GoalEngine for goal execution
+    """
+
     def __init__(self, config: ButlerConfig, scheduler: object = None, db: object = None) -> None:
         self.config = config
         self.db = db
@@ -116,11 +159,26 @@ class ToolRunner:
         self.goal_engine = GoalEngine()
 
     def attach_scheduler(self, scheduler: object) -> None:
+        """Attach a scheduler instance for task scheduling.
+
+        Args:
+            scheduler: ScheduleRunner instance
+        """
         self.scheduler = scheduler
 
     def execute_plan(
         self, plan_id: str, actions: List[Dict[str, Any]], privacy_mode: bool
     ) -> List[ActionResult]:
+        """Execute a list of actions and return results.
+
+        Args:
+            plan_id: ID of the plan being executed
+            actions: List of action dictionaries with 'action_type' and 'params'
+            privacy_mode: Whether privacy mode is enabled
+
+        Returns:
+            List of ActionResult objects containing execution status and output
+        """
         results: List[ActionResult] = []
         for action in actions:
             if self._blocked_by_privacy(action, privacy_mode):
@@ -138,6 +196,15 @@ class ToolRunner:
         return results
 
     def _execute_action(self, plan_id: str, action: Dict[str, Any]) -> ActionResult:
+        """Execute a single action and return its result.
+
+        Args:
+            plan_id: ID of the plan being executed
+            action: Action dictionary with 'action_type' and 'params'
+
+        Returns:
+            ActionResult containing execution status and output
+        """
         action_type = action.get("action_type", "unknown")
         params = action.get("params", {}) or {}
         status = "ok"
@@ -146,6 +213,8 @@ class ToolRunner:
         try:
             if action_type == "ptz_goto_preset":
                 name = params.get("name") or params.get("preset") or self.config.ptz_entry_preset
+                if not name:
+                    raise ValidationError("name parameter is required", field="name")
                 output = self.ptz.goto_preset(name)
             elif action_type == "ptz_patrol":
                 presets = params.get("presets") or self.config.patrol_presets
@@ -179,15 +248,23 @@ class ToolRunner:
                     to_list = [addr.strip() for addr in to_value.split(",") if addr.strip()]
                 else:
                     to_list = [str(addr) for addr in to_value if str(addr).strip()]
+                if not to_list:
+                    raise ValidationError("to parameter is required", field="to")
+                subject = str(params.get("subject") or "")
+                if not subject:
+                    raise ValidationError("subject parameter is required", field="subject")
                 output = self.email.send(
                     to_addrs=to_list,
-                    subject=str(params.get("subject") or ""),
+                    subject=subject,
                     body=str(params.get("body") or ""),
                     from_addr=params.get("from"),
                 )
             elif action_type == "image_generate":
+                prompt = str(params.get("prompt") or "")
+                if not prompt:
+                    raise ValidationError("prompt parameter is required", field="prompt")
                 output = self.image_gen.generate(
-                    prompt=str(params.get("prompt") or ""),
+                    prompt=prompt,
                     size=str(params.get("size") or "1024x1024"),
                     n=int(params.get("n") or 1),
                 )
@@ -310,12 +387,16 @@ class ToolRunner:
                 )
             elif action_type == "system_exec":
                 command = str(params.get("command") or "")
+                if not command:
+                    raise ValidationError("command parameter is required", field="command")
                 args = params.get("args") or []
                 if not isinstance(args, list):
                     args = [str(args)]
                 output = self.sys_exec.run(command, [str(item) for item in args])
             elif action_type == "script_run":
                 script = str(params.get("script") or params.get("name") or "")
+                if not script:
+                    raise ValidationError("script parameter is required", field="script")
                 args = params.get("args") or []
                 if not isinstance(args, list):
                     args = [str(args)]
@@ -339,9 +420,15 @@ class ToolRunner:
                     note = str(params.get("note") or "Scheduled task")
                     output = self.scheduler.schedule_actions(actions, int(run_at), note)
             elif action_type == "openclaw_message_send":
+                target = str(params.get("target") or "")
+                message = str(params.get("message") or "")
+                if not target:
+                    raise ValidationError("target parameter is required", field="target")
+                if not message:
+                    raise ValidationError("message parameter is required", field="message")
                 output = self.openclaw.send_message(
-                    target=str(params.get("target") or ""),
-                    message=str(params.get("message") or ""),
+                    target=target,
+                    message=message,
                     channel=params.get("channel"),
                     account=params.get("account"),
                 )
@@ -386,54 +473,88 @@ class ToolRunner:
                 output = store_event(params.get("kind", "event"), params)
             elif action_type == "device_turn_on":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 output = self.device_hub.turn_on(device_id, **{k: v for k, v in params.items() if k not in ["device_id", "target"]})
             elif action_type == "device_turn_off":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 output = self.device_hub.turn_off(device_id)
             elif action_type == "device_toggle":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 output = self.device_hub.toggle(device_id)
             elif action_type == "set_brightness":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 brightness = int(params.get("brightness") or 255)
                 output = self.device_hub.set_brightness(device_id, brightness)
             elif action_type == "set_temperature":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 temperature = float(params.get("temperature") or 22.0)
                 output = self.device_hub.set_temperature(device_id, temperature)
             elif action_type == "set_hvac_mode":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 mode = str(params.get("mode") or "auto")
                 output = self.device_hub.set_hvac_mode(device_id, mode)
             elif action_type == "open_cover":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 output = self.device_hub.open_cover(device_id)
             elif action_type == "close_cover":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 output = self.device_hub.close_cover(device_id)
             elif action_type == "play_media":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 media_content_id = str(params.get("media_content_id") or "")
+                if not media_content_id:
+                    raise ValidationError("media_content_id parameter is required", field="media_content_id")
                 media_content_type = str(params.get("media_content_type") or "music")
                 output = self.device_hub.play_media(device_id, media_content_id, media_content_type)
             elif action_type == "pause_media":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 output = self.device_hub.pause(device_id)
             elif action_type == "stop_media":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 output = self.device_hub.stop(device_id)
             elif action_type == "ir_send_command":
                 device_id = str(params.get("device_id") or "")
                 command = str(params.get("command") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
+                if not command:
+                    raise ValidationError("command parameter is required", field="command")
                 repeat = int(params.get("repeat") or 1)
                 output = self.device_hub.send_ir_command(device_id, command, repeat)
             elif action_type == "ir_learn_command":
                 device_id = str(params.get("device_id") or "")
                 command_name = str(params.get("command_name") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
+                if not command_name:
+                    raise ValidationError("command_name parameter is required", field="command_name")
                 duration = float(params.get("duration") or 5.0)
                 output = self.device_hub.learn_ir_command(device_id, command_name, duration)
             elif action_type == "get_device_state":
                 device_id = str(params.get("device_id") or params.get("target") or "")
+                if not device_id:
+                    raise ValidationError("device_id parameter is required", field="device_id")
                 output = self.device_hub.get_device_state(device_id)
             elif action_type == "list_devices":
                 backend_filter = params.get("backend")
@@ -462,9 +583,21 @@ class ToolRunner:
             else:
                 status = "error"
                 output = {"error": f"Unsupported action_type: {action_type}"}
-        except Exception as exc:  # pragma: no cover - defensive for MVP
+        except ButlerError as exc:
             status = "error"
-            output = {"error": str(exc)}
+            output = exc.to_dict()
+        except ValueError as exc:
+            status = "error"
+            output = ValidationError(str(exc)).to_dict()
+        except ConnectionError as exc:
+            status = "error"
+            output = ActionExecutionError(str(exc)).to_dict()
+        except TimeoutError as exc:
+            status = "error"
+            output = ActionExecutionError(str(exc)).to_dict()
+        except Exception as exc:
+            status = "error"
+            output = ActionExecutionError(str(exc)).to_dict()
 
         return ActionResult(
             plan_id=plan_id,
@@ -475,6 +608,15 @@ class ToolRunner:
         )
 
     def _blocked_by_privacy(self, action: Dict[str, Any], privacy_mode: bool) -> bool:
+        """Check if an action is blocked by privacy mode.
+
+        Args:
+            action: Action dictionary with 'action_type' and optional 'params'
+            privacy_mode: Whether privacy mode is enabled
+
+        Returns:
+            True if the action should be blocked, False otherwise
+        """
         if not privacy_mode:
             return False
         action_type = action.get("action_type", "")

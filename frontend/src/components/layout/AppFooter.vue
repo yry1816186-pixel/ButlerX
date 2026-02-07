@@ -1,6 +1,6 @@
 <template>
   <footer class="app-footer">
-    <p>&copy; 2024 智慧管家 Butler Smart Home. All rights reserved.</p>
+    <p>&copy; 2024 Smart Butler. All rights reserved.</p>
   </footer>
 </template>
 

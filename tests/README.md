@@ -1,6 +1,6 @@
 # Butler Project Tests
 
-This directory contains comprehensive pytest tests for the Butler (智慧管家) project.
+This directory contains comprehensive pytest tests for the Butler (Smart Butler) project.
 
 ## Test Structure
 

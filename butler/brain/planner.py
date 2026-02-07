@@ -48,6 +48,17 @@ class _CacheEntry:
 
 
 class BrainPlanner:
+    """LLM-based planning engine for the Smart Butler system.
+
+    Generates action plans based on user requests, context, and vision input.
+    Supports caching, retries, and configurable allowlists for security.
+
+    Attributes:
+        glm: GLMClient for LLM API communication
+        config: BrainPlannerConfig for planner behavior
+        _cache: OrderedDict for LRU caching of plans
+    """
+
     def __init__(self, glm: GLMClient, config: Optional[BrainPlannerConfig] = None) -> None:
         self.glm = glm
         self.config = config or BrainPlannerConfig()
@@ -80,6 +91,15 @@ class BrainPlanner:
         self._cache: "OrderedDict[str, _CacheEntry]" = OrderedDict()
 
     def plan(self, req: BrainRequest, use_cache: bool = True) -> BrainPlanResult:
+        """Generate an action plan based on the request.
+
+        Args:
+            req: BrainRequest containing text, images, and context
+            use_cache: Whether to use cached results if available
+
+        Returns:
+            BrainPlanResult with the plan, raw LLM response, and cache status
+        """
         cache_key = self._build_cache_key(req)
         if use_cache:
             cached = self._get_cache(cache_key)

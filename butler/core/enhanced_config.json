@@ -2,7 +2,7 @@
   "version": "2.0",
   "system": {
     "name": "Butler Enhanced",
-    "description": "全屋智慧管家系统 - 增强版",
+    "description": "Smart Butler System - Enhanced",
     "log_level": "INFO"
   },
   "modules": {
@@ -103,7 +103,7 @@
     "cache_size": 128
   },
   "voice": {
-    "wake_words": ["hello", "butler", "管家"],
+    "wake_words": ["hello", "butler", "smart"],
     "asr": {
       "provider": "faster-whisper",
       "model": "small",

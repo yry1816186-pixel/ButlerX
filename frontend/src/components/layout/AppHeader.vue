@@ -4,7 +4,7 @@
       <button class="menu-btn" @click="toggleSidebar">
         <span class="hamburger"></span>
       </button>
-      <h1 class="app-title">智慧管家</h1>
+      <h1 class="app-title">Smart Butler</h1>
     </div>
     <nav class="header-nav">
       <RouterLink v-for="route in routes" :key="route.path" :to="route.path" class="nav-link">

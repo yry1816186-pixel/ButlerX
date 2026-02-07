@@ -25,7 +25,7 @@ MANIFEST
 venv/
 env/
 ENV/
-.venv
+.venv/
 
 # IDE
 .vscode/
@@ -81,3 +81,65 @@ captures/
 # DaShan Robot
 DaShan/logs/
 DaShan/data/
+
+# IDE specific
+.history/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# IDE configuration files
+*.sublime-project
+*.sublime-workspace
+
+# Local data directories
+butler/data/
+simulator/data/
+
+# Test databases
+test_*.db
+
+# Coverage files
+.coverage.*
+coverage.xml
+*.cover
+
+# Pyre type checker
+.pyre/
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pytest
+.pytest_cache/
+.cache
+
+# Environments
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Model files (downloaded during runtime)
+*.pt
+*.pth
+*.onnx
+*.pb
+
+# Configuration backups
+*.backup
+*.bak
+*~
+
+# Local development files
+.local/

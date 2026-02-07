@@ -1,11 +1,11 @@
 <template>
   <div class="home-view">
     <section class="hero">
-      <h1 class="hero-title">欢迎使用智慧管家</h1>
-      <p class="hero-subtitle">您的智能家居控制中心</p>
+      <h1 class="hero-title">Welcome to Smart Butler</h1>
+      <p class="hero-subtitle">Your Smart Home Control Center</p>
       <div class="hero-actions">
-        <RouterLink to="/dashboard" class="btn btn-primary">进入仪表盘</RouterLink>
-        <RouterLink to="/devices" class="btn btn-secondary">管理设备</RouterLink>
+        <RouterLink to="/dashboard" class="btn btn-primary">Go to Dashboard</RouterLink>
+        <RouterLink to="/devices" class="btn btn-secondary">Manage Devices</RouterLink>
       </div>
     </section>
 

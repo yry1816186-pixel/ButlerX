@@ -189,6 +189,46 @@
   },
   "openclaw": {
     "cli_path": "openclaw",
-    "env": {}
+    "env": {},
+    "gateway_enabled": true,
+    "gateway_url": "ws://127.0.0.1:18789",
+    "gateway_token": "",
+    "gateway_password": "",
+    "channels": {
+      "discord": {
+        "enabled": false,
+        "polls": true,
+        "threads": true,
+        "stickers": true,
+        "emojiUploads": true,
+        "stickerUploads": true
+      },
+      "slack": {
+        "enabled": false,
+        "emojiList": true
+      },
+      "telegram": {
+        "enabled": false,
+        "sticker": true,
+        "inlineButtons": false
+      },
+      "whatsapp": {
+        "enabled": false,
+        "polls": true
+      },
+      "googlechat": {
+        "enabled": false
+      },
+      "signal": {
+        "enabled": false
+      },
+      "imessage": {
+        "enabled": false
+      },
+      "msteams": {
+        "enabled": false,
+        "polls": true
+      }
+    }
   }
 }

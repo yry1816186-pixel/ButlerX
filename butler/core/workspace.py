@@ -159,11 +159,11 @@ class WorkspaceTemplates:
 - 定期清理过期记忆
 """
 
-    DEFAULT_BOOTSTRAP = """# 工作区引导
+    DEFAULT_BOOTSTRAP = """# Workspace Bootstrap
 
-## 欢迎使用智慧管家
+## Welcome to Smart Butler
 
-本工作区包含智慧管家系统的所有配置和自定义文件。
+This workspace contains all configuration and customization files for the Smart Butler system.
 
 ## 目录结构
 - `AGENTS.md`: 助手配置
@@ -174,21 +174,21 @@ class WorkspaceTemplates:
 - `MEMORY.md`: 记忆管理
 - `BOOTSTRAP.md`: 本文件
 
-## 自定义指南
+## Customization Guide
 
-1. 修改 `USER.md` 添加您的个人偏好
-2. 在 `SOUL.md` 中调整助手的个性
-3. 在 `TOOLS.md` 中添加自定义工具
-4. 在 `MEMORY.md` 中记录重要信息
+1. Modify `USER.md` to add your personal preferences
+2. Adjust the assistant's personality in `SOUL.md`
+3. Add custom tools in `TOOLS.md`
+4. Record important information in `MEMORY.md`
 
-## 开始使用
+## Getting Started
 
-运行以下命令启动服务：
+Run the following command to start the service:
 ```bash
 python -m butler.core.main
 ```
 
-访问 Web UI: http://localhost:8000
+Access Web UI: http://localhost:8000
 """
 
 

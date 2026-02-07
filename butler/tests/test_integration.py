@@ -125,7 +125,7 @@ async def test_memory():
     await memory.initialize()
 
     await memory.add_memory(
-        content="智慧管家是一个智能家居控制系统",
+        content="Smart Butler is a smart home control system",
         source="test",
         tags=["system", "description"],
     )
