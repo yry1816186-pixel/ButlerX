@@ -71,12 +71,12 @@ class SQLiteConnectionPool:
             
             yield conn
             
-        except Exception as e:
+        except (sqlite3.Error, queue.Empty, RuntimeError) as e:
             logger.error(f"Error in connection pool: {e}")
             if conn:
                 try:
                     conn.rollback()
-                except Exception:
+                except sqlite3.Error:
                     pass
             raise
         finally:
@@ -93,7 +93,7 @@ class SQLiteConnectionPool:
             else:
                 try:
                     conn.rollback()
-                except Exception:
+                except sqlite3.Error:
                     pass
                 self._pool.put_nowait(conn)
         except queue.Full:

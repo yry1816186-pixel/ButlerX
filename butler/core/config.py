@@ -10,6 +10,13 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 try:
+    from .config_helper import decrypt_sensitive_value, should_encrypt_field
+    CONFIG_HELPER_AVAILABLE = True
+except ImportError:
+    CONFIG_HELPER_AVAILABLE = False
+    logger.warning("config_helper not available, encryption disabled")
+
+try:
     from dotenv import load_dotenv
     DOTENV_AVAILABLE = True
 except ImportError:
@@ -359,6 +366,35 @@ class ButlerConfig:
     workspace_auto_init: bool = True
     skills_enabled: bool = True
     skills_dir: str = "butler/skills"
+
+
+def _decrypt_sensitive_fields(config: ButlerConfig) -> ButlerConfig:
+    if not CONFIG_HELPER_AVAILABLE:
+        return config
+    
+    from .config_helper import decrypt_sensitive_value
+    
+    sensitive_attrs = [
+        "email_password",
+        "ha_token",
+        "gateway_token",
+        "openclaw_gateway_password",
+        "dashan_mqtt_password",
+        "asr_api_key",
+        "search_api_key",
+        "image_api_key",
+        "llm_api_key",
+        "embedding_api_key",
+        "openclaw_gateway_token",
+    ]
+    
+    for attr in sensitive_attrs:
+        if hasattr(config, attr):
+            value = getattr(config, attr)
+            if value and isinstance(value, str):
+                setattr(config, attr, decrypt_sensitive_value(value))
+    
+    return config
 
 
 def load_config(path: Optional[str] = None) -> ButlerConfig:
@@ -978,4 +1014,70 @@ def load_config(path: Optional[str] = None) -> ButlerConfig:
         dashan_mqtt_password=_env_or_cfg(
             "DASHAN_MQTT_PASSWORD", cfg, "dashan.mqtt_password", _parse_str, None
         ),
+        memory_enabled=_env_or_cfg(
+            "MEMORY_ENABLED", cfg, "memory.enabled", _parse_bool, True
+        ),
+        memory_db_path=_env_or_cfg(
+            "MEMORY_DB_PATH", cfg, "memory.db_path", _parse_str, "butler/data/memory_vectors.db"
+        ),
+        memory_embedding_dims=_env_or_cfg(
+            "MEMORY_EMBEDDING_DIMS", cfg, "memory.embedding_dims", _parse_int, 1024
+        ),
+        memory_enable_fts=_env_or_cfg(
+            "MEMORY_ENABLE_FTS", cfg, "memory.enable_fts", _parse_bool, True
+        ),
+        memory_auto_sync=_env_or_cfg(
+            "MEMORY_AUTO_SYNC", cfg, "memory.auto_sync", _parse_bool, True
+        ),
+        memory_sync_interval_sec=_env_or_cfg(
+            "MEMORY_SYNC_INTERVAL_SEC", cfg, "memory.sync_interval_sec", _parse_int, 60
+        ),
+        memory_chunk_size=_env_or_cfg(
+            "MEMORY_CHUNK_SIZE", cfg, "memory.chunk_size", _parse_int, 500
+        ),
+        memory_chunk_overlap=_env_or_cfg(
+            "MEMORY_CHUNK_OVERLAP", cfg, "memory.chunk_overlap", _parse_int, 50
+        ),
+        embedding_provider=_env_or_cfg(
+            "EMBEDDING_PROVIDER", cfg, "embedding.provider", _parse_str, "glm"
+        ),
+        embedding_api_key=_env_or_cfg(
+            "EMBEDDING_API_KEY", cfg, "embedding.api_key", _parse_str, ""
+        ),
+        embedding_model=_env_or_cfg(
+            "EMBEDDING_MODEL", cfg, "embedding.model", _parse_str, "embedding-2"
+        ),
+        embedding_timeout_sec=_env_or_cfg(
+            "EMBEDDING_TIMEOUT_SEC", cfg, "embedding.timeout_sec", _parse_int, 60
+        ),
+        agent_streaming_enabled=_env_or_cfg(
+            "AGENT_STREAMING_ENABLED", cfg, "agent.streaming_enabled", _parse_bool, True
+        ),
+        agent_max_context_tokens=_env_or_cfg(
+            "AGENT_MAX_CONTEXT_TOKENS", cfg, "agent.max_context_tokens", _parse_int, 8192
+        ),
+        agent_max_tool_iterations=_env_or_cfg(
+            "AGENT_MAX_TOOL_ITERATIONS", cfg, "agent.max_tool_iterations", _parse_int, 5
+        ),
+        session_db_path=_env_or_cfg(
+            "SESSION_DB_PATH", cfg, "session.db_path", _parse_str, "butler/data/sessions.db"
+        ),
+        session_cache_enabled=_env_or_cfg(
+            "SESSION_CACHE_ENABLED", cfg, "session.cache_enabled", _parse_bool, True
+        ),
+        workspace_dir=_env_or_cfg(
+            "WORKSPACE_DIR", cfg, "workspace.dir", _parse_str, "workspace"
+        ),
+        workspace_auto_init=_env_or_cfg(
+            "WORKSPACE_AUTO_INIT", cfg, "workspace.auto_init", _parse_bool, True
+        ),
+        skills_enabled=_env_or_cfg(
+            "SKILLS_ENABLED", cfg, "skills.enabled", _parse_bool, True
+        ),
+        skills_dir=_env_or_cfg(
+            "SKILLS_DIR", cfg, "skills.dir", _parse_str, "butler/skills"
+        ),
     )
+    
+    config = _decrypt_sensitive_fields(config)
+    return config

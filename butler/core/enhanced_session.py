@@ -332,12 +332,13 @@ class SessionManager:
                 params.append(json.dumps(metadata, ensure_ascii=False))
 
             if updates:
+                set_clause = ", ".join(updates)
                 updates.append("updated_at = ?")
                 params.append(datetime.now().isoformat())
                 params.append(session_id)
 
                 cursor.execute(
-                    f"UPDATE sessions SET {', '.join(updates)} WHERE session_id = ?",
+                    f"UPDATE sessions SET {set_clause} WHERE session_id = ?",
                     params,
                 )
                 conn.commit()

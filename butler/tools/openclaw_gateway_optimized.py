@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple
@@ -34,7 +35,7 @@ class GatewayConfig:
     """Configuration for OpenClaw Gateway client.
 
     Attributes:
-        url: WebSocket URL for the gateway
+        url: WebSocket URL for gateway
         token: Bearer token for authentication
         password: Password for authentication
         device_identity: Device identity information
@@ -44,6 +45,9 @@ class GatewayConfig:
         request_timeout_sec: Default request timeout
         max_retries: Maximum number of retries for failed requests
         enable_auto_reconnect: Whether to automatically reconnect
+        allowed_origins: List of allowed WebSocket origins
+        max_message_size: Maximum message size in bytes
+        max_pending_requests: Maximum pending requests
     """
 
     url: str = "ws://127.0.0.1:18789"
@@ -56,6 +60,9 @@ class GatewayConfig:
     request_timeout_sec: float = 30.0
     max_retries: int = 3
     enable_auto_reconnect: bool = True
+    allowed_origins: List[str] = field(default_factory=list)
+    max_message_size: int = 10485760
+    max_pending_requests: int = 100
 
 
 @dataclass
@@ -115,6 +122,30 @@ class OpenClawGatewayClientOptimized:
         self._listen_task: Optional[asyncio.Task] = None
         self._reconnect_count = 0
         self._last_heartbeat: Optional[datetime] = None
+        self._client_origin: Optional[str] = None
+
+    def _validate_message_size(self, data: str) -> bool:
+        """Validate message size before sending."""
+        if len(data) > self.config.max_message_size:
+            logger.error(
+                "Message size %d exceeds maximum %d",
+                len(data),
+                self.config.max_message_size
+            )
+            return False
+        return True
+
+    def _validate_message_content(self, data: Dict[str, Any]) -> bool:
+        """Validate message content for security."""
+        if not isinstance(data, dict):
+            return False
+
+        frame_type = data.get("type")
+        if frame_type not in ["hello", "request", "event", "ping", "pong"]:
+            logger.warning("Invalid frame type: %s", frame_type)
+            return False
+
+        return True
 
     async def connect(self) -> bool:
         """Connect to the OpenClaw Gateway.
@@ -134,12 +165,20 @@ class OpenClawGatewayClientOptimized:
 
         try:
             logger.info("Connecting to OpenClaw Gateway at %s", self.config.url)
+
+            origin = None
+            if "://" in self.config.url:
+                parsed = self.config.url.split("://")[1]
+                origin = f"{parsed.split('/')[0]}"
+
             self.ws = await websockets.connect(
                 self.config.url,
                 additional_headers=headers,
                 ping_interval=self.config.heartbeat_interval_sec,
                 ping_timeout=10.0,
                 close_timeout=10.0,
+                max_size=self.config.max_message_size,
+                origin=origin,
             )
 
             await self._send_hello()
@@ -155,7 +194,7 @@ class OpenClawGatewayClientOptimized:
 
             return True
 
-        except Exception as exc:
+        except (ValueError, asyncio.TimeoutError, ConnectionRefusedError, ConnectionError) as exc:
             logger.error("Failed to connect to OpenClaw Gateway: %s", exc)
             self.state = ConnectionState.ERROR
             self._notify_state_change(ConnectionState.ERROR)
@@ -239,7 +278,20 @@ class OpenClawGatewayClientOptimized:
                     "params": params or {},
                 }
 
-                await self.ws.send(json.dumps(request_payload))
+                if not self._validate_message_content(request_payload):
+                    return RequestResult(
+                        success=False,
+                        error="Invalid request content",
+                    )
+
+                json_str = json.dumps(request_payload)
+                if not self._validate_message_size(json_str):
+                    return RequestResult(
+                        success=False,
+                        error="Request too large",
+                    )
+
+                await self.ws.send(json_str)
 
                 future = asyncio.Future()
                 self.pending_requests[request_id] = future
@@ -262,7 +314,7 @@ class OpenClawGatewayClientOptimized:
                         self.config.max_retries,
                     )
 
-            except Exception as exc:
+            except (ValueError, json.JSONDecodeError) as exc:
                 last_error = str(exc)
                 retry_count += 1
                 logger.warning(

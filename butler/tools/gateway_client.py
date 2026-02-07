@@ -53,7 +53,7 @@ class GatewayClient:
                 "text": resp.text,
                 "headers": dict(resp.headers),
             }
-        except Exception as exc:
+        except (httpx.HTTPError, httpx.TimeoutException, httpx.ConnectError) as exc:
             return {"error": str(exc)}
 
     def get(self, path: str) -> Dict[str, Any]:
@@ -113,32 +113,32 @@ class GatewayWebSocketClient:
         retry_count = 0
         while retry_count < self.max_retries:
             try:
-                self._websocket = await websockets.connect(
-                    self.ws_url,
-                    additional_headers=self._build_headers(),
-                    ping_interval=self.ping_interval,
-                    ping_timeout=self.ping_timeout,
-                    close_timeout=self.close_timeout,
-                )
-                self._connected = True
-                return True
-            except (OSError, ConnectionRefusedError, ConnectionError) as e:
-                retry_count += 1
-                if retry_count < self.max_retries:
-                    await asyncio.sleep(self.retry_delay)
-                else:
-                    self._call_error_handlers({"error": f"Connection failed after {self.max_retries} retries", "details": str(e)})
-                    return False
-            except Exception as e:
-                self._call_error_handlers({"error": "Unexpected connection error", "details": str(e)})
+            self._websocket = await websockets.connect(
+                self.ws_url,
+                additional_headers=self._build_headers(),
+                ping_interval=self.ping_interval,
+                ping_timeout=self.ping_timeout,
+                close_timeout=self.close_timeout,
+            )
+            self._connected = True
+            return True
+        except (OSError, ConnectionRefusedError, ConnectionError) as e:
+            retry_count +=1
+            if retry_count < self.max_retries:
+                await asyncio.sleep(self.retry_delay)
+            else:
+                self._call_error_handlers({"error": f"Connection failed after {self.max_retries} retries", "details": str(e)})
                 return False
+        except (websockets.exceptions.WebSocketException, ValueError) as e:
+            self._call_error_handlers({"error": "Unexpected connection error", "details": str(e)})
+            return False
 
     async def disconnect(self) -> None:
         self._should_reconnect = False
         if self._websocket:
             try:
                 await self._websocket.close()
-            except Exception:
+            except (websockets.exceptions.WebSocketException, RuntimeError):
                 pass
         self._connected = False
         self._websocket = None
@@ -202,28 +202,28 @@ class GatewayWebSocketClient:
         for handler in self._event_handlers.get(event_type, []):
             try:
                 handler(data)
-            except Exception:
+            except (RuntimeError, ValueError, TypeError):
                 pass
 
     def _call_message_handlers(self, data: Any) -> None:
         for handler in self._message_handlers:
             try:
                 handler(data)
-            except Exception:
+            except (RuntimeError, ValueError, TypeError):
                 pass
 
     def _call_error_handlers(self, error: Dict[str, Any]) -> None:
         for handler in self._error_handlers:
             try:
                 handler(error)
-            except Exception:
+            except (RuntimeError, ValueError, TypeError):
                 pass
 
     def _call_close_handlers(self, close_info: Dict[str, Any]) -> None:
         for handler in self._close_handlers:
             try:
                 handler(close_info)
-            except Exception:
+            except (RuntimeError, ValueError, TypeError):
                 pass
 
     async def listen(self) -> None:

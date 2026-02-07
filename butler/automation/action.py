@@ -133,7 +133,7 @@ class ServiceAction(Action):
             )
 
     def _resolve_templates(self, data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
-        from jinja2 import Template
+        from jinja2 import Template, TemplateError
         resolved = {}
 
         for key, value in data.items():
@@ -141,7 +141,7 @@ class ServiceAction(Action):
                 try:
                     template = Template(value)
                     resolved[key] = template.render(**context)
-                except Exception:
+                except (TemplateError, ValueError, KeyError):
                     resolved[key] = value
             else:
                 resolved[key] = value

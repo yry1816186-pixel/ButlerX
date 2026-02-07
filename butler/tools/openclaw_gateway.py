@@ -108,12 +108,11 @@ class OpenClawGatewayClient:
     async def _listen(self) -> None:
         if not self.ws:
             return
-
         try:
             async for message in self.ws:
                 data = json.loads(message)
                 await self._handle_frame(data)
-        except Exception:
+        except (websockets.exceptions.WebSocketException, json.JSONDecodeError, ConnectionError):
             self.connected = False
 
     async def _handle_frame(self, data: Dict[str, Any]) -> None:

@@ -99,7 +99,7 @@ class Trigger(ABC):
             for callback in self._callbacks:
                 try:
                     await callback(trigger_data)
-                except Exception as e:
+                except (RuntimeError, ValueError, TypeError):
                     pass
 
             return True

@@ -1,21 +1,74 @@
 from __future__ import annotations
 
+import os
 import time
 from pathlib import Path
 from typing import Any, Dict
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from .capabilities import action_catalog
 from .service import ButlerService
+from .auth import get_auth_manager, get_current_user, get_admin_user, require_role
+from .rate_limit import check_rate_limit_middleware
+from .error_handler import butler_exception_handler, ValidationError, AuthenticationError, AuthorizationError
+from .schemas import (
+    CommandPayload,
+    StateUpdatePayload,
+    SystemExecPayload,
+    ScriptRunPayload,
+    ImageGenPayload,
+    VoiceASRPayload,
+    VoiceTTSPayload,
+    SearchPayload,
+    HomeAssistantPayload,
+    EmailPayload,
+    AutomationRulePayload,
+    FaceEnrollPayload,
+    FaceVerifyPayload,
+    PTZPayload,
+    SnapshotPayload,
+    VisionDetectPayload,
+    WebSearchPayload,
+)
 
 
 def create_app(service: ButlerService) -> FastAPI:
     app = FastAPI(title="Butler Control Panel")
     app.state.service = service
     app.state.config = service.config
+
+    app.add_exception_handler(Exception, butler_exception_handler)
+
+    allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:8000,http://localhost:3000").split(",")
+    
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    @app.middleware("http")
+    async def rate_limit_middleware(request: Request, call_next):
+        middleware = check_rate_limit_middleware(
+            requests_per_minute=60,
+            requests_per_hour=1000,
+            burst_limit=10,
+        )
+        return await middleware(request, call_next)
+
+    auth = get_auth_manager()
+    admin_api_key = auth.generate_api_key("admin")
+    user_api_key = auth.generate_api_key("user")
+    print(f"Admin API Key: {admin_api_key}")
+    print(f"User API Key: {user_api_key}")
+    print(f"Default admin password: {os.getenv('BUTLER_ADMIN_PASSWORD', 'admin123')}")
+    print(f"Default user password: {os.getenv('BUTLER_USER_PASSWORD', 'user123')}")
 
     ui_dir = Path(__file__).resolve().parents[1] / "ui"
     assets_dir = ui_dir / "assets"
@@ -100,7 +153,8 @@ def create_app(service: ButlerService) -> FastAPI:
         return HTMLResponse(content=body)
 
     @app.get("/api/dashboard")
-    def api_dashboard() -> Dict[str, Any]:
+    async def api_dashboard(request: Request) -> Dict[str, Any]:
+        await get_current_user(request)
         privacy_mode = bool(
             service.db.get_state("privacy_mode", service.config.privacy_mode_default)
         )
@@ -144,13 +198,9 @@ def create_app(service: ButlerService) -> FastAPI:
         }
 
     @app.post("/api/command")
-    async def api_command(request: Request) -> JSONResponse:
-        payload = await request.json()
-        if "command_type" not in payload:
-            return JSONResponse({"status": "error", "error": "command_type required"}, status_code=400)
-        if "source" not in payload:
-            payload["source"] = "ui"
-        service.publish_command(payload)
+    async def api_command(payload: CommandPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
+        service.publish_command(payload.dict())
         return JSONResponse({"status": "ok"})
 
     @app.get("/api/brain/capabilities")
@@ -230,49 +280,37 @@ def create_app(service: ButlerService) -> FastAPI:
         return {"due": due}
 
     @app.post("/api/voice/transcribe")
-    async def api_voice_transcribe(request: Request) -> JSONResponse:
-        payload = await request.json()
-        audio = payload.get("audio")
-        if not audio:
-            return JSONResponse({"status": "error", "error": "audio required"}, status_code=400)
+    async def api_voice_transcribe(payload: VoiceASRPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
         output = service.tool_runner.voice.transcribe(
-            audio=audio,
-            language=payload.get("language"),
-            prompt=payload.get("prompt"),
+            audio=payload.audio_data,
+            language=payload.format,
+            prompt=payload.language,
         )
         return JSONResponse({"status": "ok", "output": output})
 
     @app.post("/api/voice/enroll")
-    async def api_voice_enroll(request: Request) -> JSONResponse:
-        payload = await request.json()
-        label = payload.get("label")
-        audio = payload.get("audio")
-        if not label or not audio:
-            return JSONResponse(
-                {"status": "error", "error": "label and audio required"}, status_code=400
-            )
+    async def api_voice_enroll(payload: VoiceASRPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
         results = service.tool_runner.execute_plan(
             "voice_enroll_api",
-            [{"action_type": "voice_enroll", "params": {"label": label, "audio": audio}}],
+            [{"action_type": "voice_enroll", "params": {"label": payload.language, "audio": payload.audio_data}}],
             privacy_mode=False,
         )
         return JSONResponse({"status": "ok", "output": results[0].to_dict() if results else {}})
 
     @app.post("/api/voice/verify")
-    async def api_voice_verify(request: Request) -> JSONResponse:
-        payload = await request.json()
-        audio = payload.get("audio")
-        if not audio:
-            return JSONResponse({"status": "error", "error": "audio required"}, status_code=400)
+    async def api_voice_verify(payload: VoiceASRPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
         results = service.tool_runner.execute_plan(
             "voice_verify_api",
             [
                 {
                     "action_type": "voice_verify",
                     "params": {
-                        "audio": audio,
-                        "label": payload.get("label"),
-                        "voiceprint_id": payload.get("voiceprint_id"),
+                        "audio": payload.audio_data,
+                        "label": payload.label,
+                        "voiceprint_id": payload.voiceprint_id,
                     },
                 }
             ],
@@ -281,14 +319,14 @@ def create_app(service: ButlerService) -> FastAPI:
         return JSONResponse({"status": "ok", "output": results[0].to_dict() if results else {}})
 
     @app.post("/api/voice/wake")
-    async def api_voice_wake(request: Request) -> JSONResponse:
-        payload = await request.json()
+    async def api_voice_wake(payload: VoiceASRPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
         results = service.tool_runner.execute_plan(
             "wakeword_api",
             [
                 {
                     "action_type": "wakeword_detect",
-                    "params": {"audio": payload.get("audio"), "text": payload.get("text")},
+                    "params": {"audio": payload.audio_data, "text": payload.prompt},
                 }
             ],
             privacy_mode=False,
@@ -296,23 +334,20 @@ def create_app(service: ButlerService) -> FastAPI:
         return JSONResponse({"status": "ok", "output": results[0].to_dict() if results else {}})
 
     @app.post("/api/vision/detect")
-    async def api_vision_detect(request: Request) -> JSONResponse:
-        payload = await request.json()
-        images = payload.get("images") or payload.get("image")
-        if images is None:
-            return JSONResponse({"status": "error", "error": "image required"}, status_code=400)
+    async def api_vision_detect(payload: VisionDetectPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
         results = service.tool_runner.execute_plan(
             "vision_detect_api",
             [
                 {
                     "action_type": "vision_detect",
                     "params": {
-                        "images": images,
-                        "model": payload.get("model", "object"),
-                        "min_conf": payload.get("min_conf"),
-                        "max_det": payload.get("max_det"),
-                        "match_faces": payload.get("match_faces", False),
-                        "top_k": payload.get("top_k", 3),
+                        "images": payload.images,
+                        "model": payload.model,
+                        "min_conf": payload.min_conf,
+                        "max_det": payload.max_det,
+                        "match_faces": payload.match_faces,
+                        "top_k": payload.top_k,
                     },
                 }
             ],
@@ -321,23 +356,17 @@ def create_app(service: ButlerService) -> FastAPI:
         return JSONResponse({"status": "ok", "output": results[0].to_dict() if results else {}})
 
     @app.post("/api/face/enroll")
-    async def api_face_enroll(request: Request) -> JSONResponse:
-        payload = await request.json()
-        label = payload.get("label")
-        image = payload.get("image")
-        if not label or not image:
-            return JSONResponse(
-                {"status": "error", "error": "label and image required"}, status_code=400
-            )
+    async def api_face_enroll(payload: FaceEnrollPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
         results = service.tool_runner.execute_plan(
             "face_enroll_api",
             [
                 {
                     "action_type": "face_enroll",
                     "params": {
-                        "label": label,
-                        "image": image,
-                        "face_index": payload.get("face_index", 0),
+                        "label": payload.name,
+                        "image": payload.image_data,
+                        "face_index": 0,
                     },
                 }
             ],
@@ -346,20 +375,17 @@ def create_app(service: ButlerService) -> FastAPI:
         return JSONResponse({"status": "ok", "output": results[0].to_dict() if results else {}})
 
     @app.post("/api/face/verify")
-    async def api_face_verify(request: Request) -> JSONResponse:
-        payload = await request.json()
-        image = payload.get("image")
-        if not image:
-            return JSONResponse({"status": "error", "error": "image required"}, status_code=400)
+    async def api_face_verify(payload: FaceVerifyPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
         results = service.tool_runner.execute_plan(
             "face_verify_api",
             [
                 {
                     "action_type": "face_verify",
                     "params": {
-                        "image": image,
-                        "label": payload.get("label"),
-                        "faceprint_id": payload.get("faceprint_id"),
+                        "image": payload.image_data,
+                        "label": None,
+                        "faceprint_id": None,
                     },
                 }
             ],
@@ -376,17 +402,14 @@ def create_app(service: ButlerService) -> FastAPI:
         return {"prints": service.db.list_faceprints()}
 
     @app.post("/api/web/search")
-    async def api_web_search(request: Request) -> JSONResponse:
-        payload = await request.json()
-        query = payload.get("query") or payload.get("q")
-        if not query:
-            return JSONResponse({"status": "error", "error": "query required"}, status_code=400)
+    async def api_web_search(payload: WebSearchPayload, request: Request) -> JSONResponse:
+        await get_current_user(request)
         results = service.tool_runner.execute_plan(
             "web_search_api",
             [
                 {
                     "action_type": "web_search",
-                    "params": {"query": query, "limit": payload.get("limit", 5)},
+                    "params": {"query": payload.query, "limit": payload.limit},
                 }
             ],
             privacy_mode=False,

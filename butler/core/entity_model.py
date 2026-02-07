@@ -159,7 +159,7 @@ class Entity:
             for callback in self._state_callbacks:
                 try:
                     callback(old_state, value)
-                except Exception as e:
+                except (RuntimeError, ValueError, TypeError):
                     pass
         
         self._last_updated = now

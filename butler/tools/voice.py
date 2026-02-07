@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import hashlib
 import io
 import json
@@ -70,7 +71,7 @@ def decode_audio_input(audio: Any) -> Optional[bytes]:
 def _decode_base64(value: str) -> Optional[bytes]:
     try:
         return base64.b64decode(value, validate=True)
-    except Exception:
+    except (ValueError, binascii.Error):
         return None
 
 
@@ -79,7 +80,7 @@ def _download(url: str) -> Optional[bytes]:
         resp = httpx.get(url, timeout=30)
         resp.raise_for_status()
         return resp.content
-    except Exception:
+    except (httpx.HTTPError, httpx.TimeoutException, httpx.ConnectError):
         return None
 
 
@@ -87,7 +88,7 @@ def _read_file(path: str) -> Optional[bytes]:
     try:
         with open(path, "rb") as handle:
             return handle.read()
-    except Exception:
+    except (FileNotFoundError, PermissionError, OSError):
         return None
 
 
@@ -131,7 +132,7 @@ def _cleanup_temp(path: Optional[str]) -> None:
         return
     try:
         os.remove(path)
-    except Exception:
+    except (FileNotFoundError, PermissionError, OSError):
         return
 
 

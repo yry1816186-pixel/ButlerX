@@ -453,8 +453,9 @@ class DatabaseOptimizer:
                     index_name = f"idx_{table}_{column}"
 
                     cursor.execute(
-                        f"SELECT name FROM sqlite_master "
-                        f"WHERE type='index' AND name='{index_name}'"
+                        "SELECT name FROM sqlite_master "
+                        "WHERE type='index' AND name=?",
+                        (index_name,)
                     )
                     if cursor.fetchone():
                         continue

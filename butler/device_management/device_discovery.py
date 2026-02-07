@@ -405,7 +405,7 @@ class HTTPScanner(DiscoveryScanner):
             ip_address = socket.gethostbyname(hostname)
             network = ipaddress.IPv4Network(f"{ip_address}/24", strict=False)
             return str(network)
-        except Exception:
+        except (socket.gaierror, socket.herror, ValueError):
             return "192.168.1.0/24"
 
     async def scan(self, timeout: float = 30.0) -> List[DiscoveredDevice]:
